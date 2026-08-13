@@ -15,6 +15,7 @@ from validate_delivery_manifest import (
     effective_review_stages,
     validate_manifest,
 )
+from validate_local_execution_preflight import validate_packet
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -107,6 +108,79 @@ def assert_delivery_execution_policy() -> None:
         raise AssertionError("adapter remediation ceiling above the plugin maximum was accepted")
 
 
+def assert_local_execution_safety() -> None:
+    valid_fixtures = (
+        "valid-local-execution-preflight.json",
+        "valid-local-execution-interrupted.json",
+    )
+    for fixture in valid_fixtures:
+        errors = validate_packet(load_fixture(fixture))
+        if errors:
+            raise AssertionError(f"valid local-execution fixture failed: {fixture}: {errors}")
+        run(str(SCRIPTS / "validate_local_execution_preflight.py"), str(FIXTURES / fixture))
+
+    invalid_fixtures = {
+        "invalid-local-execution-root-absent.json": (
+            "canonical root does not exist",
+            "must report dependent coverage as Gray",
+        ),
+        "invalid-local-execution-root-mismatch.json": ("does not match",),
+        "invalid-local-execution-dirty.json": ("must be clean",),
+        "invalid-local-execution-shared-writer.json": (
+            "exactly one",
+            "must be isolated-worktree",
+            "must not be shared",
+        ),
+        "invalid-local-execution-ambiguous-lock.json": ("live or ambiguous lock",),
+        "invalid-local-execution-live-lock.json": ("live or ambiguous lock",),
+        "invalid-local-execution-unrelated-branch.json": ("related to the approved change",),
+        "invalid-local-execution-dependency-state.json": (
+            "is required and must pass",
+            "dependency state must be consistent",
+            "must not contain a partial mutation",
+        ),
+        "invalid-local-execution-missing-prerequisite.json": ("is required and must pass",),
+        "invalid-local-execution-surviving-process.json": (
+            "survived the timeout boundary",
+            "must not remain running",
+            "integrity check must pass",
+        ),
+        "invalid-local-execution-incomplete-resume.json": ("resume_packet missing field",),
+    }
+    for fixture, expected_errors in invalid_fixtures.items():
+        errors = validate_packet(load_fixture(fixture))
+        if not errors or not all(
+            any(expected_error in error for error in errors) for expected_error in expected_errors
+        ):
+            raise AssertionError(
+                f"invalid local-execution fixture did not fail as expected: "
+                f"{fixture}: {errors}"
+            )
+        run(
+            str(SCRIPTS / "validate_local_execution_preflight.py"),
+            str(FIXTURES / fixture),
+            expect=1,
+        )
+
+    reference_path = ROOT / "references" / "local-execution-safety.md"
+    reference = reference_path.read_text(encoding="utf-8")
+    for forbidden in ("Sloski", "PNPM", "Docker", "MinIO", "sloski-drop"):
+        if forbidden.casefold() in reference.casefold():
+            raise AssertionError(f"generic local-execution contract contains project-specific term: {forbidden}")
+    for skill_name in ("project-ops-delivery", "project-ops-upgrader"):
+        skill = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
+        if "../../references/local-execution-safety.md" not in skill:
+            raise AssertionError(f"{skill_name} does not load the local-execution safety contract")
+        if "read" not in skill.casefold() or "apply" not in skill.casefold():
+            raise AssertionError(f"{skill_name} does not explicitly read and apply the safety contract")
+
+    adapter = (ROOT / "references" / "sloski-adapter.md").read_text(encoding="utf-8")
+    if r"C:\Dev\sloski-drop" not in adapter:
+        raise AssertionError("Sloski adapter does not preserve the current canonical repository")
+    if r"C:\Users\david\OneDrive\Documents\GitHub\sloski-drop" in adapter:
+        raise AssertionError("Sloski adapter still treats the retired checkout as canonical")
+
+
 def main() -> int:
     assert_no_placeholders(ROOT)
     assert_skills()
@@ -130,6 +204,7 @@ def main() -> int:
             expect=1,
         )
     assert_delivery_execution_policy()
+    assert_local_execution_safety()
 
     with tempfile.TemporaryDirectory(prefix="project-operations-") as temporary:
         vault = Path(temporary) / "Test Vault"

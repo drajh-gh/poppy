@@ -5,7 +5,7 @@ description: Orchestrate an explicitly approved project delivery manifest throug
 
 # Project Operations delivery
 
-Read [delivery orchestration](../../references/delivery-orchestration.md) and [approval policy](../../references/approval-and-risk.md), then read the project's delivery adapter and repository rules. For Sloski, also read [Sloski adoption adapter](../../references/sloski-adapter.md), compose the existing repo-local `prepare-delivery-session`, `orchestrate-board-ticket`, `assess-delivery-gate`, and lifecycle skills, and do not replace them.
+Read [delivery orchestration](../../references/delivery-orchestration.md), [approval policy](../../references/approval-and-risk.md), and [local execution safety](../../references/local-execution-safety.md), then read the project's delivery adapter and repository rules. Apply the local execution gate before any R1 or R2 repository mutation. For Sloski, also read [Sloski adoption adapter](../../references/sloski-adapter.md), compose the existing repo-local `prepare-delivery-session`, `orchestrate-board-ticket`, `assess-delivery-gate`, and lifecycle skills, and do not replace them.
 
 1. Validate the schema-v1 immutable dispatch manifest, current base, and project adapter. Resolve the automatic-remediation ceiling as the minimum of the plugin ceiling of two and any stricter adapter or manifest limit; reject every declared value outside `0..2`.
 2. Create one parent run, isolated branch/worktree, and sole writer.

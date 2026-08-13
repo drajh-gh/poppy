@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "project": "example-project",
+  "run_id": "run-shared-writer",
+  "risk": "R2",
+  "canonical_root": {
+    "nominated": "PROJECT_ROOT",
+    "observed": "PROJECT_ROOT",
+    "exists": true
+  },
+  "coverage": {
+    "status": "full",
+    "reasons": []
+  },
+  "mutation": {
+    "requested": true,
+    "writer_count": 2,
+    "writer_mode": "shared-checkout",
+    "surface": {
+      "clean": true,
+      "shared_with_active_task": true,
+      "lock_state": "clear",
+      "branch_related": true
+    }
+  },
+  "preflight_checks": [],
+  "dependency_state": {
+    "consistent": true,
+    "partial_mutation_detected": false
+  },
+  "process_control": {
+    "owned_processes": [],
+    "timed_out": false,
+    "surviving_owned_processes": [],
+    "post_timeout_integrity": "not-required"
+  },
+  "interruption": {
+    "occurred": false,
+    "resume_packet": null
+  }
+}
