@@ -4,8 +4,8 @@
   "run_id": "run-shared-writer",
   "risk": "R2",
   "canonical_root": {
-    "nominated": "PROJECT_ROOT",
-    "observed": "PROJECT_ROOT",
+    "nominated": "/project/root",
+    "observed": "/project/root",
     "exists": true
   },
   "coverage": {
@@ -23,6 +23,7 @@
       "branch_related": true
     }
   },
+  "nominated_checks": [],
   "preflight_checks": [],
   "dependency_state": {
     "consistent": true,

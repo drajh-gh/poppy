@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import ntpath
+import posixpath
 import sys
 from pathlib import Path
 from typing import Any
@@ -35,8 +37,40 @@ def _is_string_list(value: Any) -> bool:
     return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
 
-def _normalized_root(value: str) -> str:
-    return value.strip().replace("\\", "/").rstrip("/")
+def _canonical_root_identity(value: str) -> tuple[tuple[str, str] | None, str | None]:
+    """Return a safe lexical identity for an absolute path without filesystem access."""
+    if value != value.strip() or "\x00" in value:
+        return None, "must not contain surrounding whitespace or null bytes"
+
+    windows = value.replace("/", "\\")
+    if len(windows) >= 2 and windows[1] == ":":
+        if not (windows[0].isalpha() and len(windows) >= 3 and windows[2] == "\\"):
+            return None, "must be absolute; Windows drive-relative paths are not allowed"
+        path_style = "windows"
+    elif windows.startswith("\\\\"):
+        drive, _ = ntpath.splitdrive(windows)
+        share_parts = [part for part in drive[2:].split("\\") if part]
+        if len(share_parts) != 2 or not ntpath.isabs(windows):
+            return None, "must be an absolute UNC path with server and share"
+        path_style = "windows"
+    elif value.startswith("/") and not value.startswith("//"):
+        path_style = "posix"
+    else:
+        return None, "must be a syntactically absolute Windows, UNC, or POSIX path"
+
+    separator = "\\" if path_style == "windows" else "/"
+    candidate = windows if path_style == "windows" else value
+    segments = [part for part in candidate.split(separator) if part]
+    if ".." in segments:
+        return None, "must not contain parent-traversal segments"
+    if path_style == "windows" and any(
+        part != "." and part.rstrip(" .") != part for part in segments
+    ):
+        return None, "must not contain Windows path segments with trailing spaces or dots"
+
+    if path_style == "windows":
+        return (path_style, ntpath.normcase(ntpath.normpath(candidate))), None
+    return (path_style, posixpath.normpath(candidate)), None
 
 
 def _require_object(value: Any, name: str, errors: list[str]) -> dict[str, Any]:
@@ -66,8 +100,20 @@ def _validate_canonical_root(packet: dict[str, Any], errors: list[str]) -> None:
     elif not exists:
         errors.append("canonical root does not exist")
         root_valid = False
-    if _is_non_empty_string(nominated) and _is_non_empty_string(observed):
-        if _normalized_root(nominated) != _normalized_root(observed):
+    nominated_identity = None
+    observed_identity = None
+    if _is_non_empty_string(nominated):
+        nominated_identity, path_error = _canonical_root_identity(nominated)
+        if path_error:
+            errors.append(f"canonical_root.nominated {path_error}")
+            root_valid = False
+    if _is_non_empty_string(observed):
+        observed_identity, path_error = _canonical_root_identity(observed)
+        if path_error:
+            errors.append(f"canonical_root.observed {path_error}")
+            root_valid = False
+    if nominated_identity is not None and observed_identity is not None:
+        if nominated_identity != observed_identity:
             errors.append("observed root does not match the project-nominated canonical root")
             root_valid = False
 
@@ -106,12 +152,34 @@ def _validate_mutation(packet: dict[str, Any], errors: list[str]) -> None:
 
 
 def _validate_checks(packet: dict[str, Any], errors: list[str]) -> None:
+    nominated = packet.get("nominated_checks")
+    nominated_by_id: dict[str, dict[str, Any]] = {}
+    if not isinstance(nominated, list):
+        errors.append("nominated_checks must be a list")
+        nominated = []
+    for index, value in enumerate(nominated):
+        path = f"nominated_checks[{index}]"
+        if not isinstance(value, dict):
+            errors.append(f"{path} must be an object")
+            continue
+        check_id = value.get("id")
+        if not _is_non_empty_string(check_id):
+            errors.append(f"{path}.id must be a non-empty string")
+        elif check_id in nominated_by_id:
+            errors.append(f"{path}.id must be unique")
+        else:
+            nominated_by_id[check_id] = value
+        if value.get("category") not in CHECK_CATEGORIES:
+            errors.append(f"{path}.category must be dependency or prerequisite")
+        if not isinstance(value.get("required"), bool):
+            errors.append(f"{path}.required must be boolean")
+
     checks = packet.get("preflight_checks")
     if not isinstance(checks, list):
         errors.append("preflight_checks must be a list")
-        return
+        checks = []
 
-    seen: set[str] = set()
+    checks_by_id: dict[str, dict[str, Any]] = {}
     for index, value in enumerate(checks):
         path = f"preflight_checks[{index}]"
         if not isinstance(value, dict):
@@ -120,10 +188,10 @@ def _validate_checks(packet: dict[str, Any], errors: list[str]) -> None:
         check_id = value.get("id")
         if not _is_non_empty_string(check_id):
             errors.append(f"{path}.id must be a non-empty string")
-        elif check_id in seen:
+        elif check_id in checks_by_id:
             errors.append(f"{path}.id must be unique")
         else:
-            seen.add(check_id)
+            checks_by_id[check_id] = value
         if value.get("category") not in CHECK_CATEGORIES:
             errors.append(f"{path}.category must be dependency or prerequisite")
         if not isinstance(value.get("required"), bool):
@@ -134,6 +202,18 @@ def _validate_checks(packet: dict[str, Any], errors: list[str]) -> None:
         elif value.get("required") is True and status != "pass":
             errors.append(f"{path} is required and must pass")
 
+    for check_id in sorted(nominated_by_id.keys() - checks_by_id.keys()):
+        errors.append(f"preflight_checks omits nominated check: {check_id}")
+    for check_id in sorted(checks_by_id.keys() - nominated_by_id.keys()):
+        errors.append(f"preflight_checks contains undeclared check: {check_id}")
+    for check_id in sorted(nominated_by_id.keys() & checks_by_id.keys()):
+        declaration = nominated_by_id[check_id]
+        result = checks_by_id[check_id]
+        if result.get("category") != declaration.get("category"):
+            errors.append(f"preflight check category does not match nomination: {check_id}")
+        if result.get("required") != declaration.get("required"):
+            errors.append(f"preflight check required flag does not match nomination: {check_id}")
+
     dependency = _require_object(packet.get("dependency_state"), "dependency_state", errors)
     if dependency.get("consistent") is not True:
         errors.append("dependency state must be consistent")
@@ -141,7 +221,7 @@ def _validate_checks(packet: dict[str, Any], errors: list[str]) -> None:
         errors.append("dependency state must not contain a partial mutation")
 
 
-def _validate_process_control(packet: dict[str, Any], errors: list[str]) -> None:
+def _validate_process_control(packet: dict[str, Any], errors: list[str]) -> set[str]:
     control = _require_object(packet.get("process_control"), "process_control", errors)
     ledger = control.get("owned_processes")
     ledger_ids: set[str] = set()
@@ -185,9 +265,12 @@ def _validate_process_control(packet: dict[str, Any], errors: list[str]) -> None
             errors.append("post-timeout integrity check must pass")
     elif control.get("post_timeout_integrity") not in {"not-required", "pass"}:
         errors.append("post_timeout_integrity must be not-required or pass")
+    return ledger_ids
 
 
-def _validate_interruption(packet: dict[str, Any], errors: list[str]) -> None:
+def _validate_interruption(
+    packet: dict[str, Any], errors: list[str], authoritative_process_ids: set[str]
+) -> None:
     interruption = _require_object(packet.get("interruption"), "interruption", errors)
     occurred = interruption.get("occurred")
     if not isinstance(occurred, bool):
@@ -211,6 +294,15 @@ def _validate_interruption(packet: dict[str, Any], errors: list[str]) -> None:
     for field in ("changed_files", "owned_processes", "remaining_external_write_gates"):
         if field in resume and not _is_string_list(resume[field]):
             errors.append(f"resume_packet.{field} must be a list of strings")
+    resume_processes = resume.get("owned_processes")
+    if _is_string_list(resume_processes):
+        if len(resume_processes) != len(set(resume_processes)):
+            errors.append("resume_packet.owned_processes must not contain duplicates")
+        resume_ids = set(resume_processes)
+        for process_id in sorted(authoritative_process_ids - resume_ids):
+            errors.append(f"resume_packet.owned_processes omits ledger process: {process_id}")
+        for process_id in sorted(resume_ids - authoritative_process_ids):
+            errors.append(f"resume_packet.owned_processes contains non-ledger process: {process_id}")
 
 
 def validate_packet(value: dict[str, Any]) -> list[str]:
@@ -226,8 +318,8 @@ def validate_packet(value: dict[str, Any]) -> list[str]:
     _validate_canonical_root(value, errors)
     _validate_mutation(value, errors)
     _validate_checks(value, errors)
-    _validate_process_control(value, errors)
-    _validate_interruption(value, errors)
+    authoritative_process_ids = _validate_process_control(value, errors)
+    _validate_interruption(value, errors, authoritative_process_ids)
     return errors
 
 

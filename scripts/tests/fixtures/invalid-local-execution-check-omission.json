@@ -1,17 +1,14 @@
 {
   "schema_version": 1,
   "project": "example-project",
-  "run_id": "run-valid",
+  "run_id": "run-check-omission",
   "risk": "R2",
   "canonical_root": {
     "nominated": "/project/root",
     "observed": "/project/root",
     "exists": true
   },
-  "coverage": {
-    "status": "full",
-    "reasons": []
-  },
+  "coverage": {"status": "full", "reasons": []},
   "mutation": {
     "requested": true,
     "writer_count": 1,
@@ -41,31 +38,14 @@
       "category": "dependency",
       "required": true,
       "status": "pass"
-    },
-    {
-      "id": "adapter-prerequisite-check",
-      "category": "prerequisite",
-      "required": true,
-      "status": "pass"
     }
   ],
-  "dependency_state": {
-    "consistent": true,
-    "partial_mutation_detected": false
-  },
+  "dependency_state": {"consistent": true, "partial_mutation_detected": false},
   "process_control": {
-    "owned_processes": [
-      {
-        "id": "worker-1",
-        "state": "stopped"
-      }
-    ],
-    "timed_out": true,
+    "owned_processes": [],
+    "timed_out": false,
     "surviving_owned_processes": [],
-    "post_timeout_integrity": "pass"
+    "post_timeout_integrity": "not-required"
   },
-  "interruption": {
-    "occurred": false,
-    "resume_packet": null
-  }
+  "interruption": {"occurred": false, "resume_packet": null}
 }

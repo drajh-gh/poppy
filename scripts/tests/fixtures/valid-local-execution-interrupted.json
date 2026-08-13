@@ -4,8 +4,8 @@
   "run_id": "run-interrupted",
   "risk": "R1",
   "canonical_root": {
-    "nominated": "PROJECT_ROOT",
-    "observed": "PROJECT_ROOT",
+    "nominated": "/project/root",
+    "observed": "/project/root",
     "exists": true
   },
   "coverage": {
@@ -23,13 +23,32 @@
       "branch_related": true
     }
   },
-  "preflight_checks": [],
+  "nominated_checks": [
+    {
+      "id": "adapter-prerequisite-check",
+      "category": "prerequisite",
+      "required": true
+    }
+  ],
+  "preflight_checks": [
+    {
+      "id": "adapter-prerequisite-check",
+      "category": "prerequisite",
+      "required": true,
+      "status": "pass"
+    }
+  ],
   "dependency_state": {
     "consistent": true,
     "partial_mutation_detected": false
   },
   "process_control": {
-    "owned_processes": [],
+    "owned_processes": [
+      {
+        "id": "worker-1",
+        "state": "exited"
+      }
+    ],
     "timed_out": false,
     "surviving_owned_processes": [],
     "post_timeout_integrity": "not-required"
@@ -43,7 +62,9 @@
         "path/to/file"
       ],
       "last_passed_gate": "local-execution-preflight",
-      "owned_processes": [],
+      "owned_processes": [
+        "worker-1"
+      ],
       "blocker": "bounded interruption",
       "remaining_external_write_gates": [],
       "resume_instruction": "Resume from the next approved gate."

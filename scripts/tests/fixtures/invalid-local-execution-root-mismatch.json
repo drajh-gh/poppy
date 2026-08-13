@@ -4,8 +4,8 @@
   "run_id": "run-root-mismatch",
   "risk": "R1",
   "canonical_root": {
-    "nominated": "PROJECT_ROOT",
-    "observed": "OTHER_ROOT",
+    "nominated": "/project/root",
+    "observed": "/other/root",
     "exists": true
   },
   "coverage": {
@@ -25,6 +25,7 @@
       "branch_related": true
     }
   },
+  "nominated_checks": [],
   "preflight_checks": [],
   "dependency_state": {
     "consistent": true,

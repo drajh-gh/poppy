@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project": "example-project",
-  "run_id": "run-ambiguous-lock",
-  "risk": "R2",
+  "run_id": "run-resume-process-omission",
+  "risk": "R1",
   "canonical_root": {
     "nominated": "/project/root",
     "observed": "/project/root",
@@ -16,7 +16,7 @@
     "surface": {
       "clean": true,
       "shared_with_active_task": false,
-      "lock_state": "ambiguous",
+      "lock_state": "clear",
       "branch_related": true
     }
   },
@@ -24,10 +24,24 @@
   "preflight_checks": [],
   "dependency_state": {"consistent": true, "partial_mutation_detected": false},
   "process_control": {
-    "owned_processes": [],
+    "owned_processes": [
+      {"id": "worker-1", "state": "exited"}
+    ],
     "timed_out": false,
     "surviving_owned_processes": [],
     "post_timeout_integrity": "not-required"
   },
-  "interruption": {"occurred": false, "resume_packet": null}
+  "interruption": {
+    "occurred": true,
+    "resume_packet": {
+      "branch": "change-branch",
+      "revision": "revision-id",
+      "changed_files": [],
+      "last_passed_gate": "local-execution-preflight",
+      "owned_processes": [],
+      "blocker": "bounded interruption",
+      "remaining_external_write_gates": [],
+      "resume_instruction": "Resume from the next approved gate."
+    }
+  }
 }

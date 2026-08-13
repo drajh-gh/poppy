@@ -4,8 +4,8 @@
   "run_id": "run-dependency-state",
   "risk": "R1",
   "canonical_root": {
-    "nominated": "PROJECT_ROOT",
-    "observed": "PROJECT_ROOT",
+    "nominated": "/project/root",
+    "observed": "/project/root",
     "exists": true
   },
   "coverage": {"status": "full", "reasons": []},
@@ -20,6 +20,13 @@
       "branch_related": true
     }
   },
+  "nominated_checks": [
+    {
+      "id": "adapter-dependency-check",
+      "category": "dependency",
+      "required": true
+    }
+  ],
   "preflight_checks": [
     {
       "id": "adapter-dependency-check",

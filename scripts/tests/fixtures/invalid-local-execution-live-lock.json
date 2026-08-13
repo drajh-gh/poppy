@@ -4,8 +4,8 @@
   "run_id": "run-live-lock",
   "risk": "R2",
   "canonical_root": {
-    "nominated": "PROJECT_ROOT",
-    "observed": "PROJECT_ROOT",
+    "nominated": "/project/root",
+    "observed": "/project/root",
     "exists": true
   },
   "coverage": {"status": "full", "reasons": []},
@@ -20,6 +20,7 @@
       "branch_related": true
     }
   },
+  "nominated_checks": [],
   "preflight_checks": [],
   "dependency_state": {"consistent": true, "partial_mutation_detected": false},
   "process_control": {

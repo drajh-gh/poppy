@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import subprocess
 import sys
@@ -146,6 +147,12 @@ def assert_local_execution_safety() -> None:
             "integrity check must pass",
         ),
         "invalid-local-execution-incomplete-resume.json": ("resume_packet missing field",),
+        "invalid-local-execution-check-omission.json": (
+            "preflight_checks omits nominated check: adapter-prerequisite-check",
+        ),
+        "invalid-local-execution-resume-process-omission.json": (
+            "resume_packet.owned_processes omits ledger process: worker-1",
+        ),
     }
     for fixture, expected_errors in invalid_fixtures.items():
         errors = validate_packet(load_fixture(fixture))
@@ -161,6 +168,72 @@ def assert_local_execution_safety() -> None:
             str(FIXTURES / fixture),
             expect=1,
         )
+
+    base = load_fixture("valid-local-execution-preflight.json")
+
+    for label, nominated, observed in (
+        ("POSIX", "/project/root", "/project/./root/"),
+        ("Windows", r"C:\Project\Root", "c:/project/./root/"),
+        ("UNC", r"\\server\share\root", "//SERVER/share/./root/"),
+    ):
+        packet = copy.deepcopy(base)
+        packet["canonical_root"] = {
+            "nominated": nominated,
+            "observed": observed,
+            "exists": True,
+        }
+        errors = validate_packet(packet)
+        if errors:
+            raise AssertionError(f"valid absolute {label} roots failed lexical comparison: {errors}")
+
+    for label, nominated, observed, expected_error in (
+        ("relative", "project/root", "project/root", "syntactically absolute"),
+        ("drive-only", "C:", "C:", "drive-relative"),
+        ("drive-relative", "C:project", "C:project", "drive-relative"),
+        ("rooted-current-drive", r"\project\root", r"\project\root", "syntactically absolute"),
+        ("Windows parent traversal", r"C:\safe\..\root", r"C:\root", "parent-traversal"),
+        ("POSIX parent traversal", "/safe/../root", "/root", "parent-traversal"),
+        ("cross-platform alias", "/C:/root", r"C:\root", "does not match"),
+    ):
+        packet = copy.deepcopy(base)
+        packet["canonical_root"] = {
+            "nominated": nominated,
+            "observed": observed,
+            "exists": True,
+        }
+        packet["coverage"] = {"status": "gray", "reasons": [f"invalid {label} root"]}
+        errors = validate_packet(packet)
+        if not any(expected_error in error for error in errors):
+            raise AssertionError(f"unsafe {label} roots were not rejected as expected: {errors}")
+
+    check_adversaries = []
+    packet = copy.deepcopy(base)
+    packet["preflight_checks"].append(
+        {"id": "undeclared-check", "category": "prerequisite", "required": True, "status": "pass"}
+    )
+    check_adversaries.append(("extra result", packet, "contains undeclared check"))
+    packet = copy.deepcopy(base)
+    packet["preflight_checks"][0]["category"] = "prerequisite"
+    check_adversaries.append(("category change", packet, "category does not match nomination"))
+    packet = copy.deepcopy(base)
+    packet["preflight_checks"].append(copy.deepcopy(packet["preflight_checks"][0]))
+    check_adversaries.append(("duplicate result", packet, ".id must be unique"))
+    packet = copy.deepcopy(base)
+    packet["nominated_checks"].append(copy.deepcopy(packet["nominated_checks"][0]))
+    check_adversaries.append(("duplicate nomination", packet, ".id must be unique"))
+    packet = copy.deepcopy(base)
+    packet["preflight_checks"][0]["required"] = False
+    check_adversaries.append(("required-flag change", packet, "required flag does not match nomination"))
+    for label, packet, expected_error in check_adversaries:
+        errors = validate_packet(packet)
+        if not any(expected_error in error for error in errors):
+            raise AssertionError(f"{label} did not fail exact nominated-check coverage: {errors}")
+
+    packet = copy.deepcopy(load_fixture("valid-local-execution-interrupted.json"))
+    packet["interruption"]["resume_packet"]["owned_processes"].append("not-in-ledger")
+    errors = validate_packet(packet)
+    if not any("contains non-ledger process" in error for error in errors):
+        raise AssertionError(f"resume packet accepted a non-ledger process: {errors}")
 
     reference_path = ROOT / "references" / "local-execution-safety.md"
     reference = reference_path.read_text(encoding="utf-8")
