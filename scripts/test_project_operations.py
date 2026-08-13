@@ -136,11 +136,11 @@ def assert_local_execution_safety() -> None:
         "invalid-local-execution-live-lock.json": ("live or ambiguous lock",),
         "invalid-local-execution-unrelated-branch.json": ("related to the approved change",),
         "invalid-local-execution-dependency-state.json": (
-            "is required and must pass",
+            "must have status pass",
             "dependency state must be consistent",
             "must not contain a partial mutation",
         ),
-        "invalid-local-execution-missing-prerequisite.json": ("is required and must pass",),
+        "invalid-local-execution-missing-prerequisite.json": ("must have status pass",),
         "invalid-local-execution-surviving-process.json": (
             "survived the timeout boundary",
             "must not remain running",
@@ -152,6 +152,12 @@ def assert_local_execution_safety() -> None:
         ),
         "invalid-local-execution-resume-process-omission.json": (
             "resume_packet.owned_processes omits ledger process: worker-1",
+        ),
+        "invalid-local-execution-optional-fail.json": ("must have status pass",),
+        "invalid-local-execution-optional-missing.json": ("must have status pass",),
+        "invalid-local-execution-optional-unverified.json": ("must have status pass",),
+        "invalid-local-execution-empty-blocker.json": (
+            "resume_packet.blocker must be a non-empty string",
         ),
     }
     for fixture, expected_errors in invalid_fixtures.items():
@@ -194,6 +200,15 @@ def assert_local_execution_safety() -> None:
         ("Windows parent traversal", r"C:\safe\..\root", r"C:\root", "parent-traversal"),
         ("POSIX parent traversal", "/safe/../root", "/root", "parent-traversal"),
         ("cross-platform alias", "/C:/root", r"C:\root", "does not match"),
+        ("device namespace", r"\\.\C:\repo", r"\\.\C:\repo", "device or extended-length"),
+        ("extended-length namespace", r"\\?\C:\repo", r"\\?\C:\repo", "device or extended-length"),
+        (
+            "extended-length UNC namespace",
+            r"\\?\UNC\server\share\repo",
+            r"\\?\UNC\server\share\repo",
+            "device or extended-length",
+        ),
+        ("alternate data stream", r"C:\repo:stream", r"C:\repo:stream", "alternate-data-stream"),
     ):
         packet = copy.deepcopy(base)
         packet["canonical_root"] = {

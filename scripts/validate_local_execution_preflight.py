@@ -43,10 +43,14 @@ def _canonical_root_identity(value: str) -> tuple[tuple[str, str] | None, str | 
         return None, "must not contain surrounding whitespace or null bytes"
 
     windows = value.replace("/", "\\")
+    if windows.startswith(("\\\\.\\", "\\\\?\\")):
+        return None, "must not use a Windows device or extended-length namespace"
+    drive_path = False
     if len(windows) >= 2 and windows[1] == ":":
         if not (windows[0].isalpha() and len(windows) >= 3 and windows[2] == "\\"):
             return None, "must be absolute; Windows drive-relative paths are not allowed"
         path_style = "windows"
+        drive_path = True
     elif windows.startswith("\\\\"):
         drive, _ = ntpath.splitdrive(windows)
         share_parts = [part for part in drive[2:].split("\\") if part]
@@ -67,6 +71,9 @@ def _canonical_root_identity(value: str) -> tuple[tuple[str, str] | None, str | 
         part != "." and part.rstrip(" .") != part for part in segments
     ):
         return None, "must not contain Windows path segments with trailing spaces or dots"
+    stream_segments = segments[1:] if drive_path else segments
+    if path_style == "windows" and any(":" in part for part in stream_segments):
+        return None, "must not use a Windows alternate-data-stream path"
 
     if path_style == "windows":
         return (path_style, ntpath.normcase(ntpath.normpath(candidate))), None
@@ -199,8 +206,8 @@ def _validate_checks(packet: dict[str, Any], errors: list[str]) -> None:
         status = value.get("status")
         if status not in CHECK_STATUSES:
             errors.append(f"{path}.status must be pass, fail, missing, or unverified")
-        elif value.get("required") is True and status != "pass":
-            errors.append(f"{path} is required and must pass")
+        elif status != "pass":
+            errors.append(f"{path} is nominated and must have status pass")
 
     for check_id in sorted(nominated_by_id.keys() - checks_by_id.keys()):
         errors.append(f"preflight_checks omits nominated check: {check_id}")
@@ -289,8 +296,8 @@ def _validate_interruption(
     for field in ("branch", "revision", "last_passed_gate", "resume_instruction"):
         if field in resume and not _is_non_empty_string(resume[field]):
             errors.append(f"resume_packet.{field} must be a non-empty string")
-    if "blocker" in resume and not isinstance(resume["blocker"], str):
-        errors.append("resume_packet.blocker must be a string")
+    if "blocker" in resume and not _is_non_empty_string(resume["blocker"]):
+        errors.append("resume_packet.blocker must be a non-empty string")
     for field in ("changed_files", "owned_processes", "remaining_external_write_gates"):
         if field in resume and not _is_string_list(resume[field]):
             errors.append(f"resume_packet.{field} must be a list of strings")
