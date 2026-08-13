@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chief of Staff"
+  short_description: "Run the project operating control loop"
+  default_prompt: "Use $project-ops-manager to assess this project's current state and recommend the next PM actions."

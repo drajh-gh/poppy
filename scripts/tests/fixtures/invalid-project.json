@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "project": {
+    "key": "Bad Key",
+    "name": "Broken",
+    "client": "Broken",
+    "stage": "active-delivery",
+    "archetypes": {"primary": "fixed-scope-delivery", "overlays": []},
+    "timezone": "Europe/Ljubljana",
+    "sensitivity": "confidential"
+  },
+  "vault": {"adoption_mode": "new", "human_owned": [], "portfolio_publish": "everything"},
+  "language": {"client_language": "sl-SI", "source_languages": ["sl-SI"], "transcript_quality": "unavailable", "meeting_evidence_mode": "guess"},
+  "sources": {},
+  "authority": {"conflicts": "latest-wins"},
+  "stakeholders": {},
+  "approvals": {},
+  "cadence": {},
+  "tolerances": {"schedule_yellow_days": -1, "missing_required_baseline": "green"},
+  "onboarding": {"status": "complete", "accepted_gaps": []},
+  "api_token": "do-not-store"
+}
+

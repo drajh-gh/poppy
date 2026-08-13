@@ -1,0 +1,5 @@
+interface:
+  display_name: "Project Operations Automation"
+  short_description: "Configure safe project cadences"
+  default_prompt: "Use $project-ops-automate to inspect and recommend a safe Project Operations cadence before changing any automation."
+

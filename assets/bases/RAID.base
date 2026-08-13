@@ -1,0 +1,53 @@
+filters:
+  and:
+    - file.inFolder("wiki/{{project_key}}/pm/records/raid")
+    - 'project == "{{project_key}}"'
+    - 'type == "raid-item"'
+properties:
+  file.name:
+    displayName: Item
+  kind:
+    displayName: Kind
+  pm_state:
+    displayName: State
+  health:
+    displayName: Health
+  owner:
+    displayName: Owner
+  probability:
+    displayName: Probability
+  impact:
+    displayName: Impact
+  exposure:
+    displayName: Exposure
+  due:
+    displayName: Due
+views:
+  - type: table
+    name: Open
+    filters:
+      and:
+        - 'pm_state != "closed"'
+        - 'pm_state != "resolved"'
+    groupBy:
+      property: kind
+      direction: ASC
+    order:
+      - file.name
+      - kind
+      - health
+      - owner
+      - probability
+      - impact
+      - exposure
+      - due
+  - type: table
+    name: All
+    order:
+      - file.name
+      - kind
+      - pm_state
+      - health
+      - owner
+      - due
+

@@ -1,0 +1,27 @@
+filters:
+  and:
+    - file.inFolder("wiki/{{project_key}}/pm/records/improvements")
+    - 'type == "improvement-candidate"'
+properties:
+  file.name:
+    displayName: Candidate
+  capability_id:
+    displayName: Capability
+  classification:
+    displayName: Classification
+  status:
+    displayName: Status
+  confidence:
+    displayName: Confidence
+  review_after:
+    displayName: Review after
+views:
+  - type: table
+    name: Improvements
+    order:
+      - file.name
+      - capability_id
+      - classification
+      - status
+      - confidence
+      - review_after

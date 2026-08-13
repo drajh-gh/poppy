@@ -1,0 +1,4 @@
+interface:
+  display_name: "Upgrader"
+  short_description: "Improve operations from real work evidence"
+  default_prompt: "Use $project-ops-upgrader to review recent work evidence and improve the operating system."

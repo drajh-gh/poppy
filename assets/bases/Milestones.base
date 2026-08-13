@@ -1,0 +1,51 @@
+filters:
+  and:
+    - file.inFolder("wiki/{{project_key}}/pm/records/milestones")
+    - 'project == "{{project_key}}"'
+    - 'type == "milestone"'
+formulas:
+  days_to_target: 'if(target_date, (date(target_date) - today()).days, "")'
+properties:
+  file.name:
+    displayName: Milestone
+  pm_state:
+    displayName: State
+  health:
+    displayName: Health
+  owner:
+    displayName: Owner
+  target_date:
+    displayName: Target
+  forecast_date:
+    displayName: Forecast
+  formula.days_to_target:
+    displayName: Days
+  valid_as_of:
+    displayName: Valid as of
+views:
+  - type: table
+    name: Active
+    filters:
+      not:
+        - 'pm_state == "accepted"'
+        - 'pm_state == "cancelled"'
+    order:
+      - file.name
+      - pm_state
+      - health
+      - owner
+      - target_date
+      - forecast_date
+      - formula.days_to_target
+      - valid_as_of
+  - type: table
+    name: All
+    order:
+      - file.name
+      - pm_state
+      - health
+      - owner
+      - target_date
+      - forecast_date
+      - valid_as_of
+

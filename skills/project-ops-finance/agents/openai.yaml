@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Operations Finance"
+  short_description: "Control scope, budget, and forecasts"
+  default_prompt: "Use $project-ops-finance to reconcile scope, budget, capacity, and forecast for this project."

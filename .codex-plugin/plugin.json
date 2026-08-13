@@ -1,0 +1,26 @@
+{
+  "name": "project-operations",
+  "version": "0.1.0+codex.20260812170748",
+  "description": "Evidence-backed project architecture, operational leadership, and continuous improvement for Codex and Obsidian.",
+  "author": {
+    "name": "David Rajh"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Project Operations",
+    "shortDescription": "Architect, operate, and continuously improve projects.",
+    "longDescription": "A three-part operating system: the Solution Architect designs project operations, the Chief of Staff runs evidence-backed control loops, and the Upgrader continuously improves workflows from actual work evidence.",
+    "developerName": "David Rajh",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Guide me through onboarding a project.",
+      "Prepare this week's project health review.",
+      "Review recent work and improve how this project operates."
+    ]
+  }
+}

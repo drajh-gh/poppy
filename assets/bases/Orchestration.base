@@ -1,0 +1,33 @@
+filters:
+  and:
+    - file.inFolder("raw/{{project_key}}")
+    - 'type == "source"'
+    - or:
+        - 'source_system == "delivery-os"'
+        - 'source_system == "pm-os"'
+properties:
+  file.name:
+    displayName: Run
+  source_system:
+    displayName: System
+  source_id:
+    displayName: Run ID
+  captured:
+    displayName: Captured
+  outcome:
+    displayName: Outcome
+  risk:
+    displayName: Risk
+  confidence:
+    displayName: Confidence
+views:
+  - type: table
+    name: Runs
+    order:
+      - file.name
+      - source_system
+      - source_id
+      - captured
+      - outcome
+      - risk
+      - confidence
