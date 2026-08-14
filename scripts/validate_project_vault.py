@@ -27,9 +27,11 @@ OPERATIONAL_TYPES = {
 WIKILINK = re.compile(r"!?(?:\[\[)([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
 FOLDER_FILTER = re.compile(r'file\.inFolder\("([^"]+)"\)')
 UNESCAPED_TABLE_WIKILINK_ALIAS = re.compile(r"\[\[[^\]\n]*(?<!\\)\|[^\]\n]*\]\]")
+UNESCAPED_PIPE = re.compile(r"(?<!\\)\|")
 TABLE_SEPARATOR = re.compile(
     r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$"
 )
+FENCE_START = re.compile(r"^\s*(`{3,}|~{3,})")
 
 
 def markdown_files(vault: Path) -> list[Path]:
@@ -67,18 +69,59 @@ def resolve_project_key(vault: Path, explicit: str | None) -> str:
     return str(profile["project"]["key"])
 
 
+def fenced_code_lines(lines: list[str]) -> set[int]:
+    fenced: set[int] = set()
+    fence_character: str | None = None
+    fence_length = 0
+    for line_index, line in enumerate(lines):
+        if fence_character is None:
+            match = FENCE_START.match(line)
+            if match:
+                token = match.group(1)
+                fence_character = token[0]
+                fence_length = len(token)
+                fenced.add(line_index)
+            continue
+        fenced.add(line_index)
+        if re.fullmatch(
+            rf"\s*{re.escape(fence_character)}{{{fence_length},}}\s*", line
+        ):
+            fence_character = None
+            fence_length = 0
+    return fenced
+
+
+def markdown_table_cells(line: str) -> list[str]:
+    stripped = line.strip()
+    cells = UNESCAPED_PIPE.split(stripped)
+    if stripped.startswith("|"):
+        cells = cells[1:]
+    if stripped.endswith("|") and not stripped.endswith(r"\|"):
+        cells = cells[:-1]
+    return [cell.strip() for cell in cells]
+
+
 def markdown_table_rows(lines: list[str]) -> set[int]:
     rows: set[int] = set()
+    fenced = fenced_code_lines(lines)
     for separator_index, line in enumerate(lines):
-        if not TABLE_SEPARATOR.fullmatch(line):
+        if separator_index in fenced or not TABLE_SEPARATOR.fullmatch(line):
             continue
-        start = separator_index - 1
-        while start >= 0 and lines[start].strip() and "|" in lines[start]:
-            rows.add(start)
-            start -= 1
+        header_index = separator_index - 1
+        if header_index < 0 or header_index in fenced:
+            continue
+        header_cells = markdown_table_cells(lines[header_index])
+        if len(header_cells) < 2 or not all(header_cells):
+            continue
+        rows.add(header_index)
         rows.add(separator_index)
         end = separator_index + 1
-        while end < len(lines) and lines[end].strip() and "|" in lines[end]:
+        while (
+            end < len(lines)
+            and end not in fenced
+            and lines[end].strip()
+            and len(markdown_table_cells(lines[end])) >= 2
+        ):
             rows.add(end)
             end += 1
     return rows

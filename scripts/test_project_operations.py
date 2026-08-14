@@ -385,18 +385,41 @@ def main() -> int:
 
         index_path = vault / "wiki/test-project/index.md"
         original_index = index_path.read_text(encoding="utf-8")
-        index_path.write_text(
-            original_index + "\nTask | Read\n--- | ---\nInspect | [[wiki/test-project/current|Current]]\n",
-            encoding="utf-8",
+
+        def validate_table_case(snippet: str, *, rejected: bool) -> None:
+            index_path.write_text(original_index + snippet, encoding="utf-8")
+            result = run(
+                str(SCRIPTS / "validate_project_vault.py"),
+                str(vault),
+                "--project-key", "test-project",
+                expect=1 if rejected else 0,
+            )
+            identified = "unescaped wikilink alias pipe in Markdown table" in result.stdout
+            if rejected and not identified:
+                raise AssertionError("vault validator did not identify the malformed table wikilink")
+            if not rejected and identified:
+                raise AssertionError("vault validator falsely identified a non-table wikilink")
+
+        validate_table_case(
+            "\nTask | Read\n--- | ---\nInspect | [[wiki/test-project/current|Current]]\n",
+            rejected=True,
         )
-        malformed = run(
-            str(SCRIPTS / "validate_project_vault.py"),
-            str(vault),
-            "--project-key", "test-project",
-            expect=1,
+        validate_table_case(
+            "\n| Task | Read |\n| :--- | ---: |\n| Inspect | [[wiki/test-project/current|Current]] |\n",
+            rejected=True,
         )
-        if "unescaped wikilink alias pipe in Markdown table" not in malformed.stdout:
-            raise AssertionError("vault validator did not identify the malformed table wikilink")
+        validate_table_case(
+            "\nTask | Read\n--- | ---\nInspect | [[wiki/test-project/current\\|Current]]\n",
+            rejected=False,
+        )
+        validate_table_case(
+            "\n```markdown\nTask | Read\n--- | ---\nInspect | [[wiki/test-project/current|Current]]\n```\n",
+            rejected=False,
+        )
+        validate_table_case(
+            "\n--- | ---\nInspect | [[wiki/test-project/current|Current]]\n",
+            rejected=False,
+        )
         index_path.write_text(original_index, encoding="utf-8")
         for path in (vault / "wiki/test-project/pm").rglob("*.md"):
             if "- [ ]" in path.read_text(encoding="utf-8"):
