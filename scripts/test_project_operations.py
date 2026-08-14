@@ -106,6 +106,22 @@ def assert_delivery_execution_policy() -> None:
         raise AssertionError("effective remediation ceiling is not the strictest configured limit")
     if effective_review_stages(valid) != REVIEW_STAGES or effective_review_stages(legacy) != REVIEW_STAGES:
         raise AssertionError("review stages did not resolve to ordered functional QA then final assurance")
+    if validate_manifest(valid, {"project-content-impact"}):
+        raise AssertionError("valid adapter-nominated extension gate was rejected")
+    if not validate_manifest(legacy, {"project-content-impact"}):
+        raise AssertionError("missing adapter-nominated extension gate was accepted")
+
+    duplicate_extension = copy.deepcopy(valid)
+    duplicate_extension["extension_gates"].append(
+        copy.deepcopy(duplicate_extension["extension_gates"][0])
+    )
+    if not validate_manifest(duplicate_extension, {"project-content-impact"}):
+        raise AssertionError("duplicate extension gate was accepted")
+
+    invalid_extension = copy.deepcopy(valid)
+    invalid_extension["extension_gates"][0]["classification"] = "optional"
+    if not validate_manifest(invalid_extension, {"project-content-impact"}):
+        raise AssertionError("invalid extension classification was accepted")
 
     invalid_bool = dict(valid)
     invalid_bool["execution_policy"] = {
@@ -292,6 +308,11 @@ def main() -> int:
     run(str(SCRIPTS / "validate_delivery_manifest.py"), str(FIXTURES / "valid-manifest.json"))
     run(
         str(SCRIPTS / "validate_delivery_manifest.py"),
+        str(FIXTURES / "valid-manifest.json"),
+        "--required-extension", "project-content-impact",
+    )
+    run(
+        str(SCRIPTS / "validate_delivery_manifest.py"),
         str(FIXTURES / "valid-manifest-without-execution-policy.json"),
     )
     for invalid_manifest in (
@@ -327,6 +348,7 @@ def main() -> int:
             "--vault", str(vault),
         )
         required = [
+            ".obsidian/graph.json",
             "AGENTS.md",
             "project-ops.json",
             "wiki/test-project/current.md",
@@ -355,6 +377,27 @@ def main() -> int:
 
         assert_base_yaml(vault)
         run(str(SCRIPTS / "validate_project_vault.py"), str(vault), "--project-key", "test-project")
+        graph = json.loads((vault / ".obsidian/graph.json").read_text(encoding="utf-8"))
+        if graph.get("search") != 'path:"wiki" OR path:"dashboards" OR file:"Start Here"':
+            raise AssertionError("generated Obsidian graph does not use the focused positive query")
+        if graph.get("showOrphans") is not False or graph.get("scale") != 0.9:
+            raise AssertionError("generated Obsidian graph focus defaults are invalid")
+
+        index_path = vault / "wiki/test-project/index.md"
+        original_index = index_path.read_text(encoding="utf-8")
+        index_path.write_text(
+            original_index + "\n| Task | Read |\n| --- | --- |\n| Inspect | [[wiki/test-project/current|Current]] |\n",
+            encoding="utf-8",
+        )
+        malformed = run(
+            str(SCRIPTS / "validate_project_vault.py"),
+            str(vault),
+            "--project-key", "test-project",
+            expect=1,
+        )
+        if "unescaped wikilink alias pipe in Markdown table" not in malformed.stdout:
+            raise AssertionError("vault validator did not identify the malformed table wikilink")
+        index_path.write_text(original_index, encoding="utf-8")
         for path in (vault / "wiki/test-project/pm").rglob("*.md"):
             if "- [ ]" in path.read_text(encoding="utf-8"):
                 raise AssertionError(f"compiled PM record contains task checkbox: {path}")

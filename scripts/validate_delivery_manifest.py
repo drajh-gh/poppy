@@ -14,6 +14,7 @@ from typing import Any
 RISK_ORDER = {"R0": 0, "R1": 1, "R2": 2, "R3": 3}
 PLUGIN_MAX_AUTOMATIC_REMEDIATIONS = 2
 REVIEW_STAGES = ("functional_qa", "final_assurance")
+EXTENSION_CLASSIFICATIONS = {"required", "not-applicable"}
 REQUIRED = {
     "schema_version",
     "project",
@@ -90,7 +91,50 @@ def effective_review_stages(manifest: dict[str, Any]) -> tuple[str, str]:
     return REVIEW_STAGES if stages is None else tuple(stages)
 
 
-def validate_manifest(value: dict[str, Any]) -> list[str]:
+def _validate_extension_gates(value: Any, required_extensions: set[str]) -> list[str]:
+    if not isinstance(value, list) or not value:
+        return ["extension_gates must be a non-empty list"]
+
+    errors: list[str] = []
+    seen: set[str] = set()
+    for index, gate in enumerate(value):
+        label = f"extension_gates[{index}]"
+        if not isinstance(gate, dict):
+            errors.append(f"{label} must be an object")
+            continue
+        gate_id = gate.get("id")
+        if not isinstance(gate_id, str) or not re.fullmatch(
+            r"[a-z0-9]+(?:-[a-z0-9]+)*", gate_id
+        ):
+            errors.append(f"{label}.id must be a lowercase hyphenated key")
+        elif gate_id in seen:
+            errors.append(f"duplicate extension gate: {gate_id}")
+        else:
+            seen.add(gate_id)
+        if gate.get("classification") not in EXTENSION_CLASSIFICATIONS:
+            errors.append(
+                f"{label}.classification must be required or not-applicable"
+            )
+        rationale = gate.get("rationale")
+        if not isinstance(rationale, str) or not rationale.strip():
+            errors.append(f"{label}.rationale must be a non-empty string")
+        evidence = gate.get("evidence")
+        if (
+            not isinstance(evidence, list)
+            or not evidence
+            or any(not isinstance(item, str) or not item.strip() for item in evidence)
+        ):
+            errors.append(f"{label}.evidence must be a non-empty list of strings")
+
+    for gate_id in sorted(required_extensions - seen):
+        errors.append(f"missing adapter-nominated extension gate: {gate_id}")
+    return errors
+
+
+def validate_manifest(
+    value: dict[str, Any], required_extensions: set[str] | None = None
+) -> list[str]:
+    required_extensions = required_extensions or set()
     errors: list[str] = []
     for field in sorted(REQUIRED - set(value)):
         errors.append(f"missing field: {field}")
@@ -100,6 +144,13 @@ def validate_manifest(value: dict[str, Any]) -> list[str]:
         errors.append("schema_version must be 1")
     if "execution_policy" in value:
         errors.extend(_validate_execution_policy(value["execution_policy"]))
+    if "extension_gates" in value:
+        errors.extend(
+            _validate_extension_gates(value["extension_gates"], required_extensions)
+        )
+    elif required_extensions:
+        for gate_id in sorted(required_extensions):
+            errors.append(f"missing adapter-nominated extension gate: {gate_id}")
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", str(value.get("project", ""))):
         errors.append("project must be a lowercase hyphenated key")
     floor = value.get("risk_floor")
@@ -125,12 +176,21 @@ def validate_manifest(value: dict[str, Any]) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path)
+    parser.add_argument(
+        "--required-extension",
+        action="append",
+        default=[],
+        help="Adapter-nominated extension gate ID; repeat for every required gate",
+    )
     args = parser.parse_args()
     try:
         value = json.loads(args.manifest.read_text(encoding="utf-8"))
         if not isinstance(value, dict):
             raise ValueError("manifest root must be an object")
-        errors = validate_manifest(value)
+        required_extensions = set(args.required_extension)
+        if len(required_extensions) != len(args.required_extension):
+            raise ValueError("--required-extension values must be unique")
+        errors = validate_manifest(value, required_extensions)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         errors = [str(exc)]
     for error in errors:

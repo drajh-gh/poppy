@@ -90,6 +90,7 @@ def planned_files(profile: dict[str, Any], vault: Path) -> list[tuple[Path | Non
     files: list[tuple[Path | None, Path, str | None]] = []
 
     template_map = {
+        ".obsidian/graph.json": "obsidian-graph.json",
         "AGENTS.md": "AGENTS.md",
         "Start Here.md": "Start Here.md",
         f"wiki/{key}/index.md": "index.md",

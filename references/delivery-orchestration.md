@@ -17,6 +17,28 @@ Schema version 1 permits this optional execution policy:
 }
 ```
 
+Project adapters may also nominate project-local extension gates without moving domain rules into
+the generic plugin. Carry every nominated gate in the manifest as one structured declaration:
+
+```json
+{
+  "extension_gates": [
+    {
+      "id": "project-content-impact",
+      "classification": "required",
+      "rationale": "Repository delivery invokes the project-local workflow.",
+      "evidence": ["Adapter gate and receipt are included in the frozen packet."]
+    }
+  ]
+}
+```
+
+Gate IDs are project-adapter contracts; the generic plugin knows only their identifier and the
+`required` or `not-applicable` classification. Require a non-empty rationale and evidence list,
+reject duplicate or invalid declarations, and pass every adapter-nominated ID to
+`validate_delivery_manifest.py --required-extension <id>`. The project adapter remains responsible
+for stricter applicability, closure, and artifact-propagation rules.
+
 The plugin ceiling is two automatic remediation rounds. Resolve the effective ceiling as the minimum of two and every declared adapter or approved-manifest limit; each declared value must be an integer from zero through two. An adapter or manifest may narrow the ceiling but cannot widen another boundary. Omitting `execution_policy` or either member preserves the plugin defaults: two rounds and ordered `functional_qa`, then `final_assurance`. A declared `review_stages` value must contain those two distinct roles in exactly that order.
 
 ## Concurrency and ownership
@@ -42,7 +64,7 @@ A candidate revision change invalidates both stage verdicts. Missing, failed, st
 
 ## Evidence packet
 
-Freeze manifest version, effective execution policy, base/head, diff, acceptance matrix, deterministic tests/CI, specialist reports, proposed action, rollback/observability, external effects, prior remediation findings, and stage verdicts. Each assessor returns only `PASS_HANDOFF`, `BLOCK_REMEDIATE`, or `ESCALATE_APPROVAL` for its named stage. A stage verdict qualifies evidence; it does not itself authorize a write or any R2/R3 action.
+Freeze manifest version, effective execution policy, validated extension gates, base/head, diff, acceptance matrix, deterministic tests/CI, specialist reports, proposed action, rollback/observability, external effects, prior remediation findings, and stage verdicts. Each assessor returns only `PASS_HANDOFF`, `BLOCK_REMEDIATE`, or `ESCALATE_APPROVAL` for its named stage. A stage verdict qualifies evidence; it does not itself authorize a write or any R2/R3 action.
 
 The generic plugin defines this protocol but is not an executable delivery adapter by itself. A project must nominate and validate its tracker, repository, base branch, worktree allocator, deterministic gates, receipt schema, and approval boundaries. Preserve Sloski's repo-local adapter until its own pilot gate authorizes extraction.
 

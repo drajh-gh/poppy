@@ -27,6 +27,8 @@ Forward-test with bounded historical or synthetic evidence and zero external wri
 21. The effective automatic-remediation ceiling is the minimum of plugin, adapter, and manifest limits; zero and one are honored while negative, non-integer, or above-two values fail.
 22. Declared review stages accept only distinct ordered `functional_qa`, then `final_assurance`; collapsed or reversed roles fail.
 23. Functional QA checks acceptance and directly affected regressions, while Final Assurance consumes the exact-candidate QA verdict and checks evidence, authority, separation, rollback, and residual risk without duplicating QA or expanding write authority.
+24. An adapter-nominated project extension is present exactly once with `required` or `not-applicable`, a non-empty rationale, and evidence; omission, duplication, or an invalid classification fails without moving project vocabulary into the generic plugin.
+25. A scaffolded Obsidian graph uses a verified positive query over `wiki`, `dashboards`, and `Start Here`, while vault lint rejects an unescaped wikilink alias pipe that would split a Markdown table.
 
 ## Validation commands
 

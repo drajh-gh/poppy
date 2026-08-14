@@ -14,12 +14,10 @@ This proposal exists because onboarding preserved the existing navigation files.
 
 ## Proposed links
 
-| Existing surface | Additive link | Purpose |
-|---|---|---|
-| `Start Here.md` | `[[dashboards/{{project_name}} PM|{{project_name}} PM cockpit]]` | Primary PM entrypoint |
-| `wiki/{{project_key}}/index.md` | `[[wiki/{{project_key}}/pm/index|PM control index]]` | Connect project knowledge to PM records |
-| `wiki/{{project_key}}/current.md` | `[[dashboards/{{project_name}} PM|PM cockpit]]` | Current-state handoff |
-| `wiki/{{project_key}}/source-map.md` | `[[wiki/{{project_key}}/pm/project-profile|Project profile]]` | Connect authority mappings to source configuration |
+- `Start Here.md`: add [[dashboards/{{project_name}} PM|{{project_name}} PM cockpit]] as the primary PM entrypoint.
+- `wiki/{{project_key}}/index.md`: add [[wiki/{{project_key}}/pm/index|PM control index]] to connect project knowledge to PM records.
+- `wiki/{{project_key}}/current.md`: add [[dashboards/{{project_name}} PM|PM cockpit]] as the current-state handoff.
+- `wiki/{{project_key}}/source-map.md`: add [[wiki/{{project_key}}/pm/project-profile|Project profile]] to connect authority mappings to source configuration.
 
 ## Application gate
 

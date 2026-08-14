@@ -26,6 +26,7 @@ OPERATIONAL_TYPES = {
 }
 WIKILINK = re.compile(r"!?(?:\[\[)([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
 FOLDER_FILTER = re.compile(r'file\.inFolder\("([^"]+)"\)')
+UNESCAPED_TABLE_WIKILINK_ALIAS = re.compile(r"\[\[[^\]\n]*(?<!\\)\|[^\]\n]*\]\]")
 
 
 def markdown_files(vault: Path) -> list[Path]:
@@ -93,6 +94,11 @@ def main() -> int:
     for path, text in text_by_path.items():
         relative = path.relative_to(vault)
         meta = meta_by_path[path]
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            if line.lstrip().startswith("|") and UNESCAPED_TABLE_WIKILINK_ALIAS.search(line):
+                errors.append(
+                    f"unescaped wikilink alias pipe in Markdown table: {relative}:{line_number}"
+                )
         note_type = meta.get("type", "")
         if root in path.parents and not meta:
             warnings.append(f"canonical note lacks frontmatter: {relative}")
@@ -136,7 +142,7 @@ def main() -> int:
 
     graph: dict[Path, set[Path]] = defaultdict(set)
     for path, text in text_by_path.items():
-        for target in WIKILINK.findall(text):
+        for target in WIKILINK.findall(text.replace(r"\|", "|")):
             resolved = resolve(target)
             if resolved:
                 graph[path].add(resolved)

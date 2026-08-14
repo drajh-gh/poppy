@@ -18,6 +18,14 @@
     "max_automatic_remediations": 1,
     "review_stages": ["functional_qa", "final_assurance"]
   },
+  "extension_gates": [
+    {
+      "id": "project-content-impact",
+      "classification": "required",
+      "rationale": "The project adapter requires a content-impact workflow for repository delivery.",
+      "evidence": ["The adapter-nominated gate and its receipt are part of the delivery packet."]
+    }
+  ],
   "approved_by": "David",
   "approved_at": "2026-08-10T10:00:00+02:00"
 }
