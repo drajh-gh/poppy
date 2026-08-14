@@ -386,7 +386,7 @@ def main() -> int:
         index_path = vault / "wiki/test-project/index.md"
         original_index = index_path.read_text(encoding="utf-8")
         index_path.write_text(
-            original_index + "\n| Task | Read |\n| --- | --- |\n| Inspect | [[wiki/test-project/current|Current]] |\n",
+            original_index + "\nTask | Read\n--- | ---\nInspect | [[wiki/test-project/current|Current]]\n",
             encoding="utf-8",
         )
         malformed = run(

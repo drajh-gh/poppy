@@ -27,6 +27,9 @@ OPERATIONAL_TYPES = {
 WIKILINK = re.compile(r"!?(?:\[\[)([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
 FOLDER_FILTER = re.compile(r'file\.inFolder\("([^"]+)"\)')
 UNESCAPED_TABLE_WIKILINK_ALIAS = re.compile(r"\[\[[^\]\n]*(?<!\\)\|[^\]\n]*\]\]")
+TABLE_SEPARATOR = re.compile(
+    r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$"
+)
 
 
 def markdown_files(vault: Path) -> list[Path]:
@@ -64,6 +67,23 @@ def resolve_project_key(vault: Path, explicit: str | None) -> str:
     return str(profile["project"]["key"])
 
 
+def markdown_table_rows(lines: list[str]) -> set[int]:
+    rows: set[int] = set()
+    for separator_index, line in enumerate(lines):
+        if not TABLE_SEPARATOR.fullmatch(line):
+            continue
+        start = separator_index - 1
+        while start >= 0 and lines[start].strip() and "|" in lines[start]:
+            rows.add(start)
+            start -= 1
+        rows.add(separator_index)
+        end = separator_index + 1
+        while end < len(lines) and lines[end].strip() and "|" in lines[end]:
+            rows.add(end)
+            end += 1
+    return rows
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("vault", type=Path)
@@ -94,10 +114,11 @@ def main() -> int:
     for path, text in text_by_path.items():
         relative = path.relative_to(vault)
         meta = meta_by_path[path]
-        for line_number, line in enumerate(text.splitlines(), start=1):
-            if line.lstrip().startswith("|") and UNESCAPED_TABLE_WIKILINK_ALIAS.search(line):
+        lines = text.splitlines()
+        for line_index in sorted(markdown_table_rows(lines)):
+            if UNESCAPED_TABLE_WIKILINK_ALIAS.search(lines[line_index]):
                 errors.append(
-                    f"unescaped wikilink alias pipe in Markdown table: {relative}:{line_number}"
+                    f"unescaped wikilink alias pipe in Markdown table: {relative}:{line_index + 1}"
                 )
         note_type = meta.get("type", "")
         if root in path.parents and not meta:
