@@ -375,6 +375,59 @@ def main() -> int:
         if "CREATE (0)" not in second.stdout or "UPDATE (0)" not in second.stdout:
             raise AssertionError("bootstrap rerun is not idempotent")
 
+        existing_profile = json.loads((FIXTURES / "valid-project.json").read_text(encoding="utf-8"))
+        existing_profile["vault"]["adoption_mode"] = "existing"
+        existing_profile_path = Path(temporary) / "existing-project.json"
+        existing_profile_path.write_text(json.dumps(existing_profile, indent=2) + "\n", encoding="utf-8")
+        existing_vault = Path(temporary) / "Existing Vault"
+        existing_vault.mkdir()
+        (existing_vault / "inbox.md").write_text("# Human inbox\n", encoding="utf-8")
+        run(
+            str(SCRIPTS / "bootstrap_project.py"),
+            "--profile", str(existing_profile_path),
+            "--vault", str(existing_vault),
+            "--date", "2026-01-02",
+        )
+        existing_profile["cadence"]["daily_brief"]["time"] = "09:15"
+        evolved_profile_text = json.dumps(existing_profile, indent=2) + "\n"
+        existing_profile_path.write_text(json.dumps(existing_profile, separators=(",", ":")) + "\n", encoding="utf-8")
+        (existing_vault / "project-ops.json").write_text(evolved_profile_text, encoding="utf-8")
+        canonical = existing_vault / "wiki/test-project/current.md"
+        canonical.write_text("# Human canonical current\n", encoding="utf-8")
+        for command_date, dry_run in (("2026-02-03", True), ("2026-03-04", False), ("2026-04-05", True)):
+            args = [
+                str(SCRIPTS / "bootstrap_project.py"),
+                "--profile", str(existing_profile_path),
+                "--vault", str(existing_vault),
+                "--date", command_date,
+            ]
+            if dry_run:
+                args.append("--dry-run")
+            rerun = run(*args)
+            if "CREATE (0)" not in rerun.stdout or "UPDATE (0)" not in rerun.stdout:
+                raise AssertionError(f"existing-vault onboarding is not semantically idempotent on {command_date}")
+        decisions = list((existing_vault / "wiki/test-project/decisions").glob("*-adopt-project-operations.md"))
+        receipts = list((existing_vault / "raw/test-project/pm-os/onboarding").glob("*-onboarding-*.md"))
+        if len(decisions) != 1 or len(receipts) != 1:
+            raise AssertionError("existing-vault onboarding duplicated a one-time decision or receipt")
+        if (existing_vault / "inbox.md").read_text(encoding="utf-8") != "# Human inbox\n":
+            raise AssertionError("existing-vault onboarding overwrote a human-owned file")
+        if canonical.read_text(encoding="utf-8") != "# Human canonical current\n":
+            raise AssertionError("existing-vault onboarding overwrote a canonical page")
+        reconfigure_profile = copy.deepcopy(existing_profile)
+        reconfigure_profile["vault"]["adoption_mode"] = "reconfigure"
+        reconfigure_profile_path = Path(temporary) / "reconfigure-project.json"
+        reconfigure_profile_path.write_text(json.dumps(reconfigure_profile, indent=2) + "\n", encoding="utf-8")
+        reconfigure = run(
+            str(SCRIPTS / "bootstrap_project.py"),
+            "--profile", str(reconfigure_profile_path),
+            "--vault", str(existing_vault),
+            "--dry-run",
+            "--date", "2026-05-06",
+        )
+        if "2026-05-06-adopt-project-operations.md" not in reconfigure.stdout:
+            raise AssertionError("explicit reconfigure path did not remain available")
+
         assert_base_yaml(vault)
         run(str(SCRIPTS / "validate_project_vault.py"), str(vault), "--project-key", "test-project")
         graph = json.loads((vault / ".obsidian/graph.json").read_text(encoding="utf-8"))

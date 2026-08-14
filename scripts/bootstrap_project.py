@@ -35,8 +35,7 @@ def _text(value: Any) -> str:
     return str(value)
 
 
-def substitutions(profile: dict[str, Any]) -> dict[str, str]:
-    today = date.today()
+def substitutions(profile: dict[str, Any], today: date) -> dict[str, str]:
     project = profile["project"]
     vault = profile["vault"]
     language = profile["language"]
@@ -79,8 +78,45 @@ def render(template_path: Path, values: dict[str, str]) -> str:
     return content
 
 
-def planned_files(profile: dict[str, Any], vault: Path) -> list[tuple[Path | None, Path, str | None]]:
-    values = substitutions(profile)
+def _matching_onboarding_receipt(profile: dict[str, Any], vault: Path) -> tuple[date, Path] | None:
+    """Return the captured date for a completed matching existing-vault adoption."""
+    if profile["vault"]["adoption_mode"] != "existing":
+        return None
+
+    existing_profile = vault / "project-ops.json"
+    if not existing_profile.exists():
+        return None
+    try:
+        if json.loads(existing_profile.read_text(encoding="utf-8")) != profile:
+            return None
+    except json.JSONDecodeError:
+        return None
+
+    receipt_root = vault / f"raw/{profile['project']['key']}/pm-os/onboarding"
+    for receipt in sorted(receipt_root.glob("*-onboarding-*.md")):
+        try:
+            captured = date.fromisoformat(receipt.name[:10])
+        except ValueError:
+            continue
+        decision = vault / f"wiki/{profile['project']['key']}/decisions/{captured.isoformat()}-adopt-project-operations.md"
+        receipt_digest = receipt.stem.rsplit("-onboarding-", 1)[-1]
+        if (
+            decision.exists()
+            and profile.get("onboarding", {}).get("status") == "complete"
+            and f"source_id: onboarding-{receipt_digest}" in receipt.read_text(encoding="utf-8")
+        ):
+            return captured, receipt
+    return None
+
+
+def planned_files(
+    profile: dict[str, Any], vault: Path, today: date, *, reuse_completed_adoption: bool = True
+) -> list[tuple[Path | None, Path, str | None]]:
+    profile_text = json.dumps(profile, ensure_ascii=False, indent=2) + "\n"
+    completed_adoption = (
+        _matching_onboarding_receipt(profile, vault) if reuse_completed_adoption else None
+    )
+    values = substitutions(profile, completed_adoption[0] if completed_adoption else today)
     values["vault_path"] = str(vault.resolve())
     values["github_repositories"] = _text(
         profile.get("sources", {}).get("github", {}).get("repositories", [])
@@ -133,7 +169,6 @@ def planned_files(profile: dict[str, Any], vault: Path) -> list[tuple[Path | Non
         destination = vault / "dashboards" / f"{name} {source.name}"
         files.append((source, destination, render(source, values)))
 
-    profile_text = json.dumps(profile, ensure_ascii=False, indent=2) + "\n"
     files.append((None, vault / "project-ops.json", profile_text))
     digest = hashlib.sha256(profile_text.encode("utf-8")).hexdigest()[:12]
     receipt = (
@@ -154,7 +189,11 @@ def planned_files(profile: dict[str, Any], vault: Path) -> list[tuple[Path | Non
         "## External effects\n\n"
         "The onboarding scaffold itself performs no tracker, GitHub, Drive, Dashboard, Slack, Gmail, Calendar, finance, deployment, or production mutation.\n"
     )
-    files.append((None, vault / f"raw/{key}/pm-os/onboarding/{values['date']}-onboarding-{digest}.md", receipt))
+    if completed_adoption:
+        completed_receipt = completed_adoption[1]
+        files.append((None, completed_receipt, completed_receipt.read_text(encoding="utf-8")))
+    else:
+        files.append((None, vault / f"raw/{key}/pm-os/onboarding/{values['date']}-onboarding-{digest}.md", receipt))
     files.append((None, vault / "inbox.md", "# Inbox\n"))
     files.append((None, vault / "log.md", "# Project Operations log\n"))
     return files
@@ -193,7 +232,10 @@ def required_directories(profile: dict[str, Any], vault: Path) -> list[Path]:
     return [vault / item for item in relative]
 
 
-def bootstrap(profile: dict[str, Any], vault: Path, dry_run: bool, update_profile: bool) -> dict[str, list[str]]:
+def bootstrap(
+    profile: dict[str, Any], vault: Path, dry_run: bool, update_profile: bool, today: date | None = None
+) -> dict[str, list[str]]:
+    today = today or date.today()
     mode = profile["vault"]["adoption_mode"]
     existing = vault.exists() and any(vault.iterdir())
     if mode == "new" and existing:
@@ -226,7 +268,9 @@ def bootstrap(profile: dict[str, Any], vault: Path, dry_run: bool, update_profil
             if not dry_run:
                 directory.mkdir(parents=True, exist_ok=True)
 
-    for _source, destination, content in planned_files(profile, vault):
+    for _source, destination, content in planned_files(
+        profile, vault, today, reuse_completed_adoption=not update_profile
+    ):
         relative = destination.relative_to(vault).as_posix()
         if destination.exists():
             current = destination.read_text(encoding="utf-8")
@@ -234,7 +278,7 @@ def bootstrap(profile: dict[str, Any], vault: Path, dry_run: bool, update_profil
                 result["unchanged"].append(relative)
                 continue
             if relative == "project-ops.json" and update_profile:
-                stamp = date.today().isoformat()
+                stamp = today.isoformat()
                 receipt = vault / f"raw/{profile['project']['key']}/pm-os/onboarding/{stamp}-project-profile-before-update.json"
                 result["update"].append(relative)
                 if not dry_run:
@@ -269,6 +313,7 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--allow-draft", action="store_true")
     parser.add_argument("--update-profile", action="store_true", help="Version the old project-ops.json and replace it")
+    parser.add_argument("--date", type=date.fromisoformat, help=argparse.SUPPRESS)
     args = parser.parse_args()
 
     try:
@@ -280,7 +325,7 @@ def main() -> int:
             for error in errors:
                 print(f"ERROR: {error}")
             return 1
-        result = bootstrap(profile, args.vault.resolve(), args.dry_run, args.update_profile)
+        result = bootstrap(profile, args.vault.resolve(), args.dry_run, args.update_profile, args.date)
         print_result(result, args.dry_run)
         return 0
     except (OSError, ValueError, json.JSONDecodeError) as exc:
