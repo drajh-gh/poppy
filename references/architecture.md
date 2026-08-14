@@ -11,6 +11,11 @@ Use four peer orchestrator roles over one evidence-backed project record:
 
 The persistent core-agent triad is Chief of Staff, Researcher, and Upgrader. Solution Architect remains the design and reconfiguration role. Use one persistent Chief of Staff task per project, bounded Researcher and Upgrader runs, and one portfolio task consuming sanitized project summaries. Keep operational control, external discovery, delivery execution, and improvement governance distinct while sharing evidence.
 
+When an orchestrator delegates work, apply [task orchestration](task-orchestration.md): the root is
+the sole human-control surface, every worker is a direct depth-1 child, default fan-out is two
+active and five created workers, and closure/archive state returns to the root. Task identity and
+content are transient evidence, not a second project record or approval system.
+
 ```text
 External sources -> bounded evidence receipts -> compiled project memory
                                             -> operating design  -> Solution Architect
@@ -85,6 +90,10 @@ Substantive multi-source refreshes pass through the executable operational-contr
 6. Reconcile claims, contradictions, source quality, repository risk, and target-specific applicability.
 7. Score and sequence findings with deterministic repair-first relevance.
 8. Validate a normalized handoff and route project fixes or plugin candidates to Upgrader without implementation authority.
+
+Every delivery role runs under the root task-control contract. A worker cannot create another
+worker or accept approval, and a completed worker remains visible until the root captures its
+closure card and verifies clean or commit-recoverable state.
 
 ### Upgrade loop
 

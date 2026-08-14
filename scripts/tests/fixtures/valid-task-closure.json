@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "packet_type": "closure",
+  "root_task_id": "root-ops-41",
+  "expected_worker_ids": ["worker-ops-41-writer"],
+  "workers": [
+    {
+      "task_id": "worker-ops-41-writer",
+      "root_task_id": "root-ops-41",
+      "parent_task_id": "root-ops-41",
+      "status": "complete",
+      "attention_required": false,
+      "result_captured_by_parent": true,
+      "repository_state": {
+        "kind": "commit_recoverable",
+        "branch": "candidate/task-controls",
+        "commit": "0123456789abcdef0123456789abcdef01234567"
+      },
+      "archive_requested": true,
+      "worktree_cleanup_requested": false,
+      "cleanup_approved": false,
+      "closure_card": {
+        "outcome": "Task-control candidate implemented and verified.",
+        "evidence": ["Deterministic contract suite passed."],
+        "repository_state": "Commit-recoverable on the candidate branch.",
+        "residual_risk": "Cross-platform forward testing remains pending.",
+        "next_action": "Parent captures the result and may archive this worker."
+      }
+    }
+  ],
+  "root": {
+    "task_id": "root-ops-41",
+    "archive_requested": false,
+    "user_archive_approved": false,
+    "cleanup_requested": false,
+    "cleanup_approved": false
+  }
+}

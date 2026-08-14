@@ -16,10 +16,12 @@ from validate_delivery_manifest import (
     effective_review_stages,
     validate_manifest,
 )
-from validate_local_execution_preflight import validate_packet
 from validate_operational_control_packet import validate_packet as validate_operational_control_packet
 from validate_project_profile import validate_profile
 from validate_research_packet import validate_packet as validate_research_packet
+from summarize_task_hygiene import summarize as summarize_task_hygiene
+from validate_local_execution_preflight import validate_packet as validate_local_packet
+from validate_task_orchestration import validate_packet as validate_task_packet
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -331,7 +333,7 @@ def assert_local_execution_safety() -> None:
         "valid-local-execution-interrupted.json",
     )
     for fixture in valid_fixtures:
-        errors = validate_packet(load_fixture(fixture))
+        errors = validate_local_packet(load_fixture(fixture))
         if errors:
             raise AssertionError(f"valid local-execution fixture failed: {fixture}: {errors}")
         run(str(SCRIPTS / "validate_local_execution_preflight.py"), str(FIXTURES / fixture))
@@ -377,7 +379,7 @@ def assert_local_execution_safety() -> None:
         ),
     }
     for fixture, expected_errors in invalid_fixtures.items():
-        errors = validate_packet(load_fixture(fixture))
+        errors = validate_local_packet(load_fixture(fixture))
         if not errors or not all(
             any(expected_error in error for error in errors) for expected_error in expected_errors
         ):
@@ -404,7 +406,7 @@ def assert_local_execution_safety() -> None:
             "observed": observed,
             "exists": True,
         }
-        errors = validate_packet(packet)
+        errors = validate_local_packet(packet)
         if errors:
             raise AssertionError(f"valid absolute {label} roots failed lexical comparison: {errors}")
 
@@ -433,7 +435,7 @@ def assert_local_execution_safety() -> None:
             "exists": True,
         }
         packet["coverage"] = {"status": "gray", "reasons": [f"invalid {label} root"]}
-        errors = validate_packet(packet)
+        errors = validate_local_packet(packet)
         if not any(expected_error in error for error in errors):
             raise AssertionError(f"unsafe {label} roots were not rejected as expected: {errors}")
 
@@ -456,13 +458,13 @@ def assert_local_execution_safety() -> None:
     packet["preflight_checks"][0]["required"] = False
     check_adversaries.append(("required-flag change", packet, "required flag does not match nomination"))
     for label, packet, expected_error in check_adversaries:
-        errors = validate_packet(packet)
+        errors = validate_local_packet(packet)
         if not any(expected_error in error for error in errors):
             raise AssertionError(f"{label} did not fail exact nominated-check coverage: {errors}")
 
     packet = copy.deepcopy(load_fixture("valid-local-execution-interrupted.json"))
     packet["interruption"]["resume_packet"]["owned_processes"].append("not-in-ledger")
-    errors = validate_packet(packet)
+    errors = validate_local_packet(packet)
     if not any("contains non-ledger process" in error for error in errors):
         raise AssertionError(f"resume packet accepted a non-ledger process: {errors}")
 
@@ -483,6 +485,139 @@ def assert_local_execution_safety() -> None:
         raise AssertionError("Sloski adapter does not preserve the current canonical repository")
     if r"C:\Users\david\OneDrive\Documents\GitHub\sloski-drop" in adapter:
         raise AssertionError("Sloski adapter still treats the retired checkout as canonical")
+
+
+def assert_task_orchestration() -> None:
+    valid_plan = load_fixture("valid-task-plan.json")
+    valid_closure = load_fixture("valid-task-closure.json")
+    for fixture, packet in (
+        ("valid-task-plan.json", valid_plan),
+        ("valid-task-closure.json", valid_closure),
+    ):
+        errors = validate_task_packet(packet)
+        if errors:
+            raise AssertionError(f"valid task-orchestration fixture failed: {fixture}: {errors}")
+        run(str(SCRIPTS / "validate_task_orchestration.py"), str(FIXTURES / fixture))
+
+    invalid_plan_cases: list[tuple[str, dict[str, object], str]] = []
+    packet = copy.deepcopy(valid_plan)
+    packet["workers"][0]["title"] = "<work-key> · Writer · raw prompt"
+    invalid_plan_cases.append(("raw title markup", packet, "raw prompt markup"))
+    packet = copy.deepcopy(valid_plan)
+    packet["workers"][0]["title"] = "Acme · Writer · Implement task controls"
+    invalid_plan_cases.append(("redundant project prefix", packet, "redundant project prefix"))
+    packet = copy.deepcopy(valid_plan)
+    packet["workers"][0]["human_authority"] = True
+    invalid_plan_cases.append(("worker authority", packet, "human_authority must be false"))
+    packet = copy.deepcopy(valid_plan)
+    packet["workers"][0]["decision_protocol"] = "accept_child_input"
+    invalid_plan_cases.append(("child decision authority", packet, "decision_protocol must be relay_to_root"))
+    packet = copy.deepcopy(valid_plan)
+    packet["workers"][0]["created_child_ids"] = ["recursive-worker"]
+    invalid_plan_cases.append(("recursive delegation", packet, "recursive delegation is forbidden"))
+    packet = copy.deepcopy(valid_plan)
+    packet["workers"][0]["delegation_depth"] = 2
+    invalid_plan_cases.append(("delegation depth", packet, "delegation_depth must be 1"))
+    packet = copy.deepcopy(valid_plan)
+    packet["workers"][0]["effort"] = "xhigh"
+    packet["workers"][0]["effort_rationale"] = "Review carefully."
+    invalid_plan_cases.append(("unjustified xhigh", packet, "xhigh effort requires"))
+    packet = copy.deepcopy(valid_plan)
+    packet["max_active_workers"] = 3
+    invalid_plan_cases.append(("unapproved active budget", packet, "approved_budget_extension"))
+    for label, packet, expected_error in invalid_plan_cases:
+        errors = validate_task_packet(packet)
+        if not any(expected_error in error for error in errors):
+            raise AssertionError(f"{label} was accepted or failed unclearly: {errors}")
+
+    invalid_closure_cases: list[tuple[str, dict[str, object], str]] = []
+    packet = copy.deepcopy(valid_closure)
+    packet["workers"] = []
+    invalid_closure_cases.append(("missing worker closure", packet, "do not match expected_worker_ids"))
+    packet = copy.deepcopy(valid_closure)
+    packet["workers"][0]["repository_state"] = {"kind": "dirty"}
+    invalid_closure_cases.append(("dirty worker archive", packet, "cannot be archived"))
+    packet = copy.deepcopy(valid_closure)
+    packet["workers"][0]["attention_required"] = True
+    invalid_closure_cases.append(("attention worker archive", packet, "attention_required must be false"))
+    packet = copy.deepcopy(valid_closure)
+    packet["root"]["archive_requested"] = True
+    invalid_closure_cases.append(("root auto archive", packet, "cannot auto-archive"))
+    packet = copy.deepcopy(valid_closure)
+    packet["workers"][0]["worktree_cleanup_requested"] = True
+    invalid_closure_cases.append(("worker cleanup without approval", packet, "cleanup requires separate"))
+    packet = copy.deepcopy(valid_closure)
+    packet["root"]["cleanup_requested"] = True
+    invalid_closure_cases.append(("root cleanup without approval", packet, "cleanup requires separate"))
+    for label, packet, expected_error in invalid_closure_cases:
+        errors = validate_task_packet(packet)
+        if not any(expected_error in error for error in errors):
+            raise AssertionError(f"{label} was accepted or failed unclearly: {errors}")
+
+    snapshot = load_fixture("valid-task-hygiene-snapshot.json")
+    summary = summarize_task_hygiene(snapshot)
+    if summary["summary"] != {"task_count": 2, "exception_count": 1}:
+        raise AssertionError(f"unexpected hygiene summary: {summary}")
+    if [item["code"] for item in summary["exceptions"]] != ["archive_candidate"]:
+        raise AssertionError(f"valid snapshot did not produce one archive candidate: {summary}")
+
+    adversarial = copy.deepcopy(snapshot)
+    adversarial["tasks"][0]["title"] = "ROOT-1 · Delivery · private root title"
+    adversarial["tasks"][0]["archive_requested"] = True
+    adversarial["tasks"][1]["title"] = "{{ raw delegation blob }}"
+    adversarial["tasks"][1]["delegation_depth"] = 2
+    adversarial["tasks"][1]["created_child_count"] = 1
+    adversarial["tasks"][1]["human_authority"] = True
+    hygienic = summarize_task_hygiene(adversarial)
+    codes = {item["code"] for item in hygienic["exceptions"]}
+    required_codes = {
+        "raw_title_markup",
+        "recursive_delegation",
+        "worker_authority",
+        "root_archive_without_approval",
+    }
+    if not required_codes.issubset(codes):
+        raise AssertionError(f"hygiene analyzer missed adversarial cases: {hygienic}")
+    rendered = json.dumps(hygienic)
+    for forbidden in ("private root title", "raw delegation blob", "root-ops-41", "worker-ops-41-writer"):
+        if forbidden in rendered:
+            raise AssertionError(f"hygiene output leaked task text or raw identity: {forbidden}")
+
+    for script_name in ("validate_task_orchestration.py", "summarize_task_hygiene.py"):
+        script = (SCRIPTS / script_name).read_text(encoding="utf-8")
+        for forbidden in ("state_5.sqlite", "threads.sqlite", "conversation body"):
+            if forbidden in script:
+                raise AssertionError(f"{script_name} reads or names private task storage: {forbidden}")
+
+    task_reference = (ROOT / "references" / "task-orchestration.md").read_text(encoding="utf-8")
+    for required in (
+        "sole human-control surface",
+        "NEEDS_PARENT_DECISION",
+        "delegation depth 1",
+        "two active workers and five created workers",
+        "<work-key> · <role> · <outcome>",
+        "never auto-archives",
+        "Cleanup is a",
+    ):
+        if required.casefold() not in task_reference.casefold():
+            raise AssertionError(f"task-orchestration contract is missing {required}")
+
+    for skill_name in (
+        "project-ops-manager",
+        "project-ops-delivery",
+        "project-ops-assess",
+        "project-ops-upgrader",
+        "project-ops-automate",
+    ):
+        skill = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
+        if "../../references/task-orchestration.md" not in skill:
+            raise AssertionError(f"{skill_name} does not load the task-orchestration contract")
+
+    run(str(SCRIPTS / "test_owned_process_supervisor.py"))
+    promotion = (ROOT / "references" / "promotion-registry.md").read_text(encoding="utf-8")
+    for required in ("Windows", "POSIX", "independent assessment", "not activated"):
+        if required.casefold() not in promotion.casefold():
+            raise AssertionError(f"owned-process promotion gate is missing {required}")
 
 
 def main() -> int:
@@ -522,6 +657,7 @@ def main() -> int:
         )
     assert_delivery_execution_policy()
     assert_local_execution_safety()
+    assert_task_orchestration()
 
     with tempfile.TemporaryDirectory(prefix="project-operations-") as temporary:
         vault = Path(temporary) / "Test Vault"
