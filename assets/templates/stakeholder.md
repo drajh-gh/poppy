@@ -1,5 +1,6 @@
 ---
-type: stakeholder
+type: analysis
+record_kind: stakeholder
 project: {{project_key}}
 status: current
 pm_state: active
@@ -32,4 +33,3 @@ sources: []
 ## Open concerns and commitments
 
 Do not record speculative personality, protected characteristics, or sensitive private traits.
-

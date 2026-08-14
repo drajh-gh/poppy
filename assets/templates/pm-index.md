@@ -1,7 +1,8 @@
 ---
 type: analysis
+record_kind: redirect
 project: {{project_key}}
-status: current
+status: superseded
 updated: {{date}}
 valid_as_of: {{date}}
 review_after: {{review_after}}
@@ -9,16 +10,6 @@ sensitivity: internal
 sources: []
 ---
 
-# {{project_name}} PM control index
+# {{project_name}} PM control index — redirect
 
-- [[wiki/{{project_key}}/pm/project-profile|Project profile]]
-- [[wiki/{{project_key}}/pm/charter|Charter]]
-- [[wiki/{{project_key}}/pm/scope-baseline|Scope baseline]]
-- [[wiki/{{project_key}}/pm/approval-policy|Approval policy]]
-- [[wiki/{{project_key}}/pm/communication-plan|Communication plan]]
-- [[wiki/{{project_key}}/pm/glossary|Glossary]]
-- [[wiki/{{project_key}}/pm/portfolio-summary|Portfolio summary]]
-- [[dashboards/{{project_name}} PM|PM cockpit]]
-
-Operational records live under `pm/records/`; delivery tasks remain in the nominated tracker.
-
+Use [[wiki/{{project_key}}/index|the canonical knowledge index]]. It owns semantic routing for product knowledge, PM controls, systems, and evidence.

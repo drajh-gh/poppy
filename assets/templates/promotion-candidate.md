@@ -1,5 +1,6 @@
 ---
-type: improvement-candidate
+type: analysis
+record_kind: improvement-candidate
 project: {{project_key}}
 status: candidate
 classification: plugin-candidate

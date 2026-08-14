@@ -1,6 +1,6 @@
 filters:
   and:
-    - file.inFolder("wiki/{{project_key}}/pm/records/decisions")
+    - file.inFolder("wiki/{{project_key}}/decisions")
     - 'project == "{{project_key}}"'
     - 'type == "decision"'
 properties:
@@ -26,4 +26,3 @@ views:
       - evidence_grade
       - updated
       - review_after
-

@@ -2,7 +2,8 @@ filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/health")
     - 'project == "{{project_key}}"'
-    - 'type == "health-snapshot"'
+    - 'type == "analysis"'
+    - 'record_kind == "health-snapshot"'
 properties:
   file.name:
     displayName: Snapshot
@@ -31,6 +32,9 @@ properties:
 views:
   - type: table
     name: Latest
+    filters:
+      and:
+        - 'status == "current"'
     limit: 12
     order:
       - file.name
@@ -45,4 +49,13 @@ views:
       - quality_health
       - freshness_health
       - valid_as_of
-
+  - type: table
+    name: History
+    filters:
+      and:
+        - 'status == "superseded"'
+    order:
+      - file.name
+      - period
+      - overall_health
+      - valid_as_of

@@ -6,7 +6,7 @@ Automations are execution triggers, not project memory. The confirmed project pr
 
 | Control purpose | Suggested cadence | Output | No-change behavior |
 |---|---|---|---|
-| operational scan | weekdays or changed-only | exceptions, overdue commitments, blockers | stay silent |
+| operational scan | weekdays, changed-only | exceptions, overdue commitments, blockers | stay silent |
 | weekly planning | once weekly before planning | health snapshot, priority proposal, decisions needed | publish concise stable-state note only if requested |
 | monthly governance | once monthly | budget, scope, milestone and stakeholder review | record reviewed/no material change |
 | portfolio roll-up | after project refreshes | cross-project exceptions and decisions needed | stay silent |
@@ -24,6 +24,8 @@ These are recommendations, not mandatory schedules. Frequency should follow proj
 - External writes, messages, ticket changes, and client-facing outputs remain approval-gated even when an automation discovers them.
 - A source outage or incomplete scan must produce a coverage warning, never a false green status.
 - Workflow-improvement automations use `project-ops-upgrader`, inspect only the bounded task period, and may use at most two read-only specialists.
+- Durable scheduled prompts explicitly invoke `project-ops-manager` and `project-ops-memory`, follow the repository adapter, and pass a manual rehearsal before activation.
+- Prefer one consolidated project loop: weekday changed-only refresh, Friday semantic lint, and first-Monday governance. Add another automation only when isolation has a concrete operational benefit.
 - Automatic project or plugin source mutations require an explicit approved manifest; ordinary scheduled runs classify, record candidates, and draft changes.
 - Changed-only monitoring should be quiet when there is no material change.
 - Use the Codex automation API for all lifecycle changes. Never hand-edit automation files.

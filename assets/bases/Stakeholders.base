@@ -2,7 +2,8 @@ filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/stakeholders")
     - 'project == "{{project_key}}"'
-    - 'type == "stakeholder"'
+    - 'type == "analysis"'
+    - 'record_kind == "stakeholder"'
 properties:
   file.name:
     displayName: Stakeholder
@@ -43,4 +44,3 @@ views:
       - role
       - pm_state
       - last_touch
-

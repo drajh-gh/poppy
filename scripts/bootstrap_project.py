@@ -81,6 +81,10 @@ def render(template_path: Path, values: dict[str, str]) -> str:
 
 def planned_files(profile: dict[str, Any], vault: Path) -> list[tuple[Path | None, Path, str | None]]:
     values = substitutions(profile)
+    values["vault_path"] = str(vault.resolve())
+    values["github_repositories"] = _text(
+        profile.get("sources", {}).get("github", {}).get("repositories", [])
+    )
     key = values["project_key"]
     name = values["project_name"]
     files: list[tuple[Path | None, Path, str | None]] = []
@@ -99,7 +103,8 @@ def planned_files(profile: dict[str, Any], vault: Path) -> list[tuple[Path | Non
         f"wiki/{key}/pm/communication-plan.md": "communication-plan.md",
         f"wiki/{key}/pm/glossary.md": "glossary.md",
         f"wiki/{key}/pm/portfolio-summary.md": "portfolio-summary.md",
-        f"wiki/{key}/pm/records/decisions/{values['date']}-adopt-project-operations.md": "adopt-project-operations-decision.md",
+        f"wiki/{key}/pm/repository-agent-adoption-plan.md": "repository-agent-adoption-plan.md",
+        f"wiki/{key}/decisions/{values['date']}-adopt-project-operations.md": "adopt-project-operations-decision.md",
         f"dashboards/{name} PM.md": "dashboard.md",
         "templates/project-profile.md": "project-profile.md",
         "templates/milestone.md": "milestone.md",
@@ -170,6 +175,9 @@ def required_directories(profile: dict[str, Any], vault: Path) -> list[Path]:
         "templates",
         "wiki",
         f"wiki/{key}",
+        f"wiki/{key}/decisions",
+        f"wiki/{key}/human-input",
+        f"wiki/{key}/meetings",
         f"wiki/{key}/pm",
         f"wiki/{key}/pm/records/milestones",
         f"wiki/{key}/pm/records/commitments",
@@ -179,7 +187,6 @@ def required_directories(profile: dict[str, Any], vault: Path) -> list[Path]:
         f"wiki/{key}/pm/records/budgets",
         f"wiki/{key}/pm/records/health",
         f"wiki/{key}/pm/records/reports",
-        f"wiki/{key}/pm/records/decisions",
         f"wiki/{key}/pm/records/improvements",
     ]
     return [vault / item for item in relative]

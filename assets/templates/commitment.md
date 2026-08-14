@@ -1,5 +1,6 @@
 ---
-type: commitment
+type: analysis
+record_kind: commitment
 project: {{project_key}}
 status: current
 pm_state: open
@@ -27,4 +28,3 @@ sources: []
 ## Impact and follow-up
 
 Execution belongs in the nominated tracker when it is delivery work.
-

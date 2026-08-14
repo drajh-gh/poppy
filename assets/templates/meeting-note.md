@@ -1,5 +1,6 @@
 ---
-type: source
+type: analysis
+record_kind: meeting-note
 project: {{project_key}}
 source_system: meeting
 source_id:

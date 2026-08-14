@@ -2,7 +2,8 @@ filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/budgets")
     - 'project == "{{project_key}}"'
-    - 'type == "budget-snapshot"'
+    - 'type == "analysis"'
+    - 'record_kind == "budget-snapshot"'
 properties:
   file.name:
     displayName: Snapshot
@@ -47,4 +48,3 @@ views:
       - forecast_variance
       - unpriced_change
       - valid_as_of
-

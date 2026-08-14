@@ -1,5 +1,6 @@
 ---
-type: change-request
+type: analysis
+record_kind: change-request
 project: {{project_key}}
 status: current
 pm_state: proposed
@@ -30,4 +31,3 @@ sources: []
 ## Impact assessment
 
 ## Decision
-

@@ -1,7 +1,8 @@
 filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/improvements")
-    - 'type == "improvement-candidate"'
+    - 'type == "analysis"'
+    - 'record_kind == "improvement-candidate"'
 properties:
   file.name:
     displayName: Candidate

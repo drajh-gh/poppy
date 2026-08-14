@@ -2,7 +2,8 @@ filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/raid")
     - 'project == "{{project_key}}"'
-    - 'type == "raid-item"'
+    - 'type == "analysis"'
+    - 'record_kind == "raid-item"'
 properties:
   file.name:
     displayName: Item
@@ -50,4 +51,3 @@ views:
       - health
       - owner
       - due
-

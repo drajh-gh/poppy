@@ -2,7 +2,8 @@ filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/milestones")
     - 'project == "{{project_key}}"'
-    - 'type == "milestone"'
+    - 'type == "analysis"'
+    - 'record_kind == "milestone"'
 formulas:
   days_to_target: 'if(target_date, (date(target_date) - today()).days, "")'
 properties:
@@ -48,4 +49,3 @@ views:
       - target_date
       - forecast_date
       - valid_as_of
-

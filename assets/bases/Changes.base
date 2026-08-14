@@ -2,7 +2,8 @@ filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/changes")
     - 'project == "{{project_key}}"'
-    - 'type == "change-request"'
+    - 'type == "analysis"'
+    - 'record_kind == "change-request"'
 properties:
   file.name:
     displayName: Change

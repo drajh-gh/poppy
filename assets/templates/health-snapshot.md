@@ -1,5 +1,6 @@
 ---
-type: health-snapshot
+type: analysis
+record_kind: health-snapshot
 project: {{project_key}}
 status: current
 pm_state: recorded
@@ -38,4 +39,3 @@ sources: []
 ## Decisions and commitments
 
 ## Next plan and freshness gaps
-

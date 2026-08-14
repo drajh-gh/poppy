@@ -1,5 +1,6 @@
 ---
-type: portfolio-summary
+type: analysis
+record_kind: portfolio-summary
 project: {{project_key}}
 status: current
 overall_health: Gray

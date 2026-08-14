@@ -42,3 +42,4 @@ sources: []
 
 ## Freshness gaps
 
+Keep this page below 750 words. Put historical narrative in dated health snapshots or canonical history pages.

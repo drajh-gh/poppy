@@ -1,5 +1,6 @@
 ---
-type: raid-item
+type: analysis
+record_kind: raid-item
 project: {{project_key}}
 status: current
 pm_state: open
@@ -30,4 +31,3 @@ sources: []
 ## Response and trigger
 
 ## Current assessment
-

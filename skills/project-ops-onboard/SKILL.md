@@ -14,8 +14,9 @@ Read [onboarding-workflow](../../references/onboarding-workflow.md), [project pr
 5. Preview the complete profile, gaps, generated files, and exact external effects.
 6. Run `../../scripts/validate_project_profile.py` and a bootstrap dry run.
 7. Generate only after the user confirms the preview.
-8. Lint the generated surface and report unresolved gaps.
-9. Offer cadence automation as a separate preview-and-confirm step. Inspect and deconflict existing automations before calling `$project-ops-automate`.
+8. Discover each active repository's agent-instruction source and preview the generated repository adoption plan. Complete the adapter integration or record it as an explicit accepted gap.
+9. Lint the generated surface and report unresolved gaps.
+10. Offer cadence automation as a separate preview-and-confirm step. Inspect and deconflict existing automations before calling `$project-ops-automate`.
 
 Never request credentials, infer that the newest Drive document is approved, overwrite an existing vault file, or create a duplicate ticket backlog. Existing-vault adoption preserves `AGENTS.md`, `raw/`, `inbox.md`, `daily/`, `log.md`, and canonical pages by default.
 

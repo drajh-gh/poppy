@@ -7,7 +7,8 @@ Create a canonical note only for a distinct project, domain, workflow, system, m
 Every compiled record uses `status` for the knowledge lifecycle and `pm_state` for operational state:
 
 ```yaml
-type:
+type: analysis
+record_kind:
 project:
 status:
 pm_state:
@@ -20,6 +21,8 @@ evidence_grade:
 supersedes: []
 sources: []
 ```
+
+Use `type: analysis` plus one of the operational `record_kind` values: `milestone`, `commitment`, `raid-item`, `change-request`, `stakeholder`, `budget-snapshot`, `health-snapshot`, `meeting-note`, `portfolio-summary`, or `improvement-candidate`. Decisions remain `type: decision`. This keeps Project Operations records compatible with the Project OS knowledge lifecycle while letting Bases select operational records precisely.
 
 Use `status: current|draft|needs-review|superseded` for milestone, commitment, RAID, change, stakeholder, budget, and health records. Do not place values such as `blocked`, `overdue`, `approved`, or `at-risk` in `status`; those belong in `pm_state` or `health`. Decisions and open questions retain their Project OS lifecycle values.
 

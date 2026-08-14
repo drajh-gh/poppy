@@ -1,5 +1,6 @@
 ---
-type: milestone
+type: analysis
+record_kind: milestone
 project: {{project_key}}
 status: current
 pm_state: planned
@@ -27,4 +28,3 @@ sources: []
 ## Dependencies and risks
 
 ## Evidence
-

@@ -1,4 +1,4 @@
 interface:
   display_name: "Project Operations Memory"
-  short_description: "Reconcile sources into Obsidian memory"
-  default_prompt: "Use $project-ops-memory to refresh this project's evidence-backed Obsidian memory."
+  short_description: "Orient, reconcile, and close Obsidian memory"
+  default_prompt: "Use $project-ops-memory to orient from this project's evidence-backed Obsidian memory, then close with only durable source-backed changes."

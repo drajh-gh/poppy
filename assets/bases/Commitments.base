@@ -2,7 +2,8 @@ filters:
   and:
     - file.inFolder("wiki/{{project_key}}/pm/records/commitments")
     - 'project == "{{project_key}}"'
-    - 'type == "commitment"'
+    - 'type == "analysis"'
+    - 'record_kind == "commitment"'
 formulas:
   days_until_due: 'if(due, (date(due) - today()).days, "")'
   due_state: 'if(!due, "⚪ No date", if(pm_state == "fulfilled", "✅ Fulfilled", if(date(due) < today(), "🔴 Overdue", if((date(due) - today()).days <= 7, "🟠 Due soon", "🟢 Scheduled"))))'
@@ -47,4 +48,3 @@ views:
       - counterparty
       - due
       - confirmation_status
-

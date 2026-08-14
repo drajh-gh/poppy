@@ -12,8 +12,8 @@ Read [automation and cadence](../../references/automation-and-cadence.md), [proj
 3. Recommend the smallest useful cadence and notification policy. Prefer a heartbeat attached to the current task unless the user explicitly asks for standalone project work.
 4. Show the proposed name, purpose, schedule in local human-readable time, target, expected outputs, no-change behavior, and external side effects.
 5. Ask for explicit confirmation before creating, changing, enabling, disabling, or deleting an automation.
-6. Use the automation tool, preserving all unspecified fields when updating.
-7. Record the automation identifier and purpose in the project profile or onboarding receipt only after successful creation or update.
+6. Rehearse the proposed prompt manually against the project contract before activation. Durable scheduled prompts must explicitly invoke `project-ops-manager` and `project-ops-memory`.
+7. Use the automation tool, preserving all unspecified fields when updating.
+8. Record the automation identifier and purpose in the project profile or onboarding receipt only after successful creation or update.
 
-Never create competing automations for the same project and control purpose. Never put notification preferences inside the automation prompt, expose raw recurrence rules to the user, create a cron workaround for a heartbeat, or silently alter the existing Sloski Monday refresh.
-
+Never create competing automations for the same project and control purpose. Prefer one consolidated weekday changed-only loop with Friday semantic lint and first-Monday governance. Never put notification preferences inside the automation prompt, expose raw recurrence rules to the user, create a cron workaround for a heartbeat, or silently alter an existing project control loop.

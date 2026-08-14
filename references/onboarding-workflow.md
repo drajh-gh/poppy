@@ -30,13 +30,13 @@ Modes: `new-project`, `adopt-existing-vault`, `clone-project-archetype`, and `re
 9. Select approval preset and exact external-write boundaries.
 10. Confirm cadence, quiet hours, destinations, and changed-only notifications.
 11. Recommend archetype-specific RAG tolerances and allow adjustment.
-12. Preview source map, authority map, artifact plan, gaps, and exact external effects.
-13. Run a zero-write dry report over bounded historical evidence.
-14. Generate files only after confirmation, then validate and lint.
+12. Discover every active repository's agent-instruction source and preview a compact repository memory adapter; never edit generated instruction outputs directly.
+13. Preview source map, authority map, artifact plan, repository-adoption plan, gaps, and exact external effects.
+14. Run a zero-write dry report over bounded historical evidence.
+15. Generate files only after confirmation, then validate and lint.
 
 ## Completion gates
 
-Onboarding is complete only when required mappings are confirmed or accepted as gaps, every material claim has an authority or Unknown state, human-owned files are protected, approvals/language/cadence/tolerances are configured, generated artifacts validate, and the dry run made zero unauthorized external writes.
+Onboarding is complete only when required mappings are confirmed or accepted as gaps, every material claim has an authority or Unknown state, human-owned files are protected, approvals/language/cadence/tolerances are configured, every active repository has a validated memory adapter or an accepted gap, generated artifacts validate, and the dry run made zero unauthorized external writes.
 
 Use `scripts/onboard_project.py` for deterministic profile generation and `scripts/bootstrap_project.py` for dry-run or confirmed vault scaffolding.
-

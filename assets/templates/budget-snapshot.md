@@ -1,5 +1,6 @@
 ---
-type: budget-snapshot
+type: analysis
+record_kind: budget-snapshot
 project: {{project_key}}
 status: current
 pm_state: recorded
@@ -32,4 +33,3 @@ sources: []
 ## Variance and commercial exposure
 
 ## Contradictions and decisions required
-

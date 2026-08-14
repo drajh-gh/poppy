@@ -72,6 +72,19 @@ def assert_base_yaml(vault: Path) -> None:
                 raise AssertionError(f"invalid Base schema in {path}")
 
 
+def assert_memory_lifecycle_contract() -> None:
+    lifecycle = (ROOT / "references" / "project-memory-lifecycle.md").read_text(encoding="utf-8")
+    memory = (ROOT / "skills" / "project-ops-memory" / "SKILL.md").read_text(encoding="utf-8")
+    agents = (ROOT / "assets" / "templates" / "AGENTS.md").read_text(encoding="utf-8")
+    for term in ("Orient", "Close", "750", "2,500"):
+        if term.casefold() not in lifecycle.casefold():
+            raise AssertionError(f"memory lifecycle contract is missing {term}")
+    if "project-memory-lifecycle.md" not in memory:
+        raise AssertionError("memory skill does not load the lifecycle contract")
+    if "at close" not in agents.casefold() or "if nothing durable changed, write nothing" not in agents.casefold():
+        raise AssertionError("generated repository adapter lacks a bounded close contract")
+
+
 def load_fixture(name: str) -> dict[str, object]:
     value = json.loads((FIXTURES / name).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -272,6 +285,7 @@ def assert_local_execution_safety() -> None:
 def main() -> int:
     assert_no_placeholders(ROOT)
     assert_skills()
+    assert_memory_lifecycle_contract()
 
     run(str(SCRIPTS / "validate_project_profile.py"), str(FIXTURES / "valid-project.json"))
     run(str(SCRIPTS / "validate_project_profile.py"), str(FIXTURES / "invalid-project.json"), expect=1)
@@ -317,6 +331,8 @@ def main() -> int:
             "project-ops.json",
             "wiki/test-project/current.md",
             "wiki/test-project/pm/project-profile.md",
+            "wiki/test-project/pm/repository-agent-adoption-plan.md",
+            "wiki/test-project/decisions",
             "wiki/test-project/pm/records/health",
             "dashboards/Test Project PM.md",
             "dashboards/Test Project Health.base",
@@ -338,6 +354,7 @@ def main() -> int:
             raise AssertionError("bootstrap rerun is not idempotent")
 
         assert_base_yaml(vault)
+        run(str(SCRIPTS / "validate_project_vault.py"), str(vault), "--project-key", "test-project")
         for path in (vault / "wiki/test-project/pm").rglob("*.md"):
             if "- [ ]" in path.read_text(encoding="utf-8"):
                 raise AssertionError(f"compiled PM record contains task checkbox: {path}")
