@@ -110,7 +110,10 @@ def markdown_table_rows(lines: list[str]) -> set[int]:
         header_index = separator_index - 1
         if header_index < 0 or header_index in fenced:
             continue
-        header_cells = markdown_table_cells(lines[header_index])
+        header_line = lines[header_index]
+        if TABLE_SEPARATOR.fullmatch(header_line):
+            continue
+        header_cells = markdown_table_cells(header_line)
         if len(header_cells) < 2 or not all(header_cells):
             continue
         rows.add(header_index)

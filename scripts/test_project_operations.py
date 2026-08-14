@@ -420,6 +420,10 @@ def main() -> int:
             "\n--- | ---\nInspect | [[wiki/test-project/current|Current]]\n",
             rejected=False,
         )
+        validate_table_case(
+            "\n--- | ---\n--- | ---\nInspect | [[wiki/test-project/current|Current]]\n",
+            rejected=False,
+        )
         index_path.write_text(original_index, encoding="utf-8")
         for path in (vault / "wiki/test-project/pm").rglob("*.md"):
             if "- [ ]" in path.read_text(encoding="utf-8"):
