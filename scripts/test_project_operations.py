@@ -602,16 +602,18 @@ def assert_task_orchestration() -> None:
         if required.casefold() not in task_reference.casefold():
             raise AssertionError(f"task-orchestration contract is missing {required}")
 
+    upgrader = (ROOT / "skills" / "project-ops-upgrader" / "SKILL.md").read_text(encoding="utf-8")
+    if "../../references/task-orchestration.md" not in upgrader:
+        raise AssertionError("Upgrader does not load the task-orchestration candidate")
     for skill_name in (
         "project-ops-manager",
         "project-ops-delivery",
         "project-ops-assess",
-        "project-ops-upgrader",
         "project-ops-automate",
     ):
         skill = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
-        if "../../references/task-orchestration.md" not in skill:
-            raise AssertionError(f"{skill_name} does not load the task-orchestration contract")
+        if "../../references/task-orchestration.md" in skill:
+            raise AssertionError(f"{skill_name} activates the unpromoted task-orchestration candidate")
 
     run(str(SCRIPTS / "test_owned_process_supervisor.py"))
     promotion = (ROOT / "references" / "promotion-registry.md").read_text(encoding="utf-8")

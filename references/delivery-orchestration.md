@@ -44,19 +44,10 @@ The plugin ceiling is two automatic remediation rounds. Resolve the effective ce
 ## Concurrency and ownership
 
 - Default to at most two active delivery workstreams unless the profile sets a lower limit.
-- Use one root run and one isolated branch/worktree per work item. The root is the sole
-  human-control surface and every worker is its direct depth-1 child.
-- Default to at most two active workers and five created workers per root run. A wider task budget
-  requires a recorded human-approved extension. Workers never recursively delegate.
+- Use one parent run and one isolated branch/worktree per work item.
 - Exactly one writer owns each worktree.
 - Specialists, Functional QA, and Final Assurance begin read-only; the writer integrates findings.
 - Run Functional QA and Final Assurance as separate fresh-assessor tasks. Do not collapse them into one review or verdict.
-- Name workers `<work-key> · <role> · <outcome>` without a project prefix already supplied by the
-  project folder. Record effort and a concrete rationale in the worker packet.
-
-Read and apply [task orchestration](task-orchestration.md). A worker that receives user input or
-needs authority relays `NEEDS_PARENT_DECISION` to the root and stops safely; the child input itself
-is never approval.
 
 ## State machine
 
@@ -79,4 +70,4 @@ The generic plugin defines this protocol but is not an executable delivery adapt
 
 ## Closure
 
-Verify the exact completed claim, capture one compact immutable run receipt, update durable knowledge only when it changed, and leave merge/deployment/production/client communication gated by the project policy. Capture each worker's closure card and clean or identified commit/branch-recoverable state before archival. Ask the user before archiving the root. Archival never authorizes branch or worktree cleanup.
+Verify the exact completed claim, capture one compact immutable run receipt, update durable knowledge only when it changed, and leave merge/deployment/production/client communication gated by the project policy.

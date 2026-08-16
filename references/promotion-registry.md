@@ -3,17 +3,54 @@
 ## Task orchestration v1
 
 - Classification: plugin candidate
-- Status: not activated
-- Evidence: one project plus project-neutral plan, closure, title, authority, fan-out, reasoning-effort, archival, and privacy-minimized hygiene fixtures now exercise the proposed contract.
+- Status: implementation prepared; not activated
+- Evidence: one project plus project-neutral plan, closure, title, authority, fan-out, reasoning-effort, archival, and privacy-minimized hygiene fixtures exercise the proposed contract. The implementation was transplanted onto the Researcher release without replacing current plugin content.
 - Proposed contract: one root human-control surface; direct depth-1 workers; default two-active/five-created budget; structured no-prefix titles; event-only updates; relayed decisions; closure cards; clean or commit-recoverable worker archival; user-approved root archival; cleanup separation.
-- Promotion blocker: the candidate has not been independently assessed or activated, and live task snapshots still require an explicit normalized exporter. The analyzer must never read private Codex databases.
-- Next validation: run the deterministic plugin suite, independent Functional QA and Final Assurance, then request separate activation approval. Keep snapshot coverage Gray when no compatible normalized source exists.
+- Promotion blocker: product-level forward validation is incomplete for title fallback, capacity, wait/attention handling, decision relay, closure, and archive behavior. Live task snapshots also require an explicit normalized exporter; the analyzer must never read private Codex databases.
+- Next validation: run a bounded live Codex task cohort and independent assessment of the exact candidate. Keep operational skills on their current task behavior and snapshot coverage Gray until the gate passes.
 
 ## Generic owned-process supervisor
 
 - Classification: plugin candidate
 - Status: not activated
-- Evidence: ordinary shell timeout can leave owned descendant processes running even when the local-execution policy requires an owned-process ledger and zero survivors. An isolated executable candidate and deterministic current-platform fixture now cover pass, fail, timeout, child/grandchild cleanup, unrelated-process survival, output/exit propagation, survivor reporting, and bounded rollback.
+- Evidence: ordinary shell timeout can leave owned descendant processes running even when the local-execution policy requires an owned-process ledger and zero survivors. An isolated executable candidate and deterministic current-platform fixture cover pass, fail, timeout, a normal child/grandchild tree, unrelated-process survival, output/exit propagation, survivor reporting, and bounded rollback.
 - Proposed contract: run a command under an owned process-tree supervisor, propagate output and exit status, terminate owned children and grandchildren on timeout, preserve unrelated processes, detect survivors, and provide a bounded rollback path.
-- Promotion blocker: the exact candidate has passed only the current Windows matrix in this development run. The POSIX matrix and independent assessment are still required; status remains not activated.
-- Next validation: run the same deterministic fixture matrix on POSIX, preserve the Windows evidence, and obtain an independent assessment of the exact candidate. Do not activate or claim cross-platform readiness until both platform matrices pass.
+- Promotion blocker: the Windows backend uses process-group signaling plus `taskkill`, not a Job Object, and has no ignored-termination, breakaway, racing-child, or leaked-handle evidence. POSIX execution and independent assessment are also missing.
+- Next validation: implement a defensible Windows Job Object backend or explicitly narrow the guarantee to non-detaching descendants, then run adversarial Windows and POSIX matrices plus independent assessment. Do not activate or claim cross-platform containment until the exact stated guarantee passes.
+
+## Operational control envelope v1
+
+- Classification: plugin upgrade
+- Status: implementation prepared; activation pending independent assessment
+- Evidence: Researcher Run 01 found cross-project reporting, authority, source-identity, and release-evidence gaps plus direct EverAway duplicate retrieval. A schema-v1 project-neutral packet and adversarial fixtures now cover R1, R4, R5, R6, R7, and the R9 Gray safeguard.
+- Proposed contract: canonical source preflight; one logical retrieval with physical retries and success-only checkpoints; expiring human authority; outcome-first executive body with evidence appendix; and a source-revision-to-runtime release tuple with explicit Gray gaps.
+- Validation: the deterministic suite rejects duplicate logical reads, failure checkpoint advancement, retired locators, unsupported incremental control without Gray, expired active authority, false Green, source-revision mismatch, false verified releases, word-cap overflow, appendix evidence loss, and client leakage. New profiles receive safe defaults; schema-v1 profiles without `controls` remain valid.
+- Rollback: remove active skill references and default profile controls in an additive release while retaining stable source IDs, checkpoints, failures, authority receipts, detailed health records, and release evidence.
+- Post-activation observation: review two daily and two weekly cycles per project for user concision corrections, evidence loss, request reuse, and call/time change. Reopen or roll back if presentation or evidence quality regresses.
+
+## Researcher discovery and schema-v2 validation
+
+- Classification: plugin upgrade
+- Status: activated and verified
+- Evidence: commit `d80ad176963b388ba78552f6221f12655b7c5fcf`, installed version `0.1.0+codex.20260816080042`, live skill-catalog discovery, strict schema-v2 packet validation, and negative fixtures.
+- Decision: R8 requires no further source change in this run. A second bounded catalog/validator verification passed before the Upgrader mutation surface was opened.
+
+## SloSki GRAD canonical-stage preflight
+
+- Classification: project fix
+- Status: implemented in isolated branch; not pushed, merged, deployed, or executed against production
+- Evidence: the GRAD candidate used invented `STAGE=prod` while canonical configuration and deployment use `ss-prd`. Branch `codex/grad-stage-preflight-upgrader` at commit `f7d1d8f81` changes the boundary to `ss-prd` and adds pure tests for alias rejection, incomplete configuration, canonical config paths, database identity, and local/test safeguards.
+- Validation: ten focused unit tests pass; repository format and check gates pass with warnings only. No database, GRAD endpoint, deployment, or production connection was used.
+- Rollback: revert the isolated commit; retain the failed preflight and Upgrader receipt.
+
+## Artifact attestations
+
+- Classification: plugin candidate
+- Status: deferred
+- Blockers: the release tuple must first operate successfully; private-plan eligibility and a stable artifact identity are not nominated. Attestation proves build provenance, not store acceptance, deployment, or runtime behavior.
+- Next validation: one metadata-only fixture after the release tuple is established. Any CI or repository mutation requires separate authority.
+
+## Explicit no-action safeguards
+
+- Missing, stale, contradictory, or unauthoritative evidence remains owned, review-dated Gray. Do not add an inference feature that converts absence into Red, Green, or proof.
+- Do not adopt psutil as the containment boundary, unreleased OpenTelemetry GenAI conventions as a hard dependency, RDF/OWL or a graph database, or LangGraph for the observed needs.
