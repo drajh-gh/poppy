@@ -4,8 +4,9 @@ Researcher owns external discovery, source quality, repository due diligence, ap
 
 ## Normalized packet
 
-Validate every substantive handoff with `scripts/validate_research_packet.py`. The packet contains:
+Validate every substantive handoff as schema v2 with `scripts/validate_research_packet.py`. The packet contains:
 
+- the tested plugin name/version, full source commit, Researcher skill, and validator path;
 - run scope, projects, themes, task/vault/web coverage, and repository access mode;
 - observed need ledger with minimized task/vault evidence references;
 - claim-level source ledger and repository assessments;
@@ -13,6 +14,8 @@ Validate every substantive handoff with `scripts/validate_research_packet.py`. T
 - repair-first ordered recommendations with proposed classification, validation, and rollback;
 - explicit project-fix and global-candidate IDs for Upgrader review;
 - `implementation_authorized: false`.
+
+Each source records publication/release date or an explicit living/unknown state, limitations, and confidence. Each finding states applicability for every scoped project and `project-operations`, including a reasoned not-applicable result. Every coverage surface records a completeness basis, evidence references, and limitations consistent with `full`, `partial`, or `gray` status.
 
 Researcher may propose `no-action`, `project-fix`, or `plugin-candidate`. It never declares a plugin upgrade complete and never applies a recommendation. Upgrader may change the classification after reconciling work evidence, project authority, promotion thresholds, and deterministic validation.
 

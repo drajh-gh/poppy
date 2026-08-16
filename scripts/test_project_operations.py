@@ -127,6 +127,28 @@ def assert_researcher_contract() -> None:
     packet["recommendations"][0]["lane"] = "addition"  # type: ignore[index]
     packet["recommendations"][0]["repair_gate"] = "deferred"  # type: ignore[index]
     adversaries.append(("repair-first order", packet, "cannot precede disposition"))
+    packet = copy.deepcopy(valid)
+    del packet["contract"]["source_commit"]  # type: ignore[index]
+    adversaries.append(("contract identity", packet, "contract.source_commit"))
+    packet = copy.deepcopy(valid)
+    del packet["sources"][0]["publication_date"]  # type: ignore[index]
+    adversaries.append(("source date", packet, "publication_date"))
+    packet = copy.deepcopy(valid)
+    del packet["sources"][0]["limitations"]  # type: ignore[index]
+    adversaries.append(("source limitations", packet, "limitations"))
+    packet = copy.deepcopy(valid)
+    del packet["sources"][0]["confidence_note"]  # type: ignore[index]
+    adversaries.append(("source confidence", packet, "confidence_note"))
+    packet = copy.deepcopy(valid)
+    packet["findings"][0]["applicability"] = [  # type: ignore[index]
+        item
+        for item in packet["findings"][0]["applicability"]  # type: ignore[index]
+        if item["target"] != "project-beta"
+    ]
+    adversaries.append(("complete applicability", packet, "missing: project-beta"))
+    packet = copy.deepcopy(valid)
+    packet["coverage"]["task_history"]["complete"] = False  # type: ignore[index]
+    adversaries.append(("false full coverage", packet, "full status requires complete true"))
     for label, packet, expected in adversaries:
         errors = validate_research_packet(packet)
         if not any(expected in error for error in errors):

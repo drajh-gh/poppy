@@ -32,7 +32,7 @@ Forward-test with bounded historical or synthetic evidence and zero external wri
 26. Researcher reads actual task/vault evidence before external search, sequences workflow repairs before additions, and emits Gray or partial coverage rather than false completeness.
 27. Research source validation accepts official, primary, maintained evidence and rejects an uncorroborated social source as an adoption claim.
 28. Repository assessment remains inspect-only and records maintainer reputation, maintenance, license, security, quality, fit, constraints, and outcome without cloning or execution.
-29. Deterministic relevance totals, source/finding/need references, and Researcher-to-Upgrader candidate classifications validate; broken references and score drift fail.
+29. Schema-v2 contract identity, deterministic relevance totals, source/finding/need references, source dates/limitations/confidence, complete project/global applicability, explicit coverage basis, and Researcher-to-Upgrader candidate classifications validate; omissions, false-full packets, broken references, and score drift fail.
 30. Researcher handoff always has `implementation_authorized: false`; Upgrader retains project/plugin classification, validation, promotion, and activation authority.
 31. New vaults include research records, templates, and a Research Base; existing human-owned or canonical files remain protected.
 

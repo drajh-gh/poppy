@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -33,6 +34,7 @@ CLASSIFICATIONS = {"no-action", "project-fix", "plugin-candidate"}
 OWNER_LAYERS = {"project", "global", "mixed"}
 DISPOSITIONS = {"upgrader-review", "experiment-candidate", "watch", "reject", "no-action"}
 REPOSITORY_OUTCOMES = {"strong-candidate", "experiment-candidate", "watch", "reject"}
+COMMIT_PATTERN = re.compile(r"[0-9a-f]{40}")
 
 
 def _object(value: Any, path: str, errors: list[str]) -> dict[str, Any]:
@@ -105,6 +107,20 @@ def _references(values: list[str], known: set[str], path: str, errors: list[str]
             errors.append(f"{path} references unknown id: {value}")
 
 
+def _validate_contract(packet: dict[str, Any], errors: list[str]) -> None:
+    contract = _object(packet.get("contract"), "contract", errors)
+    if contract.get("plugin_name") != "project-operations":
+        errors.append("contract.plugin_name must be project-operations")
+    _string(contract.get("plugin_version"), "contract.plugin_version", errors)
+    source_commit = _string(contract.get("source_commit"), "contract.source_commit", errors)
+    if source_commit and not COMMIT_PATTERN.fullmatch(source_commit):
+        errors.append("contract.source_commit must be a full lowercase 40-character Git commit")
+    if contract.get("researcher_skill") != "project-ops-researcher":
+        errors.append("contract.researcher_skill must be project-ops-researcher")
+    if contract.get("validator") != "scripts/validate_research_packet.py":
+        errors.append("contract.validator must be scripts/validate_research_packet.py")
+
+
 def _validate_scope(packet: dict[str, Any], errors: list[str]) -> tuple[str, list[str]]:
     scope = _object(packet.get("scope"), "scope", errors)
     mode = scope.get("mode")
@@ -130,16 +146,35 @@ def _validate_scope(packet: dict[str, Any], errors: list[str]) -> tuple[str, lis
 def _validate_coverage(packet: dict[str, Any], errors: list[str]) -> None:
     coverage = _object(packet.get("coverage"), "coverage", errors)
     incomplete = False
+    declared_limitations: list[str] = []
     for name in ("task_history", "vaults", "web", "repositories"):
         item = _object(coverage.get(name), f"coverage.{name}", errors)
         if item.get("status") not in COVERAGE:
             errors.append(f"coverage.{name}.status must be full, partial, or gray")
+        _string(item.get("basis"), f"coverage.{name}.basis", errors)
+        if not isinstance(item.get("complete"), bool):
+            errors.append(f"coverage.{name}.complete must be boolean")
+        if item.get("status") == "full" and item.get("complete") is not True:
+            errors.append(f"coverage.{name}.full status requires complete true")
+        if item.get("status") != "full" and item.get("complete") is not False:
+            errors.append(f"coverage.{name}.partial or gray status requires complete false")
         if item.get("status") != "full":
             incomplete = True
-        _strings(item.get("refs"), f"coverage.{name}.refs", errors)
+        refs = _strings(item.get("refs"), f"coverage.{name}.refs", errors)
+        limitations = _strings(item.get("limitations"), f"coverage.{name}.limitations", errors)
+        declared_limitations.extend(limitations)
+        if item.get("status") in {"full", "partial"} and not refs:
+            errors.append(f"coverage.{name}.{item.get('status')} status requires evidence refs")
+        if item.get("status") == "full" and limitations:
+            errors.append(f"coverage.{name}.full status cannot contain limitations")
+        if item.get("status") != "full" and not limitations:
+            errors.append(f"coverage.{name}.partial or gray status requires limitations")
     gaps = _strings(coverage.get("gaps"), "coverage.gaps", errors)
     if incomplete and not gaps:
         errors.append("non-full coverage requires at least one coverage.gaps entry")
+    for limitation in declared_limitations:
+        if limitation not in gaps:
+            errors.append("every coverage limitation must also appear in coverage.gaps")
 
 
 def _score_total(score: dict[str, Any], path: str, errors: list[str]) -> None:
@@ -172,9 +207,10 @@ def validate_packet(packet: Any) -> list[str]:
     errors: list[str] = []
     if not isinstance(packet, dict):
         return ["packet root must be an object"]
-    if packet.get("schema_version") != 1:
-        errors.append("schema_version must be 1")
+    if packet.get("schema_version") != 2:
+        errors.append("schema_version must be 2")
     _string(packet.get("run_id"), "run_id", errors)
+    _validate_contract(packet, errors)
     mode, scope_projects = _validate_scope(packet, errors)
     _validate_coverage(packet, errors)
 
@@ -221,7 +257,10 @@ def validate_packet(packet: Any) -> list[str]:
         _https_url(item.get("url"), f"sources[{index}].url", errors)
         _string(item.get("publisher"), f"sources[{index}].publisher", errors)
         _dated(item.get("retrieved"), f"sources[{index}].retrieved", errors)
+        _string(item.get("publication_date"), f"sources[{index}].publication_date", errors)
         _string(item.get("reputation_basis"), f"sources[{index}].reputation_basis", errors)
+        _string(item.get("limitations"), f"sources[{index}].limitations", errors)
+        _string(item.get("confidence_note"), f"sources[{index}].confidence_note", errors)
         _strings(item.get("claim_refs"), f"sources[{index}].claim_refs", errors, nonempty=True)
         if not isinstance(item.get("primary"), bool):
             errors.append(f"sources[{index}].primary must be boolean")
@@ -303,12 +342,24 @@ def validate_packet(packet: Any) -> list[str]:
         applicability = _list(item.get("applicability"), f"findings[{index}].applicability", errors)
         if not applicability:
             errors.append(f"findings[{index}].applicability must not be empty")
+        applicability_targets: list[str] = []
         for app_index, app_value in enumerate(applicability):
             app = _object(app_value, f"findings[{index}].applicability[{app_index}]", errors)
             if app.get("level") not in {"project", "global"}:
                 errors.append(f"findings[{index}].applicability[{app_index}].level is invalid")
-            _string(app.get("target"), f"findings[{index}].applicability[{app_index}].target", errors)
+            target = _string(app.get("target"), f"findings[{index}].applicability[{app_index}].target", errors)
+            if target:
+                applicability_targets.append(target)
             _string(app.get("rationale"), f"findings[{index}].applicability[{app_index}].rationale", errors)
+        if len(applicability_targets) != len(set(applicability_targets)):
+            errors.append(f"findings[{index}].applicability targets must be unique")
+        required_targets = set(scope_projects) | {"project-operations"}
+        missing_targets = sorted(required_targets - set(applicability_targets))
+        if missing_targets:
+            errors.append(
+                f"findings[{index}].applicability must cover every scoped project and project-operations; "
+                f"missing: {', '.join(missing_targets)}"
+            )
 
     for source_id, source in sources.items():
         claim_refs = source.get("claim_refs", [])

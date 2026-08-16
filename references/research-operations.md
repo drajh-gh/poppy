@@ -76,6 +76,7 @@ The score ranks evidence; it does not grant authority or replace judgment.
 
 Produce one compact brief plus a normalized packet:
 
+- schema-v2 contract identity: tested plugin version, full source commit, Researcher skill, and validator;
 - scope and coverage, including gaps;
 - need ledger tied to task/vault evidence;
 - claim-level source ledger and contradictions;

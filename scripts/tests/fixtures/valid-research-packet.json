@@ -1,6 +1,13 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "run_id": "research-20260816",
+  "contract": {
+    "plugin_name": "project-operations",
+    "plugin_version": "0.1.0+codex.test",
+    "source_commit": "1111111111111111111111111111111111111111",
+    "researcher_skill": "project-ops-researcher",
+    "validator": "scripts/validate_research_packet.py"
+  },
   "scope": {
     "mode": "portfolio",
     "projects": ["project-alpha", "project-beta"],
@@ -11,10 +18,10 @@
     "priority_order": ["repair-existing", "addition"]
   },
   "coverage": {
-    "task_history": {"status": "full", "refs": ["task-ref:alpha-01"]},
-    "vaults": {"status": "full", "refs": ["vault-ref:alpha-current"]},
-    "web": {"status": "full", "refs": ["query-ref:official-evidence"]},
-    "repositories": {"status": "full", "refs": ["repo-ref:G1"]},
+    "task_history": {"status": "full", "complete": true, "basis": "Complete bounded fixture task corpus", "refs": ["task-ref:alpha-01"], "limitations": []},
+    "vaults": {"status": "full", "complete": true, "basis": "Complete bounded fixture vault corpus", "refs": ["vault-ref:alpha-current"], "limitations": []},
+    "web": {"status": "full", "complete": true, "basis": "Complete bounded fixture query set", "refs": ["query-ref:official-evidence"], "limitations": []},
+    "repositories": {"status": "full", "complete": true, "basis": "Complete bounded fixture repository set", "refs": ["repo-ref:G1"], "limitations": []},
     "gaps": []
   },
   "needs": [
@@ -37,7 +44,10 @@
       "url": "https://example.org/official-workflow",
       "publisher": "Example Standards Group",
       "retrieved": "2026-08-16",
+      "publication_date": "2026-08-01",
       "reputation_basis": "Primary documentation from the mechanism owner",
+      "limitations": "Fixture documentation covers only the example mechanism",
+      "confidence_note": "high",
       "primary": true,
       "claim_refs": ["F1"],
       "social": false,
@@ -50,7 +60,10 @@
       "url": "https://github.com/example-org/evidence-handoff",
       "publisher": "Example Org",
       "retrieved": "2026-08-16",
+      "publication_date": "2026-08-10",
       "reputation_basis": "Canonical repository maintained by an established engineering organization",
+      "limitations": "Fixture repository has not been executed in this assessment",
+      "confidence_note": "high",
       "primary": true,
       "claim_refs": ["F1"],
       "social": false,
@@ -97,6 +110,7 @@
       "score": {"need": 5, "impact": 5, "fit": 4, "evidence": 5, "timeliness": 5, "cost": 1, "risk": 1, "total": 92},
       "applicability": [
         {"level": "project", "target": "project-alpha", "rationale": "Directly addresses the observed project handoff gap"},
+        {"level": "project", "target": "project-beta", "rationale": "No direct need evidence; retained as a scoped not-applicable comparison"},
         {"level": "global", "target": "project-operations", "rationale": "The validation contract is project-neutral"}
       ]
     }

@@ -19,7 +19,7 @@ Researcher may read the relevant Codex task corpus and Obsidian vaults in full w
 6. Reconcile supporting and conflicting evidence. Record direct URLs, publisher or maintainer, publication or release date when known, retrieval date, reputation basis, limitations, and confidence.
 7. Score each finding with the deterministic relevance model. State applicability separately for each project and for the global plugin; never infer cross-project fit from topic similarity alone.
 8. Sequence repair recommendations before additions. Include expected benefit, owner layer, proposed classification, validation, rollback, constraints, and unresolved questions.
-9. Validate the normalized packet with `scripts/validate_research_packet.py`. Mark unavailable task, vault, web, or repository coverage Gray or partial; never report false completeness.
+9. Validate the schema-v2 normalized packet with `scripts/validate_research_packet.py`. Record the tested plugin version and full source commit, source date/limitations/confidence, target-complete applicability, and explicit coverage basis. Mark unavailable task, vault, web, or repository coverage Gray or partial; never report false completeness.
 10. Write only authorized internal records. Store project findings under the project research record surface and publish only sanitized project-neutral findings to a configured global registry.
 11. Hand project fixes and plugin candidates to `project-ops-upgrader`. Researcher recommends and supplies evidence; Upgrader owns final classification, promotion, implementation, validation, and activation governance.
 
