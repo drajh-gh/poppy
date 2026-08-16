@@ -28,5 +28,7 @@ Calendar owns scheduled events, not decisions made during them. Link meeting evi
 
 ## Source refresh
 
-Each adapter returns: source ID, bounded coverage, observed facts, changed facts, freshness, contradictions, evidence grade, missing access, and proposed canonical updates. It must not mutate a different system as a side effect of reading.
+Each adapter returns: stable source ID, canonical locator, normalized request fingerprint, logical request ID, physical attempt, bounded coverage, observed facts, changed facts, freshness, contradictions, evidence grade, prior and next checkpoint, retained partial failures, missing access, and proposed canonical updates. Matching fingerprints reuse the first logical result within a run. Retries remain physical attempts inside that request; failure or partial coverage retains the prior checkpoint.
+
+Before retrieval, reject retired roots and resolve mutable targets through a stable provider ID. Prefer change feeds, conditional requests, or webhooks; where unavailable, declare bounded polling and the resulting Partial or Gray limitation. Validate material multi-source runs through [operational controls](operational-controls.md). An adapter must not mutate a different system as a side effect of reading.
 

@@ -22,7 +22,7 @@ supersedes: []
 sources: []
 ```
 
-Use `type: analysis` plus one of the operational `record_kind` values: `milestone`, `commitment`, `raid-item`, `change-request`, `stakeholder`, `budget-snapshot`, `health-snapshot`, `meeting-note`, `portfolio-summary`, `improvement-candidate`, `research-brief`, `repository-assessment`, or `research-handoff`. Decisions remain `type: decision`. This keeps Project Operations records compatible with the Project OS knowledge lifecycle while letting Bases select operational records precisely.
+Use `type: analysis` plus one of the operational `record_kind` values: `milestone`, `commitment`, `raid-item`, `change-request`, `stakeholder`, `budget-snapshot`, `health-snapshot`, `meeting-note`, `portfolio-summary`, `improvement-candidate`, `research-brief`, `repository-assessment`, `research-handoff`, `operational-control`, `human-authority`, or `release-evidence`. Decisions remain `type: decision`. This keeps Project Operations records compatible with the Project OS knowledge lifecycle while letting Bases select operational records precisely.
 
 Use `status: current|draft|needs-review|superseded` for milestone, commitment, RAID, change, stakeholder, budget, and health records. Do not place values such as `blocked`, `overdue`, `approved`, or `at-risk` in `status`; those belong in `pm_state` or `health`. Decisions and open questions retain their Project OS lifecycle values.
 
@@ -57,3 +57,7 @@ Add each configured health dimension, `overall_health`, `meaningful_changes`, `d
 ## Research records
 
 For a research brief, add `research_run_id`, `scope_level`, `priority_lane`, coverage, need IDs, finding IDs, and source references. For a repository assessment, add canonical URL, maintainer evidence, maintenance date, license, security/quality signals, inspection mode, and outcome. For an Upgrader handoff, add project-fix and global-candidate IDs and keep `implementation_authorized: false`.
+
+## Operational controls
+
+An operational-control record links the normalized retrieval ledger, source preflight, authority receipts, health assertions, release tuples, report envelope, and validator result for one bounded run. A human-authority record retains source, reason, scope, effective date, `review_after`, and next-run assertion without replacing missing system evidence. A release-evidence record keeps source, artifact, build, delivery/store, and runtime links separate and uses Gray for every incomplete tuple.

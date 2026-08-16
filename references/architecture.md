@@ -62,6 +62,8 @@ project-ops.json       validated machine-readable project profile
 7. Execute the exact approved write.
 8. Verify the result and update durable memory.
 
+Substantive multi-source refreshes pass through the executable operational-control envelope: canonical source preflight, one logical retrieval ledger, expiring human authority, evidence-linked executive reporting, and exact release tuples. This envelope constrains reads and claims; it does not expand write authority.
+
 ### Delivery loop
 
 1. Prepare candidate evidence.

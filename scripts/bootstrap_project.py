@@ -159,6 +159,9 @@ def planned_files(
         "templates/research-brief.md": "research-brief.md",
         "templates/repository-assessment.md": "repository-assessment.md",
         "templates/research-handoff.md": "research-handoff.md",
+        "templates/operational-control-run.md": "operational-control-run.md",
+        "templates/human-authority-receipt.md": "human-authority-receipt.md",
+        "templates/release-evidence.md": "release-evidence.md",
     }
     for destination, template in template_map.items():
         files.append((TEMPLATE_ROOT / template, vault / destination, render(TEMPLATE_ROOT / template, values)))
@@ -233,6 +236,9 @@ def required_directories(profile: dict[str, Any], vault: Path) -> list[Path]:
         f"wiki/{key}/pm/records/reports",
         f"wiki/{key}/pm/records/improvements",
         f"wiki/{key}/pm/records/research",
+        f"wiki/{key}/pm/records/authority",
+        f"wiki/{key}/pm/records/releases",
+        f"raw/{key}/pm-os/controls",
     ]
     return [vault / item for item in relative]
 

@@ -85,6 +85,34 @@ Store the validated profile as `project-ops.json` at the vault root. The onboard
     "meeting_followup": "event-driven",
     "quiet_hours": ["18:00", "08:00"]
   },
+  "controls": {
+    "retrieval": {
+      "mode": "ledger",
+      "fingerprint_components": ["provider", "stable-source-id", "normalized-request"],
+      "retry_scope": "physical-attempt",
+      "checkpoint_policy": "success-only",
+      "failure_policy": "retain"
+    },
+    "source_identity": {
+      "canonical": "stable-id-or-verified-root",
+      "mutable_target_policy": "discover-and-review",
+      "retired_locator_policy": "reject"
+    },
+    "human_authority": {
+      "require_source": true,
+      "require_review_after": true,
+      "silence_is_approval": false
+    },
+    "reporting": {
+      "executive_body_word_cap": 350,
+      "outcome_first": true,
+      "evidence_appendix": true
+    },
+    "release_evidence": {
+      "required_links": ["source", "artifact", "build", "delivery", "runtime"],
+      "missing_link_state": "gray"
+    }
+  },
   "tolerances": {
     "schedule_yellow_days": 3,
     "schedule_red_days": 7,
@@ -119,3 +147,5 @@ Store the validated profile as `project-ops.json` at the vault root. The onboard
 - A budget health result is Gray when no approved baseline exists.
 - Existing vault adoption never overwrites `AGENTS.md`, `raw/`, `inbox.md`, `daily/`, canonical pages, or `log.md`.
 - Research cadence is optional and disabled by default; scheduling never authorizes repository download/execution or project/plugin mutation.
+- `controls` is optional for backward-compatible schema-v1 profiles. When present, it enables the validated retrieval, source-identity, expiring-authority, executive-report, and release-evidence defaults without storing dynamic checkpoints or provider credentials in the profile.
+- Dynamic checkpoints, request fingerprints, failures, authority receipts, and release observations belong in dated run evidence validated by `validate_operational_control_packet.py`.

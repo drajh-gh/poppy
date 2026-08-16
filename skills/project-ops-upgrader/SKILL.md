@@ -5,7 +5,7 @@ description: Continuously improve Project Operations from evidence of actual wor
 
 # Project Operations Upgrader
 
-Read [architecture](../../references/architecture.md), [continuous improvement](../../references/continuous-improvement.md), [research handoff](../../references/research-handoff.md), [approval policy](../../references/approval-and-risk.md), [automation and cadence](../../references/automation-and-cadence.md), [promotion registry](../../references/promotion-registry.md), and the project's profile, adapter, and current page when present.
+Read [architecture](../../references/architecture.md), [continuous improvement](../../references/continuous-improvement.md), [research handoff](../../references/research-handoff.md), [operational controls](../../references/operational-controls.md), [approval policy](../../references/approval-and-risk.md), [automation and cadence](../../references/automation-and-cadence.md), [promotion registry](../../references/promotion-registry.md), and the project's profile, adapter, and current page when present.
 
 Before applying any R1 or R2 repository source change, read and apply [local execution safety](../../references/local-execution-safety.md). Review-only runs do not need to load it.
 

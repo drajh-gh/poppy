@@ -223,6 +223,82 @@ def _validate_cadence(cadence: Any, errors: list[str]) -> None:
             _require_string_list(research.get("themes", []), "cadence.workflow_research.themes", errors)
 
 
+def _validate_controls(controls: Any, errors: list[str]) -> None:
+    if controls is None:
+        return
+    if not isinstance(controls, dict):
+        errors.append("controls must be an object")
+        return
+    retrieval = controls.get("retrieval")
+    if not isinstance(retrieval, dict):
+        errors.append("controls.retrieval must be an object")
+    else:
+        if retrieval.get("mode") != "ledger":
+            errors.append("controls.retrieval.mode must be ledger")
+        components = _require_string_list(
+            retrieval.get("fingerprint_components", []),
+            "controls.retrieval.fingerprint_components",
+            errors,
+        )
+        if set(components) != {"provider", "stable-source-id", "normalized-request"}:
+            errors.append(
+                "controls.retrieval.fingerprint_components must contain provider, stable-source-id, and normalized-request"
+            )
+        if retrieval.get("retry_scope") != "physical-attempt":
+            errors.append("controls.retrieval.retry_scope must be physical-attempt")
+        if retrieval.get("checkpoint_policy") != "success-only":
+            errors.append("controls.retrieval.checkpoint_policy must be success-only")
+        if retrieval.get("failure_policy") != "retain":
+            errors.append("controls.retrieval.failure_policy must be retain")
+
+    source_identity = controls.get("source_identity")
+    if not isinstance(source_identity, dict):
+        errors.append("controls.source_identity must be an object")
+    else:
+        if source_identity.get("canonical") != "stable-id-or-verified-root":
+            errors.append("controls.source_identity.canonical must be stable-id-or-verified-root")
+        if source_identity.get("mutable_target_policy") != "discover-and-review":
+            errors.append("controls.source_identity.mutable_target_policy must be discover-and-review")
+        if source_identity.get("retired_locator_policy") != "reject":
+            errors.append("controls.source_identity.retired_locator_policy must be reject")
+
+    human = controls.get("human_authority")
+    if not isinstance(human, dict):
+        errors.append("controls.human_authority must be an object")
+    else:
+        for field in ("require_source", "require_review_after"):
+            if human.get(field) is not True:
+                errors.append(f"controls.human_authority.{field} must be true")
+        if human.get("silence_is_approval") is not False:
+            errors.append("controls.human_authority.silence_is_approval must be false")
+
+    reporting = controls.get("reporting")
+    if not isinstance(reporting, dict):
+        errors.append("controls.reporting must be an object")
+    else:
+        cap = reporting.get("executive_body_word_cap")
+        if not isinstance(cap, int) or isinstance(cap, bool) or not 1 <= cap <= 750:
+            errors.append("controls.reporting.executive_body_word_cap must be an integer from 1 to 750")
+        if reporting.get("outcome_first") is not True:
+            errors.append("controls.reporting.outcome_first must be true")
+        if reporting.get("evidence_appendix") is not True:
+            errors.append("controls.reporting.evidence_appendix must be true")
+
+    release = controls.get("release_evidence")
+    if not isinstance(release, dict):
+        errors.append("controls.release_evidence must be an object")
+    else:
+        links = _require_string_list(
+            release.get("required_links", []), "controls.release_evidence.required_links", errors
+        )
+        if set(links) != {"source", "artifact", "build", "delivery", "runtime"}:
+            errors.append(
+                "controls.release_evidence.required_links must contain source, artifact, build, delivery, and runtime"
+            )
+        if release.get("missing_link_state") != "gray":
+            errors.append("controls.release_evidence.missing_link_state must be gray")
+
+
 def validate_profile(profile: dict[str, Any], allow_draft: bool = False) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -366,6 +442,7 @@ def validate_profile(profile: dict[str, Any], allow_draft: bool = False) -> tupl
             errors.append(f"tolerances.{field} must be a non-negative number")
 
     _validate_cadence(cadence, errors)
+    _validate_controls(profile.get("controls"), errors)
 
     if profile.get("schema_version") != 1:
         errors.append("schema_version must be 1")

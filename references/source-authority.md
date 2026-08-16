@@ -30,7 +30,9 @@ Grade C or D may create a candidate or open question. Scope, budget, milestone, 
 
 ## Receipt rules
 
-Every raw receipt records source system, stable identifier, bounded coverage, capture time, language, sensitivity, evidence grade, known gaps, and exclusions. Prefer a sanitized digest to transcript or channel mirroring. Never store credentials, access instructions, raw production rows, unnecessary personal data, or case-specific financial detail when a minimized statement is sufficient.
+Every raw receipt records source system, stable identifier or verified root, logical request and physical-attempt identity, bounded coverage, capture time, language, sensitivity, evidence grade, known gaps, exclusions, and checkpoint disposition. Prefer a sanitized digest to transcript or channel mirroring. Never store credentials, access instructions, raw production rows, unnecessary personal data, or case-specific financial detail when a minimized statement is sufficient.
+
+Human authority records retain their source, reason, bounded claim scope, effective time, `review_after`, and next-run assertion. They may calibrate an assessment but never fabricate absent runtime, budget, scope, delivery, or acceptance evidence. Silence is not approval.
 
 ## Freshness
 
@@ -38,4 +40,5 @@ Every raw receipt records source system, stable identifier, bounded coverage, ca
 - Stable domains, roles, workflows, and accepted decisions: 30–90 days.
 - A stale required source makes the affected health dimension Gray until refreshed.
 - Advancing `valid_as_of` requires rereading the authoritative source.
+- Dynamic checkpoints advance only on a successful or authoritative not-modified read. Partial or failed refreshes retain the prior checkpoint and failure evidence.
 

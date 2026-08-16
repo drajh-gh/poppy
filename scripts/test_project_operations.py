@@ -17,6 +17,8 @@ from validate_delivery_manifest import (
     validate_manifest,
 )
 from validate_local_execution_preflight import validate_packet
+from validate_operational_control_packet import validate_packet as validate_operational_control_packet
+from validate_project_profile import validate_profile
 from validate_research_packet import validate_packet as validate_research_packet
 
 
@@ -168,6 +170,106 @@ def assert_researcher_contract() -> None:
     for term in ("Researcher", "core-agent triad", "Research loop"):
         if term.casefold() not in architecture.casefold():
             raise AssertionError(f"architecture is missing Researcher term: {term}")
+
+
+def assert_operational_controls() -> None:
+    valid = load_fixture("valid-operational-control-packet.json")
+    errors = validate_operational_control_packet(valid)
+    if errors:
+        raise AssertionError(f"valid operational-control packet failed: {errors}")
+    run(
+        str(SCRIPTS / "validate_operational_control_packet.py"),
+        str(FIXTURES / "valid-operational-control-packet.json"),
+    )
+
+    adversaries: list[tuple[str, dict[str, object], str]] = []
+
+    packet = copy.deepcopy(valid)
+    packet["retrieval"]["logical_requests"].append(  # type: ignore[index]
+        copy.deepcopy(packet["retrieval"]["logical_requests"][0])  # type: ignore[index]
+    )
+    packet["retrieval"]["logical_requests"][1]["id"] = "REQ-2"  # type: ignore[index]
+    adversaries.append(("duplicate logical retrieval", packet, "duplicates an existing logical request"))
+
+    packet = copy.deepcopy(valid)
+    final_attempt = packet["retrieval"]["logical_requests"][0]["attempts"][-1]  # type: ignore[index]
+    final_attempt["status"] = "failed"
+    final_attempt["result_ref"] = None
+    final_attempt["failure_ref"] = "evidence-final-failure"
+    packet["retrieval"]["logical_requests"][0]["retained_failure_refs"].append(  # type: ignore[index]
+        "evidence-final-failure"
+    )
+    adversaries.append(("failed checkpoint advance", packet, "cannot advance its checkpoint"))
+
+    packet = copy.deepcopy(valid)
+    packet["source_preflights"][0]["retired_locators"] = [  # type: ignore[index]
+        packet["source_preflights"][0]["canonical_locator"]  # type: ignore[index]
+    ]
+    adversaries.append(("retired locator", packet, "points to a retired locator"))
+
+    packet = copy.deepcopy(valid)
+    packet["source_preflights"][0]["change_control"] = {  # type: ignore[index]
+        "mode": "bounded-poll",
+        "supported": False,
+        "limitation": "Provider has no incremental API",
+    }
+    adversaries.append(("unsupported change control", packet, "status must be gray"))
+
+    packet = copy.deepcopy(valid)
+    packet["authority_receipts"][0]["review_after"] = "2026-08-16T09:00:00+02:00"  # type: ignore[index]
+    adversaries.append(("expired authority", packet, "expired but still marked active"))
+
+    packet = copy.deepcopy(valid)
+    packet["health_assertions"][0]["status"] = "Green"  # type: ignore[index]
+    adversaries.append(("false green", packet, "status must be Gray"))
+
+    packet = copy.deepcopy(valid)
+    packet["releases"][0]["artifact"]["source_revision"] = "d" * 40  # type: ignore[index]
+    adversaries.append(("release revision mismatch", packet, "must match source_revision"))
+
+    packet = copy.deepcopy(valid)
+    packet["releases"][0]["runtime"]["revision"] = None  # type: ignore[index]
+    packet["releases"][0]["missing_links"] = ["runtime"]  # type: ignore[index]
+    adversaries.append(("false verified release", packet, "cannot be verified"))
+
+    packet = copy.deepcopy(valid)
+    packet["report"]["word_cap"] = 3  # type: ignore[index]
+    adversaries.append(("executive word cap", packet, "exceeds report.word_cap"))
+
+    packet = copy.deepcopy(valid)
+    packet["report"]["evidence_appendix_refs"].remove("evidence-runtime-123")  # type: ignore[index]
+    adversaries.append(("appendix evidence loss", packet, "missing from the evidence appendix"))
+
+    packet = copy.deepcopy(valid)
+    packet["report"]["audience"] = "client"  # type: ignore[index]
+    adversaries.append(("client leakage", packet, "leaks non-client evidence"))
+
+    for label, packet, expected in adversaries:
+        errors = validate_operational_control_packet(packet)
+        if not any(expected in error for error in errors):
+            raise AssertionError(f"operational-control {label} adversary was accepted: {errors}")
+
+    contract = (ROOT / "references" / "operational-controls.md").read_text(encoding="utf-8")
+    for term in (
+        "logical request",
+        "physical attempt",
+        "retired",
+        "review_after",
+        "source revision",
+        "evidence appendix",
+        "Gray",
+    ):
+        if term.casefold() not in contract.casefold():
+            raise AssertionError(f"operational-control contract is missing {term}")
+    for skill_name in (
+        "project-ops-manager",
+        "project-ops-health",
+        "project-ops-memory",
+        "project-ops-delivery",
+    ):
+        skill = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
+        if "operational-controls.md" not in skill:
+            raise AssertionError(f"{skill_name} does not load operational controls")
 
 
 def load_fixture(name: str) -> dict[str, object]:
@@ -388,9 +490,15 @@ def main() -> int:
     assert_skills()
     assert_memory_lifecycle_contract()
     assert_researcher_contract()
+    assert_operational_controls()
 
     run(str(SCRIPTS / "validate_project_profile.py"), str(FIXTURES / "valid-project.json"))
     run(str(SCRIPTS / "validate_project_profile.py"), str(FIXTURES / "invalid-project.json"), expect=1)
+    invalid_controls = copy.deepcopy(load_fixture("valid-project.json"))
+    invalid_controls["controls"]["retrieval"]["checkpoint_policy"] = "always"  # type: ignore[index]
+    control_errors, _ = validate_profile(invalid_controls)
+    if not any("checkpoint_policy must be success-only" in error for error in control_errors):
+        raise AssertionError(f"profile accepted unsafe retrieval checkpoint policy: {control_errors}")
     run(str(SCRIPTS / "validate_delivery_manifest.py"), str(FIXTURES / "valid-manifest.json"))
     run(
         str(SCRIPTS / "validate_delivery_manifest.py"),
@@ -449,11 +557,17 @@ def main() -> int:
             "templates/research-brief.md",
             "templates/repository-assessment.md",
             "templates/research-handoff.md",
+            "templates/operational-control-run.md",
+            "templates/human-authority-receipt.md",
+            "templates/release-evidence.md",
             "wiki/test-project/pm/records/improvements",
             "dashboards/Test Project Improvements.base",
             "wiki/test-project/pm/records/research",
             "raw/test-project/research",
             "dashboards/Test Project Research.base",
+            "wiki/test-project/pm/records/authority",
+            "wiki/test-project/pm/records/releases",
+            "raw/test-project/pm-os/controls",
         ]
         for relative in required:
             if not (vault / relative).exists():
@@ -582,6 +696,11 @@ def main() -> int:
         research = generated_profile["cadence"]["workflow_research"]
         if research["repository_access"] != "inspect-only" or research["enabled"]:
             raise AssertionError("workflow research cadence was not preserved safely")
+        controls = generated_profile["controls"]
+        if controls["retrieval"]["checkpoint_policy"] != "success-only":
+            raise AssertionError("retrieval checkpoint safety was not preserved")
+        if controls["release_evidence"]["missing_link_state"] != "gray":
+            raise AssertionError("release-evidence Gray default was not preserved")
 
     print("PASS: Project Operations deterministic smoke tests")
     return 0

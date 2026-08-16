@@ -26,6 +26,10 @@ sources: []
 
 # Health snapshot — period
 
+## Executive body — state and decision
+
+Keep this audience-specific body outcome-first and bounded. Every material claim must map to the evidence appendix below.
+
 ## Outcome and milestone confidence
 
 ## Meaningful changes
@@ -39,3 +43,7 @@ sources: []
 ## Decisions and commitments
 
 ## Next plan and freshness gaps
+
+## Evidence appendix
+
+Preserve detailed source references, contradictions, Gray gaps, sensitivity, and release-tuple links here. Filter presentation for clients without deleting the internal source record.

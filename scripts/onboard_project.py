@@ -127,6 +127,38 @@ def defaults(name: str, key: str, client: str) -> dict[str, Any]:
             "meeting_followup": "event-driven",
             "quiet_hours": ["18:00", "08:00"],
         },
+        "controls": {
+            "retrieval": {
+                "mode": "ledger",
+                "fingerprint_components": [
+                    "provider",
+                    "stable-source-id",
+                    "normalized-request",
+                ],
+                "retry_scope": "physical-attempt",
+                "checkpoint_policy": "success-only",
+                "failure_policy": "retain",
+            },
+            "source_identity": {
+                "canonical": "stable-id-or-verified-root",
+                "mutable_target_policy": "discover-and-review",
+                "retired_locator_policy": "reject",
+            },
+            "human_authority": {
+                "require_source": True,
+                "require_review_after": True,
+                "silence_is_approval": False,
+            },
+            "reporting": {
+                "executive_body_word_cap": 350,
+                "outcome_first": True,
+                "evidence_appendix": True,
+            },
+            "release_evidence": {
+                "required_links": ["source", "artifact", "build", "delivery", "runtime"],
+                "missing_link_state": "gray",
+            },
+        },
         "tolerances": {
             "schedule_yellow_days": 3,
             "schedule_red_days": 7,

@@ -5,7 +5,7 @@ description: Orient and close substantive project work with evidence-backed Obsi
 
 # Project Operations memory
 
-Read [project memory lifecycle](../../references/project-memory-lifecycle.md) and the vault `AGENTS.md`. Resolve the project from its repository adapter or profile.
+Read [project memory lifecycle](../../references/project-memory-lifecycle.md), [operational controls](../../references/operational-controls.md), and the vault `AGENTS.md`. Resolve the project from its repository adapter or profile.
 
 ## Orient
 
@@ -16,12 +16,12 @@ Read [project memory lifecycle](../../references/project-memory-lifecycle.md) an
 
 ## Ingest or refresh
 
-1. Identify authority, stable source ID, bounded coverage, language, sensitivity, evidence grade, and known gaps.
-2. Retrieve the bounded corpus completely and reconcile counts or revisions.
+1. Identify authority, stable source ID or verified canonical root, bounded coverage, language, sensitivity, evidence grade, retired locators, change-control capability, and known gaps.
+2. Retrieve the bounded corpus through one logical-request ledger, reuse matching results, and reconcile physical retries, counts, revisions, checkpoints, partial failures, and retained evidence.
 3. Add an immutable sanitized receipt; never rewrite raw history.
 4. Search canonical pages before creating a new one.
 5. Compile verified facts, interpretations, decisions, contradictions, and open questions.
-6. Advance `valid_as_of` only after rereading authority.
+6. Advance `valid_as_of` and any source checkpoint only after a successful authoritative read.
 7. Update navigation only when it changed; append one log entry and lint the changed surface.
 
 ## Query

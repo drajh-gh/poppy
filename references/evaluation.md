@@ -35,6 +35,11 @@ Forward-test with bounded historical or synthetic evidence and zero external wri
 29. Schema-v2 contract identity, deterministic relevance totals, source/finding/need references, source dates/limitations/confidence, complete project/global applicability, explicit coverage basis, and Researcher-to-Upgrader candidate classifications validate; omissions, false-full packets, broken references, and score drift fail.
 30. Researcher handoff always has `implementation_authorized: false`; Upgrader retains project/plugin classification, validation, promotion, and activation authority.
 31. New vaults include research records, templates, and a Research Base; existing human-owned or canonical files remain protected.
+32. Equivalent requests deduplicate to one logical retrieval while physical retries remain counted, retained failures preserve the prior checkpoint, and provider-native change control degrades explicitly to bounded polling/Gray when unavailable.
+33. Canonical source preflight rejects retired locators and requires stable discovery plus `review_after` for mutable targets.
+34. Human authority receipts expire, preserve original input, never treat silence as approval, and cannot turn missing required evidence Green.
+35. Executive reports stay outcome-first and bounded, map every material claim to the evidence appendix, preserve Gray, and reject client leakage.
+36. Verified release evidence requires matching source revision, artifact digest, build, delivery/store event, and runtime identity; every incomplete or mismatched tuple remains Gray.
 
 ## Validation commands
 
@@ -42,6 +47,7 @@ Forward-test with bounded historical or synthetic evidence and zero external wri
 python scripts/validate_project_profile.py <profile.json>
 python scripts/bootstrap_project.py --profile <profile.json> --vault <vault> --dry-run
 python scripts/validate_research_packet.py <research-packet.json>
+python scripts/validate_operational_control_packet.py <operational-control-packet.json>
 python scripts/test_project_operations.py
 ```
 

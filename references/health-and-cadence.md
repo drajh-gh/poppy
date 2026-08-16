@@ -37,7 +37,11 @@ Do not use earned-value metrics unless the project has a trustworthy weighted sc
 
 No-change runs may refresh evidence silently. Do not notify merely because a scheduled job ran.
 
-## Weekly report structure
+## Executive envelope and evidence appendix
+
+Put the audience's state and decision first, followed by the smallest useful control signals and actions. Keep the executive body inside the configured cap and never above 750 words. Every included material claim maps to a dated health snapshot or evidence appendix; detailed source coverage, contradictions, Gray gaps, and internal sensitivity stay in that record. Client filtering removes inappropriate claims from presentation without rewriting the internal source record.
+
+## Weekly evidence appendix structure
 
 1. Outcome and milestone confidence
 2. Meaningful changes since the prior report
@@ -50,3 +54,5 @@ No-change runs may refresh evidence silently. Do not notify merely because a sch
 9. Evidence freshness and gaps
 
 Derive internal and client-facing versions from the same source record. Exclude internal commercial detail, speculation, and sensitive evidence from the client version.
+
+For material release reporting, keep source revision, artifact digest, build, delivery/store event, and runtime identity separate. Missing or mismatched links remain Gray.
