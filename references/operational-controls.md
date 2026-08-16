@@ -21,7 +21,7 @@ Resolve each source by stable provider ID or an adapter-verified canonical root 
 
 - Reject a canonical locator that matches a retired locator.
 - Rediscover mutable targets by stable parent or provider ID; do not hard-code a mutable “latest” name as authority.
-- A missing, moved, stale, unsupported, or contradictory source makes only its dependent claims Gray.
+- A missing, moved, stale, unsupported, rejected, or contradictory source makes only its dependent claims Gray. Evidence returned by a non-resolved source cannot support a favorable health state.
 - Preserve confirmed stable IDs and prior checkpoints on rollback.
 
 ## Expiring human authority
@@ -35,7 +35,7 @@ Human context may calibrate trajectory or approve a bounded decision, but it doe
 - active, expired, or superseded state; and
 - `silence_is_approval: false`.
 
-An active receipt past `review_after` is invalid. When required evidence remains missing, the affected status remains Gray even if a human receipt explains the context. Rollback removes derived evaluation fields only; the original receipt remains durable.
+An active receipt past `review_after` is invalid. An expired or superseded receipt cannot support a favorable health state. When required evidence remains missing, the affected status remains Gray even if a human receipt explains the context. Rollback removes derived evaluation fields only; the original receipt remains durable.
 
 ## Executive report envelope
 
@@ -47,7 +47,7 @@ Internal, confidential, and restricted claims are filtered from a client report.
 
 Record source revision, artifact digest, build identity, delivery event, and runtime identity as separate links. Delivery may mean deployment, store submission, or store acceptance only when the project adapter nominates that exact authority.
 
-- Artifact and runtime source revisions must match the top-level source revision for a verified tuple.
+- Artifact and runtime source revisions are required and must match the top-level source revision for a verified tuple.
 - Build provenance does not prove submission, acceptance, deployment, or runtime behavior.
 - A missing source, artifact, build, delivery, or runtime link makes the tuple Gray and must be named explicitly.
 - Never infer runtime state from repository code, a merge, or a successful build.

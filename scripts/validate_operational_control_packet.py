@@ -108,14 +108,15 @@ def _validate_coverage(packet: dict[str, Any], errors: list[str]) -> None:
 
 def _validate_retrieval(
     packet: dict[str, Any], errors: list[str]
-) -> tuple[set[str], set[str]]:
+) -> tuple[set[str], dict[str, str]]:
     retrieval = _object(packet.get("retrieval"), "retrieval", errors)
     logical, logical_by_id = _unique_objects(
         retrieval.get("logical_requests"), "retrieval.logical_requests", errors
     )
     seen_requests: set[tuple[str, str, str]] = set()
+    seen_fingerprints: set[str] = set()
     source_ids: set[str] = set()
-    evidence_refs: set[str] = set()
+    evidence_sources: dict[str, str] = {}
     for index, request in enumerate(logical):
         path = f"retrieval.logical_requests[{index}]"
         provider = _string(request.get("provider"), f"{path}.provider", errors)
@@ -124,6 +125,10 @@ def _validate_retrieval(
         fingerprint = _string(request.get("fingerprint"), f"{path}.fingerprint", errors)
         if fingerprint and not FINGERPRINT.fullmatch(fingerprint):
             errors.append(f"{path}.fingerprint must be a lowercase SHA-256 digest")
+        if fingerprint in seen_fingerprints:
+            errors.append(f"{path}.fingerprint duplicates an existing logical request fingerprint")
+        elif fingerprint:
+            seen_fingerprints.add(fingerprint)
         _string(request.get("purpose"), f"{path}.purpose", errors)
         key = (provider.casefold(), source_id, fingerprint)
         if key in seen_requests:
@@ -153,13 +158,14 @@ def _validate_retrieval(
             if state in {"success", "not-modified"}:
                 ref = _string(result_ref, f"{attempt_path}.result_ref", errors)
                 if ref:
-                    evidence_refs.add(ref)
+                    prior_source = evidence_sources.get(ref)
+                    if prior_source and prior_source != source_id:
+                        errors.append(f"{attempt_path}.result_ref is already bound to another source")
+                    evidence_sources[ref] = source_id
                 if failure_ref is not None:
                     errors.append(f"{attempt_path}.failure_ref must be null on success")
             else:
                 ref = _string(failure_ref, f"{attempt_path}.failure_ref", errors)
-                if ref:
-                    evidence_refs.add(ref)
                 if ref not in retained:
                     errors.append(f"{attempt_path}.failure_ref must be retained")
                 if result_ref is not None:
@@ -183,10 +189,12 @@ def _validate_retrieval(
         if logical_id and logical_id not in logical_by_id:
             errors.append(f"{path}.logical_request_id references an unknown request")
         _string(reuse.get("consumer"), f"{path}.consumer", errors)
-    return source_ids, evidence_refs
+    return source_ids, evidence_sources
 
 
-def _validate_sources(packet: dict[str, Any], known_sources: set[str], errors: list[str]) -> None:
+def _validate_sources(
+    packet: dict[str, Any], known_sources: set[str], errors: list[str]
+) -> dict[str, str]:
     sources, source_by_id = _unique_objects(packet.get("source_preflights"), "source_preflights", errors)
     for index, source in enumerate(sources):
         path = f"source_preflights[{index}]"
@@ -220,6 +228,10 @@ def _validate_sources(packet: dict[str, Any], known_sources: set[str], errors: l
             errors.append(f"{path}.change_control.limitation must be null when supported")
     for source_id in sorted(known_sources - set(source_by_id)):
         errors.append(f"source_preflights is missing retrieval source: {source_id}")
+    return {
+        source_id: str(source.get("status"))
+        for source_id, source in source_by_id.items()
+    }
 
 
 def _validate_authority(
@@ -249,7 +261,11 @@ def _validate_authority(
 
 
 def _validate_health(
-    packet: dict[str, Any], receipt_by_id: dict[str, dict[str, Any]], errors: list[str]
+    packet: dict[str, Any],
+    receipt_by_id: dict[str, dict[str, Any]],
+    evidence_sources: dict[str, str],
+    source_states: dict[str, str],
+    errors: list[str],
 ) -> set[str]:
     assertions, _ = _unique_objects(packet.get("health_assertions"), "health_assertions", errors)
     assertion_ids: set[str] = set()
@@ -266,22 +282,49 @@ def _validate_health(
         missing = required - observed
         if missing and status != "Gray":
             errors.append(f"{path}.status must be Gray when required evidence is missing")
+        nonresolved_sources = sorted(
+            {
+                evidence_sources[evidence]
+                for evidence in observed
+                if evidence in evidence_sources
+                and source_states.get(evidence_sources[evidence]) != "resolved"
+            }
+        )
+        if nonresolved_sources and status != "Gray":
+            errors.append(
+                f"{path}.status must be Gray when observed evidence comes from "
+                f"non-resolved sources: {nonresolved_sources}"
+            )
         receipt_id = assertion.get("authority_receipt_id")
         if receipt_id is not None:
             if receipt_id not in receipt_by_id:
                 errors.append(f"{path}.authority_receipt_id references an unknown receipt")
             elif assertion_id not in receipt_by_id[receipt_id].get("scope", []):
                 errors.append(f"{path}.authority_receipt_id does not cover this assertion")
+            elif receipt_by_id[receipt_id].get("status") != "active" and status != "Gray":
+                errors.append(
+                    f"{path}.status must be Gray when its authority receipt is not active"
+                )
     return assertion_ids
 
 
 def _release_missing(release: dict[str, Any]) -> list[str]:
+    artifact = _object(release.get("artifact"), "release.artifact", [])
+    runtime = _object(release.get("runtime"), "release.runtime", [])
     paths = {
         "source": release.get("source_revision"),
-        "artifact": _object(release.get("artifact"), "release.artifact", []).get("digest"),
-        "build": _object(release.get("artifact"), "release.artifact", []).get("build_id"),
+        "artifact": (
+            artifact.get("digest")
+            if _nonempty(artifact.get("source_revision"))
+            else None
+        ),
+        "build": artifact.get("build_id"),
         "delivery": _object(release.get("delivery"), "release.delivery", []).get("event_id"),
-        "runtime": _object(release.get("runtime"), "release.runtime", []).get("revision"),
+        "runtime": (
+            runtime.get("revision")
+            if _nonempty(runtime.get("source_revision"))
+            else None
+        ),
     }
     return sorted(label for label, value in paths.items() if not _nonempty(value))
 
@@ -310,8 +353,13 @@ def _validate_releases(packet: dict[str, Any], errors: list[str]) -> set[str]:
             if artifact.get(field) is not None:
                 _string(artifact.get(field), f"{path}.artifact.{field}", errors)
         artifact_revision = artifact.get("source_revision")
-        if artifact_revision is not None and artifact_revision != source_revision:
-            errors.append(f"{path}.artifact.source_revision must match source_revision")
+        if artifact_revision is not None:
+            if not _nonempty(artifact_revision) or not SOURCE_REVISION.fullmatch(artifact_revision):
+                errors.append(
+                    f"{path}.artifact.source_revision must be a full lowercase Git revision"
+                )
+            elif artifact_revision != source_revision:
+                errors.append(f"{path}.artifact.source_revision must match source_revision")
         delivery = _object(release.get("delivery"), f"{path}.delivery", errors)
         if delivery.get("state") not in {None, "submitted", "accepted", "deployed"}:
             errors.append(f"{path}.delivery.state is invalid")
@@ -323,8 +371,13 @@ def _validate_releases(packet: dict[str, Any], errors: list[str]) -> set[str]:
             if runtime.get(field) is not None:
                 _string(runtime.get(field), f"{path}.runtime.{field}", errors)
         runtime_revision = runtime.get("source_revision")
-        if runtime_revision is not None and runtime_revision != source_revision:
-            errors.append(f"{path}.runtime.source_revision must match source_revision")
+        if runtime_revision is not None:
+            if not _nonempty(runtime_revision) or not SOURCE_REVISION.fullmatch(runtime_revision):
+                errors.append(
+                    f"{path}.runtime.source_revision must be a full lowercase Git revision"
+                )
+            elif runtime_revision != source_revision:
+                errors.append(f"{path}.runtime.source_revision must match source_revision")
         missing = _release_missing(release)
         declared_missing = _strings(release.get("missing_links"), f"{path}.missing_links", errors)
         if declared_missing != missing:
@@ -391,10 +444,12 @@ def validate_packet(value: Any) -> list[str]:
     _string(packet.get("run_id"), "run_id", errors)
     evaluated_at = _moment(packet.get("evaluated_at"), "evaluated_at", errors)
     _validate_coverage(packet, errors)
-    source_ids, _ = _validate_retrieval(packet, errors)
-    _validate_sources(packet, source_ids, errors)
+    source_ids, evidence_sources = _validate_retrieval(packet, errors)
+    source_states = _validate_sources(packet, source_ids, errors)
     receipts = _validate_authority(packet, evaluated_at, errors)
-    health_ids = _validate_health(packet, receipts, errors)
+    health_ids = _validate_health(
+        packet, receipts, evidence_sources, source_states, errors
+    )
     release_ids = _validate_releases(packet, errors)
     _validate_report(packet, health_ids | release_ids, errors)
     return errors

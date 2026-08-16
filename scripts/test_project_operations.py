@@ -191,7 +191,14 @@ def assert_operational_controls() -> None:
         copy.deepcopy(packet["retrieval"]["logical_requests"][0])  # type: ignore[index]
     )
     packet["retrieval"]["logical_requests"][1]["id"] = "REQ-2"  # type: ignore[index]
-    adversaries.append(("duplicate logical retrieval", packet, "duplicates an existing logical request"))
+    packet["retrieval"]["logical_requests"][1]["stable_source_id"] = "source-linear-2"  # type: ignore[index]
+    second_source = copy.deepcopy(packet["source_preflights"][0])  # type: ignore[index]
+    second_source["id"] = "source-linear-2"
+    second_source["canonical_locator"] = "workspace:test-project-2"
+    packet["source_preflights"].append(second_source)  # type: ignore[index]
+    adversaries.append(
+        ("duplicate logical retrieval fingerprint", packet, "fingerprint duplicates")
+    )
 
     packet = copy.deepcopy(valid)
     final_attempt = packet["retrieval"]["logical_requests"][0]["attempts"][-1]  # type: ignore[index]
@@ -222,8 +229,30 @@ def assert_operational_controls() -> None:
     adversaries.append(("expired authority", packet, "expired but still marked active"))
 
     packet = copy.deepcopy(valid)
+    packet["authority_receipts"][0]["status"] = "expired"  # type: ignore[index]
+    packet["health_assertions"][0].update(  # type: ignore[index]
+        {
+            "status": "Green",
+            "required_evidence": ["human-input-2026-08-16"],
+            "observed_evidence": ["human-input-2026-08-16"],
+        }
+    )
+    adversaries.append(("expired authority green", packet, "receipt is not active"))
+
+    packet = copy.deepcopy(valid)
     packet["health_assertions"][0]["status"] = "Green"  # type: ignore[index]
     adversaries.append(("false green", packet, "status must be Gray"))
+
+    packet = copy.deepcopy(valid)
+    packet["source_preflights"][0]["status"] = "rejected"  # type: ignore[index]
+    packet["health_assertions"][0].update(  # type: ignore[index]
+        {
+            "status": "Green",
+            "required_evidence": ["evidence-linear-result"],
+            "observed_evidence": ["evidence-linear-result"],
+        }
+    )
+    adversaries.append(("rejected source green", packet, "non-resolved sources"))
 
     packet = copy.deepcopy(valid)
     packet["releases"][0]["artifact"]["source_revision"] = "d" * 40  # type: ignore[index]
@@ -233,6 +262,12 @@ def assert_operational_controls() -> None:
     packet["releases"][0]["runtime"]["revision"] = None  # type: ignore[index]
     packet["releases"][0]["missing_links"] = ["runtime"]  # type: ignore[index]
     adversaries.append(("false verified release", packet, "cannot be verified"))
+
+    packet = copy.deepcopy(valid)
+    del packet["releases"][0]["artifact"]["source_revision"]  # type: ignore[index]
+    del packet["releases"][0]["runtime"]["source_revision"]  # type: ignore[index]
+    packet["releases"][0]["missing_links"] = ["artifact", "runtime"]  # type: ignore[index]
+    adversaries.append(("missing release provenance", packet, "cannot be verified"))
 
     packet = copy.deepcopy(valid)
     packet["report"]["word_cap"] = 3  # type: ignore[index]
@@ -602,14 +637,12 @@ def assert_task_orchestration() -> None:
         if required.casefold() not in task_reference.casefold():
             raise AssertionError(f"task-orchestration contract is missing {required}")
 
-    upgrader = (ROOT / "skills" / "project-ops-upgrader" / "SKILL.md").read_text(encoding="utf-8")
-    if "../../references/task-orchestration.md" not in upgrader:
-        raise AssertionError("Upgrader does not load the task-orchestration candidate")
     for skill_name in (
         "project-ops-manager",
         "project-ops-delivery",
         "project-ops-assess",
         "project-ops-automate",
+        "project-ops-upgrader",
     ):
         skill = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
         if "../../references/task-orchestration.md" in skill:
