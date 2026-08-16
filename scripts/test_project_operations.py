@@ -555,6 +555,9 @@ def assert_poppy_orchestration() -> None:
         raise AssertionError(f"valid substantive Poppy plan failed: {errors}")
     if errors := validate_poppy_closure(closure, graph, plan):
         raise AssertionError(f"valid Poppy closure failed: {errors}")
+    errors = validate_poppy_closure(closure, graph)
+    if not any("requires the exact bound plan" in error for error in errors):
+        raise AssertionError(f"Poppy accepted an unbound closure: {errors}")
 
     mutating = copy.deepcopy(plan)
     mutating.update(  # type: ignore[arg-type]
@@ -685,11 +688,26 @@ def assert_poppy_orchestration() -> None:
         "outside allowed_actions" in error for error in errors
     ):
         raise AssertionError(f"Poppy accepted fabricated or out-of-scope authority: {errors}")
+    contradictory_authority = copy.deepcopy(mutating)
+    contradictory_authority["authority"]["forbidden_actions"].append(  # type: ignore[index]
+        "Set review_mode to evidence-first"
+    )
+    errors = validate_poppy_plan(contradictory_authority, graph)
+    if not any("must not overlap" in error for error in errors):
+        raise AssertionError(f"Poppy accepted contradictory allowed/forbidden authority: {errors}")
     packet = copy.deepcopy(mutation_closure)
     packet["risk"] = "R0"
     errors = validate_poppy_closure(packet, graph, mutating)
     if not any("risk does not match" in error for error in errors):
         raise AssertionError(f"Poppy closure lowered the bound plan risk: {errors}")
+    skipped_execution = copy.deepcopy(mutation_closure)
+    for node_result in skipped_execution["node_results"]:  # type: ignore[union-attr]
+        if node_result["node"] == "authorized-execution":
+            node_result.update({"status": "skipped", "skip_reason": "Not executed"})
+    skipped_execution["postflight"]["verdict"] = "ESCALATE"  # type: ignore[index]
+    errors = validate_poppy_closure(skipped_execution, graph, mutating)
+    if not any("passing authorized-execution" in error for error in errors):
+        raise AssertionError(f"Poppy recorded effects while authorized execution was skipped: {errors}")
     packet = copy.deepcopy(closure)
     packet["trigger"]["mention"] = "Poppy, do something else"  # type: ignore[index]
     packet["trigger"]["turn_digest"] = hashlib.sha256(  # type: ignore[index]
@@ -713,6 +731,16 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_plan(packet, graph)
     if not any("explicitly contain Poppy" in error for error in errors):
         raise AssertionError(f"Poppy substring trigger accepted poppycock: {errors}")
+    packet = copy.deepcopy(simple)
+    unicode_false_trigger = "Tell me about äppoppyβ"
+    packet["trigger"]["mention"] = unicode_false_trigger  # type: ignore[index]
+    packet["trigger"]["turn_digest"] = hashlib.sha256(  # type: ignore[index]
+        unicode_false_trigger.encode("utf-8")
+    ).hexdigest()
+    packet["authority"]["source_digest"] = packet["trigger"]["turn_digest"]  # type: ignore[index]
+    errors = validate_poppy_plan(packet, graph)
+    if not any("explicitly contain Poppy" in error for error in errors):
+        raise AssertionError(f"Poppy accepted a Unicode-adjacent false trigger: {errors}")
 
     ask_user = copy.deepcopy(plan)
     ask_user.update(  # type: ignore[arg-type]
@@ -740,37 +768,35 @@ def assert_poppy_orchestration() -> None:
     if errors := validate_poppy_plan(ask_user, graph):
         raise AssertionError(f"valid ambiguous-project safe-stop plan failed: {errors}")
 
-    approval_plan = copy.deepcopy(mutating)
+    unsafe_stop = copy.deepcopy(mutating)
+    unsafe_stop["preflight"]["disposition"] = "ask-user"  # type: ignore[index]
+    unsafe_stop["selected_nodes"].insert(  # type: ignore[index]
+        unsafe_stop["selected_nodes"].index("dispatch"), "needs-user-decision"  # type: ignore[index]
+    )
+    unsafe_stop["selected_edges"] = [  # type: ignore[index]
+        edge
+        for edge in unsafe_stop["selected_edges"]
+        if edge != {"from": "preflight-evaluate", "to": "dispatch"}
+    ]
+    unsafe_stop["selected_edges"].extend(  # type: ignore[union-attr]
+        [
+            {"from": "preflight-evaluate", "to": "needs-user-decision"},
+            {"from": "needs-user-decision", "to": "dispatch"},
+            {"from": "needs-user-decision", "to": "terminal"},
+        ]
+    )
+    errors = validate_poppy_plan(unsafe_stop, graph)
+    if not any("stopped plan cannot select authorized execution" in error for error in errors):
+        raise AssertionError(f"Poppy ask-user stop retained authorized execution: {errors}")
+
+    approval_plan = copy.deepcopy(ask_user)
     approval_plan.update(  # type: ignore[arg-type]
         {
             "run_id": "poppy-approval-001",
+            "interaction_class": "mutating",
+            "scope_mode": "write-authorized",
             "objective": "Request authority for one exact local control update",
             "acceptance": ["Respect a denied or deferred approval without any effect"],
-            "selected_nodes": [
-                "trigger", "triage", "project-resolve", "readiness-screen", "memory-orient",
-                "preflight-evaluate", "needs-user-decision", "dispatch", "operations-control",
-                "join", "reconcile", "human-approval", "authorized-execution",
-                "postflight-evaluate", "memory-close", "terminal",
-            ],
-            "selected_edges": [
-                {"from": "trigger", "to": "triage"},
-                {"from": "triage", "to": "project-resolve"},
-                {"from": "project-resolve", "to": "readiness-screen"},
-                {"from": "readiness-screen", "to": "memory-orient"},
-                {"from": "memory-orient", "to": "preflight-evaluate"},
-                {"from": "preflight-evaluate", "to": "needs-user-decision"},
-                {"from": "needs-user-decision", "to": "dispatch"},
-                {"from": "needs-user-decision", "to": "terminal"},
-                {"from": "dispatch", "to": "operations-control"},
-                {"from": "operations-control", "to": "join"},
-                {"from": "join", "to": "reconcile"},
-                {"from": "reconcile", "to": "human-approval"},
-                {"from": "human-approval", "to": "authorized-execution"},
-                {"from": "human-approval", "to": "terminal"},
-                {"from": "authorized-execution", "to": "postflight-evaluate"},
-                {"from": "postflight-evaluate", "to": "memory-close"},
-                {"from": "memory-close", "to": "terminal"},
-            ],
         }
     )
     approval_plan["preflight"].update(  # type: ignore[union-attr]
@@ -940,6 +966,11 @@ def assert_poppy_orchestration() -> None:
     }
     if errors := validate_poppy_plan(r2_plan, graph):
         raise AssertionError(f"valid R2 plan with fresh evaluator failed: {errors}")
+    stopped_evaluator_plan = copy.deepcopy(r2_plan)
+    stopped_evaluator_plan["delegation"]["workers"][0]["status"] = "stopped"  # type: ignore[index]
+    errors = validate_poppy_plan(stopped_evaluator_plan, graph)
+    if not any("planned fresh postflight evaluator" in error for error in errors):
+        raise AssertionError(f"Poppy R2 plan accepted a stopped evaluator: {errors}")
     fake_r2_closure = copy.deepcopy(mutation_closure)
     fake_r2_closure["risk"] = "R2"
     fake_r2_closure["plan_digest"] = poppy_digest(r2_plan)
@@ -953,6 +984,26 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(fake_r2_closure, graph, r2_plan)
     if not any("planned worker and closure card" in error for error in errors):
         raise AssertionError(f"Poppy accepted a fabricated independent evaluator identity: {errors}")
+    valid_r2_closure = copy.deepcopy(fake_r2_closure)
+    valid_r2_closure["worker_closures"] = [
+        {
+            "worker_id": "worker-postflight-r2-001",
+            "root_task_id": r2_plan["root_task_id"],
+            "parent_task_id": r2_plan["root_task_id"],
+            "outcome": "complete",
+            "evidence_refs": ["independent-postflight-verdict"],
+            "repository_state": {"status": "not-applicable"},
+            "residual_risk": "No material residual risk",
+            "next_action": "Return verdict to Poppy",
+        }
+    ]
+    if errors := validate_poppy_closure(valid_r2_closure, graph, r2_plan):
+        raise AssertionError(f"valid R2 independent-evaluator closure failed: {errors}")
+    failed_evaluator = copy.deepcopy(valid_r2_closure)
+    failed_evaluator["worker_closures"][0]["outcome"] = "failed"  # type: ignore[index]
+    errors = validate_poppy_closure(failed_evaluator, graph, r2_plan)
+    if not any("planned worker and closure card" in error for error in errors):
+        raise AssertionError(f"Poppy PASS accepted a failed R2 evaluator: {errors}")
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-simple-plan.json"))
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-plan.json"))
     run(

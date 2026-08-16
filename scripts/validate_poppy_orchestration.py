@@ -264,9 +264,9 @@ def _validate_trigger(packet: dict[str, Any], errors: list[str]) -> None:
     trigger = _object(packet.get("trigger"), "trigger", errors)
     mention = trigger.get("mention")
     mention_folded = mention.casefold() if _is_string(mention) else ""
-    explicit_name = re.search(r"(?<![a-z0-9_-])poppy(?![a-z0-9_-])", mention_folded)
+    explicit_name = re.search(r"(?<![\w-])poppy(?![\w-])", mention_folded)
     explicit_alias = re.search(
-        r"(?<![a-z0-9_-])project operations partner(?![a-z0-9_-])", mention_folded
+        r"(?<![\w-])project operations partner(?![\w-])", mention_folded
     )
     if not explicit_name and not explicit_alias:
         errors.append("trigger.mention must explicitly contain Poppy or Project Operations Partner")
@@ -386,6 +386,15 @@ def _validate_authority(
             _is_string(item) for item in authority.get(field, [])
         ):
             errors.append(f"authority.{field} must be a string list")
+    allowed_normalized = {
+        item.strip().casefold() for item in authority.get("allowed_actions", []) if _is_string(item)
+    }
+    forbidden_normalized = {
+        item.strip().casefold() for item in authority.get("forbidden_actions", []) if _is_string(item)
+    }
+    overlap = sorted(allowed_normalized & forbidden_normalized)
+    if overlap:
+        errors.append("authority allowed_actions and forbidden_actions must not overlap")
     maximum_risk = authority.get("maximum_risk")
     if maximum_risk not in RISKS:
         errors.append("authority.maximum_risk must be R0, R1, R2, or R3")
@@ -538,6 +547,7 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
     selected, selected_edges, nodes = _validate_selected_graph(packet, graph, errors)
     selected_set = set(selected)
     confidence, disposition = _validate_preflight(packet, errors)
+    stopping = disposition in {"ask-user", "escalate-approval"}
     risk_floor = packet.get("preflight", {}).get("risk")
     _validate_authority(packet, interaction, selected, risk_floor, disposition, errors)
     selected_handlers = {
@@ -545,8 +555,17 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
         for node_id in selected
         if node_id in nodes and nodes[node_id].get("kind") == "capability"
     }
+    graph_capability_handlers = {
+        node.get("handler")
+        for node in nodes.values()
+        if node.get("kind") == "capability"
+    }
     for index, preview in enumerate(packet.get("authority", {}).get("effect_previews", [])):
-        if isinstance(preview, dict) and preview.get("handler") not in selected_handlers:
+        if (
+            isinstance(preview, dict)
+            and preview.get("handler") not in selected_handlers
+            and not (stopping and preview.get("handler") in graph_capability_handlers)
+        ):
             errors.append(
                 f"authority.effect_previews[{index}].handler must identify a selected capability handler"
             )
@@ -559,11 +578,11 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
             and worker.get("node") == "postflight-evaluate"
             and worker.get("skill") == "project-ops-evaluate"
             and worker.get("authority") == "read-only"
+            and worker.get("status") in {"planned", "active"}
         ]
         if len(evaluator_workers) != 1:
             errors.append("R2 and R3 plans require exactly one planned fresh postflight evaluator worker")
 
-    stopping = disposition in {"ask-user", "escalate-approval"}
     always_required = {"trigger", "triage", "terminal"}
     if not stopping:
         always_required.update({"readiness-screen", "postflight-evaluate"})
@@ -609,10 +628,7 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
     if stopping:
         if "needs-user-decision" not in selected_set and "human-approval" not in selected_set:
             errors.append("ask-user or escalate-approval must select a root decision node")
-        if "authorized-execution" in selected_set and packet.get("authority", {}).get("status") in {
-            "read-only",
-            "denied",
-        }:
+        if "authorized-execution" in selected_set:
             errors.append("a stopped plan cannot select authorized execution")
     if interaction == "mutating" and confidence in {"low", "insufficient"} and not stopping:
         errors.append("mutating plans require medium or high preflight confidence")
@@ -649,6 +665,8 @@ def validate_closure(
     packet: dict[str, Any], graph: dict[str, Any], plan: dict[str, Any] | None = None
 ) -> list[str]:
     errors: list[str] = []
+    if plan is None:
+        errors.append("closure validation requires the exact bound plan")
     if packet.get("schema_version") != 1:
         errors.append("schema_version must be 1")
     if packet.get("packet_type") != "closure":
@@ -702,6 +720,7 @@ def validate_closure(
 
     results = _list(packet.get("node_results"), "node_results", errors)
     result_nodes: set[str] = set()
+    result_status_by_node: dict[str, str] = {}
     node_statuses: list[str] = []
     for index, item in enumerate(results):
         path = f"node_results[{index}]"
@@ -716,6 +735,8 @@ def validate_closure(
             errors.append(f"{path}.status is invalid")
         else:
             node_statuses.append(status)
+            if _is_string(node_id):
+                result_status_by_node[node_id] = status
         if not _is_string(result.get("summary")):
             errors.append(f"{path}.summary must be non-empty")
         if not isinstance(result.get("evidence_refs"), list) or not all(
@@ -801,9 +822,15 @@ def validate_closure(
                 errors.append("denied or deferred approval cannot produce external effects")
         elif recorded_effects != planned_effects:
             errors.append("external effects must exactly match the bound plan effect previews")
+        if recorded_effects:
+            if result_status_by_node.get("authorized-execution") != "pass":
+                errors.append("recorded effects require a passing authorized-execution node result")
+            if plan_authority == "approval-required" and approval_decision != "approved":
+                errors.append("approval-required effects require an approved root decision")
 
     worker_closures = _list(packet.get("worker_closures"), "worker_closures", errors)
     closure_workers: set[str] = set()
+    worker_outcomes: dict[str, str] = {}
     worker_needed_parent_decision = False
     for index, item in enumerate(worker_closures):
         path = f"worker_closures[{index}]"
@@ -822,6 +849,8 @@ def validate_closure(
             worker_needed_parent_decision = True
             if not _is_string(card.get("parent_resolution_receipt")):
                 errors.append(f"{path}.parent_resolution_receipt is required after NEEDS_PARENT_DECISION")
+        if _is_string(worker_id) and _is_string(outcome):
+            worker_outcomes[worker_id] = outcome
         if not _string_list(card.get("evidence_refs")):
             errors.append(f"{path}.evidence_refs must be a non-empty string list")
         repository = _object(card.get("repository_state"), f"{path}.repository_state", errors)
@@ -881,9 +910,14 @@ def validate_closure(
                 and worker.get("node") == "postflight-evaluate"
                 and worker.get("skill") == "project-ops-evaluate"
                 and worker.get("authority") == "read-only"
+                and worker.get("status") in {"planned", "active"}
             }
             evaluator_id = postflight.get("evaluator_task_id")
-            if evaluator_id not in planned_evaluators or evaluator_id not in closure_workers:
+            if (
+                evaluator_id not in planned_evaluators
+                or evaluator_id not in closure_workers
+                or worker_outcomes.get(evaluator_id) != "complete"
+            ):
                 errors.append("independent evaluator identity must match its planned worker and closure card")
 
     if verdict == "PASS" and any(status != "pass" for status in acceptance_statuses):

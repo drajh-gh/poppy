@@ -22,6 +22,7 @@ After bounded memory orientation and before dispatch:
 3. Verify that every selected graph node has its required input and that selected edges preserve dependency order.
 4. Set the deterministic risk floor; raise but never lower it.
 5. Separate authority already granted, actions that require approval, and forbidden effects.
+   Treat a normalized authority source digest as a binding claim, not proof of provenance; independently resolve and verify approved-manifest or named-approver evidence before consequential execution.
 6. Assess reversibility, rollback, verification, and whether delegation provides real isolation or coverage value.
 7. Assign `high`, `medium`, `low`, or `insufficient` confidence with a concise evidence basis and explicit assumptions.
 8. Block consequential execution when a required gate is missing, even if overall confidence would otherwise be high.
