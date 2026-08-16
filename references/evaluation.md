@@ -79,3 +79,8 @@ Treat the following as release-gate cases for the single-partner graph:
 13. `PASS` requires every selected node and required acceptance item to pass and every effect to be verified. `PASS_WITH_LIMITATIONS` cannot hide a failed/unverified required item, a skipped/failed node, or an unverified effect.
 14. R2/R3 postflight is performed by a fresh evaluator task whose identity differs from the root. The root cannot self-declare independence.
 15. Explicit read-only, review-only, or diagnosis-only scope suppresses every vault write, receipt, and log entry. A material write-authorized run creates at most one `orchestration-run` receipt under the existing PM run surface.
+16. A truthful ambiguous-project safe stop records `project_id: unresolved`; an executing substantive path accepts only one normalized exact project key and rejects cross-project identifiers.
+17. A trusted current turn grants write authority only when it contains explicit authorization language and every exact allowed action; a health or assessment request cannot be self-promoted into mutation authority.
+18. Unicode-equivalent allowed, forbidden, and approval-required actions remain contradictory after normalization and fail closed.
+19. Every worker budget can actually accommodate its declared depth and active state; recursive workers retain zero remaining task allowance.
+20. Delivery always traverses distinct fresh Functional QA and Final Assurance workers. Their minimized inputs and output contracts exactly match the typed selected graph edges, and passing assessment/evaluator nodes cite completed worker evidence.

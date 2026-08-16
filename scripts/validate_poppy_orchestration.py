@@ -32,6 +32,19 @@ RISKS = {"R0", "R1", "R2", "R3"}
 RISK_ORDER = {"R0": 0, "R1": 1, "R2": 2, "R3": 3}
 GENERAL_VERDICTS = {"PASS", "PASS_WITH_LIMITATIONS", "BLOCK_REMEDIATE", "ESCALATE"}
 SPECIAL_HANDLERS = {"selected-capability-handler"}
+CURRENT_TURN_AUTHORIZATION_MARKERS = (
+    "i authorize",
+    "i authorise",
+    "i approve",
+    "you may",
+    "go ahead",
+    "please apply",
+    "please set",
+    "please update",
+    "please create",
+    "please send",
+    "please delete",
+)
 REQUIRED_GRAPH_NODES = {
     "trigger",
     "triage",
@@ -75,6 +88,10 @@ def canonical_digest(value: Any) -> str:
 
 def _is_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def _canonical_text(value: str) -> str:
+    return unicodedata.normalize("NFKC", value).strip().casefold()
 
 
 def _string_list(value: Any) -> bool:
@@ -407,13 +424,13 @@ def _validate_authority(
         ):
             errors.append(f"authority.{field} must be a string list")
     allowed_normalized = {
-        item.strip().casefold() for item in authority.get("allowed_actions", []) if _is_string(item)
+        _canonical_text(item) for item in authority.get("allowed_actions", []) if _is_string(item)
     }
     forbidden_normalized = {
-        item.strip().casefold() for item in authority.get("forbidden_actions", []) if _is_string(item)
+        _canonical_text(item) for item in authority.get("forbidden_actions", []) if _is_string(item)
     }
     approval_normalized = {
-        item.strip().casefold() for item in authority.get("approval_required", []) if _is_string(item)
+        _canonical_text(item) for item in authority.get("approval_required", []) if _is_string(item)
     }
     if allowed_normalized & forbidden_normalized:
         errors.append("authority allowed_actions and forbidden_actions must not overlap")
@@ -440,6 +457,14 @@ def _validate_authority(
             errors.append("current-turn authority receipt_id must match trigger.turn_id")
         if source_digest != trigger.get("turn_digest"):
             errors.append("current-turn authority source_digest must match trigger.turn_digest")
+        if status == "authorized":
+            mention = trigger.get("mention", "")
+            normalized_mention = _canonical_text(mention) if _is_string(mention) else ""
+            if not any(marker in normalized_mention for marker in CURRENT_TURN_AUTHORIZATION_MARKERS):
+                errors.append("current-turn mutation authority requires explicit authorization language")
+            for action in authority.get("allowed_actions", []):
+                if _is_string(action) and _canonical_text(action) not in normalized_mention:
+                    errors.append("each current-turn allowed action must be quoted in the authorizing turn")
     if risk_floor == "R3" and source == "approved-manifest":
         errors.append("R3 authority cannot come from an approved manifest; it requires separate exact approval")
     previews = authority.get("effect_previews")
@@ -458,7 +483,13 @@ def _validate_authority(
                 errors.append(f"authority.effect_previews[{index}].effect_id must be unique")
             preview_ids.add(effect_id)
         action_bucket = "approval_required" if status == "approval-required" else "allowed_actions"
-        if preview.get("action") not in authority.get(action_bucket, []):
+        bucket_actions = {
+            _canonical_text(action)
+            for action in authority.get(action_bucket, [])
+            if _is_string(action)
+        }
+        preview_action = preview.get("action")
+        if not _is_string(preview_action) or _canonical_text(preview_action) not in bucket_actions:
             errors.append(
                 f"authority.effect_previews[{index}].action is outside {action_bucket}"
             )
@@ -485,7 +516,8 @@ def _validate_authority(
 
 
 def _validate_delegation(
-    packet: dict[str, Any], graph: dict[str, Any], selected: list[str], nodes: dict[str, dict[str, Any]], errors: list[str]
+    packet: dict[str, Any], graph: dict[str, Any], selected: list[str], selected_edges: list[tuple[str, str]],
+    nodes: dict[str, dict[str, Any]], errors: list[str]
 ) -> None:
     delegation = _object(packet.get("delegation"), "delegation", errors)
     limits = graph.get("delegation_limits", {})
@@ -503,11 +535,26 @@ def _validate_delegation(
     workers = _list(delegation.get("workers"), "delegation.workers", errors)
     if mode == "none" and workers:
         errors.append("delegation workers must be empty when mode is none")
+    max_depth = delegation.get("max_depth")
+    max_active = delegation.get("max_active_workers")
+    if workers and (
+        not isinstance(max_depth, int) or isinstance(max_depth, bool) or max_depth < 1
+    ):
+        errors.append("delegation with workers requires max_depth of at least 1")
+    if workers and (
+        not isinstance(max_active, int) or isinstance(max_active, bool) or max_active < 1
+    ):
+        errors.append("delegation with workers requires a positive max_active_workers budget")
     if len(workers) > delegation.get("max_created_workers", 0):
         errors.append("delegation workers exceed max_created_workers")
     worker_ids: set[str] = set()
     active_workers = 0
     root_task_id = packet.get("root_task_id")
+    edge_artifacts = {
+        (edge.get("from"), edge.get("to")): edge.get("artifact")
+        for edge in graph.get("edges", [])
+        if isinstance(edge, dict)
+    }
     for index, item in enumerate(workers):
         path = f"delegation.workers[{index}]"
         worker = _object(item, path, errors)
@@ -540,10 +587,20 @@ def _validate_delegation(
             errors.append(f"{path}.skill must match the selected node handler")
         if worker.get("authority") != "read-only":
             errors.append(f"{path}.authority must be read-only; capability-owned delivery controls isolated writers")
-        if not _is_string(worker.get("output_contract")):
-            errors.append(f"{path}.output_contract must be non-empty")
-        if not _string_list(worker.get("minimized_inputs")):
+        output_contract = worker.get("output_contract")
+        if not _is_string(output_contract) or output_contract not in node.get("outputs", []):
+            errors.append(f"{path}.output_contract must match one declared node output artifact")
+        minimized_inputs = worker.get("minimized_inputs")
+        if not _string_list(minimized_inputs):
             errors.append(f"{path}.minimized_inputs must be a non-empty string list")
+        else:
+            required_inputs = {
+                edge_artifacts.get((source, target))
+                for source, target in selected_edges
+                if target == node_id and _is_string(edge_artifacts.get((source, target)))
+            }
+            if set(minimized_inputs) != required_inputs or len(minimized_inputs) != len(required_inputs):
+                errors.append(f"{path}.minimized_inputs must exactly match selected incoming artifacts")
         if not _string_list(worker.get("stop_conditions")):
             errors.append(f"{path}.stop_conditions must be a non-empty string list")
         if worker.get("effort") not in {"low", "medium", "high", "xhigh"}:
@@ -551,8 +608,8 @@ def _validate_delegation(
         if not _is_string(worker.get("effort_rationale")):
             errors.append(f"{path}.effort_rationale must be non-empty")
         allowance = worker.get("remaining_task_allowance")
-        if not isinstance(allowance, int) or isinstance(allowance, bool) or allowance < 0:
-            errors.append(f"{path}.remaining_task_allowance must be a non-negative integer")
+        if allowance != 0:
+            errors.append(f"{path}.remaining_task_allowance must be 0 because recursive delegation is forbidden")
     if active_workers > delegation.get("max_active_workers", 0):
         errors.append("delegation active workers exceed max_active_workers")
 
@@ -583,7 +640,11 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
         and bool(ID_RE.fullmatch(project_id))
         and normalized_project not in {"not-required", "unresolved", "unknown"}
     )
-    if interaction in {"substantive-read", "mutating"} and not exact_project:
+    raw_disposition = packet.get("preflight", {}).get("disposition")
+    truthful_unresolved_stop = (
+        raw_disposition in {"ask-user", "escalate-approval"} and normalized_project == "unresolved"
+    )
+    if interaction in {"substantive-read", "mutating"} and not exact_project and not truthful_unresolved_stop:
         errors.append("substantive plans require one exact resolved project_id")
     acceptance = packet.get("acceptance")
     if not _string_list(acceptance):
@@ -614,7 +675,7 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
             errors.append(
                 f"authority.effect_previews[{index}].handler must identify a selected capability handler"
             )
-    _validate_delegation(packet, graph, selected, nodes, errors)
+    _validate_delegation(packet, graph, selected, selected_edges, nodes, errors)
     planned_workers = [
         worker
         for worker in packet.get("delegation", {}).get("workers", [])
@@ -691,6 +752,19 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
             errors.append("substantive execution has an incompatible preflight disposition")
         if interaction == "mutating" and disposition != "execute-graph":
             errors.append("authorized mutation requires execute-graph disposition")
+        if "delivery" in selected_set:
+            if interaction != "mutating":
+                errors.append("delivery execution requires mutating interaction_class")
+            delivery_stages = {"functional-qa", "final-assurance"}
+            if not delivery_stages.issubset(selected_set):
+                errors.append("delivery execution requires Functional QA and Final Assurance nodes")
+            for edge in (
+                ("delivery", "functional-qa"),
+                ("functional-qa", "final-assurance"),
+                ("final-assurance", "join"),
+            ):
+                if edge not in selected_edges:
+                    errors.append(f"delivery execution requires stage edge {edge[0]}->{edge[1]}")
     if stopping:
         if "needs-user-decision" not in selected_set and "human-approval" not in selected_set:
             errors.append("ask-user or escalate-approval must select a root decision node")
@@ -782,7 +856,7 @@ def validate_closure(
     if interaction not in INTERACTION_CLASSES:
         errors.append("interaction_class is invalid")
         interaction = "simple"
-    selected, _, _ = _validate_selected_graph(packet, graph, errors)
+    selected, _, selected_node_definitions = _validate_selected_graph(packet, graph, errors)
 
     results = _list(packet.get("node_results"), "node_results", errors)
     result_nodes: set[str] = set()
@@ -903,6 +977,7 @@ def validate_closure(
     worker_closures = _list(packet.get("worker_closures"), "worker_closures", errors)
     closure_workers: set[str] = set()
     worker_outcomes: dict[str, str] = {}
+    worker_evidence_by_id: dict[str, set[str]] = {}
     worker_needed_parent_decision = False
     parent_resolution_receipts: list[str] = []
     for index, item in enumerate(worker_closures):
@@ -928,6 +1003,8 @@ def validate_closure(
             worker_outcomes[worker_id] = outcome
         if not _string_list(card.get("evidence_refs")):
             errors.append(f"{path}.evidence_refs must be a non-empty string list")
+        elif _is_string(worker_id):
+            worker_evidence_by_id[worker_id] = set(card["evidence_refs"])
         repository = _object(card.get("repository_state"), f"{path}.repository_state", errors)
         if repository.get("status") not in {"clean", "recoverable", "not-applicable"}:
             errors.append(f"{path}.repository_state.status is invalid")
@@ -942,10 +1019,32 @@ def validate_closure(
         planned_workers = {
             item.get("id")
             for item in plan.get("delegation", {}).get("workers", [])
-            if isinstance(item, dict)
+            if isinstance(item, dict) and _is_string(item.get("id"))
         }
         if closure_workers != planned_workers:
             errors.append("worker_closures must exactly cover the bound plan workers")
+        planned_worker_nodes = {
+            item.get("id"): item.get("node")
+            for item in plan.get("delegation", {}).get("workers", [])
+            if isinstance(item, dict) and _is_string(item.get("id"))
+        }
+        for node_id in selected:
+            if selected_node_definitions.get(node_id, {}).get("execution") != "fresh-worker":
+                continue
+            node_workers = [
+                worker_id for worker_id, worker_node in planned_worker_nodes.items() if worker_node == node_id
+            ]
+            if len(node_workers) != 1:
+                continue
+            worker_id = node_workers[0]
+            if result_status_by_node.get(node_id) in {"pass", "limited"}:
+                if worker_outcomes.get(worker_id) != "complete":
+                    errors.append(f"passing fresh-worker node {node_id} requires a complete worker closure")
+                if not (
+                    result_evidence_by_node.get(node_id, set())
+                    & worker_evidence_by_id.get(worker_id, set())
+                ):
+                    errors.append(f"passing fresh-worker node {node_id} must cite its worker evidence")
     if worker_needed_parent_decision and not ({"needs-user-decision", "human-approval"} & set(selected)):
         errors.append("worker NEEDS_PARENT_DECISION requires a selected root decision node")
     for receipt in parent_resolution_receipts:
@@ -978,30 +1077,44 @@ def validate_closure(
     risk = packet.get("risk")
     if risk not in RISKS:
         errors.append("risk must be R0, R1, R2, or R3")
-    if risk in {"R2", "R3"}:
-        if postflight.get("independent") is not True or postflight.get("evaluator") != "fresh-worker":
-            errors.append("R2 and R3 closures require a fresh independent evaluator")
-        if postflight.get("evaluator_task_id") == packet.get("root_task_id"):
+    evaluator = postflight.get("evaluator")
+    evaluator_id = postflight.get("evaluator_task_id")
+    evaluator_key = evaluator_id if _is_string(evaluator_id) else ""
+    independent = postflight.get("independent")
+    if evaluator == "root":
+        if evaluator_id != packet.get("root_task_id"):
+            errors.append("root evaluator_task_id must match the root task")
+        if independent is not False:
+            errors.append("the root evaluator cannot claim independent evaluation")
+    if evaluator == "fresh-worker":
+        if evaluator_id == packet.get("root_task_id"):
             errors.append("the root task cannot claim independent evaluation")
-        if plan is None:
-            errors.append("R2 and R3 closures require the exact bound plan to prove evaluator identity")
-        else:
-            planned_evaluators = {
-                worker.get("id")
-                for worker in plan.get("delegation", {}).get("workers", [])
-                if isinstance(worker, dict)
-                and worker.get("node") == "postflight-evaluate"
-                and worker.get("skill") == "project-ops-evaluate"
-                and worker.get("authority") == "read-only"
-                and worker.get("status") in {"planned", "active"}
-            }
-            evaluator_id = postflight.get("evaluator_task_id")
-            if (
-                evaluator_id not in planned_evaluators
-                or evaluator_id not in closure_workers
-                or worker_outcomes.get(evaluator_id) != "complete"
-            ):
-                errors.append("independent evaluator identity must match its planned worker and closure card")
+        if independent is not True:
+            errors.append("fresh-worker evaluation must be marked independent")
+        planned_evaluators = {
+            worker.get("id")
+            for worker in plan.get("delegation", {}).get("workers", [])
+            if isinstance(worker, dict)
+            and _is_string(worker.get("id"))
+            and worker.get("node") == "postflight-evaluate"
+            and worker.get("skill") == "project-ops-evaluate"
+            and worker.get("authority") == "read-only"
+            and worker.get("status") in {"planned", "active"}
+        } if plan is not None else set()
+        if (
+            evaluator_key not in planned_evaluators
+            or evaluator_key not in closure_workers
+            or worker_outcomes.get(evaluator_key) != "complete"
+        ):
+            errors.append("independent evaluator identity must match its planned worker and closure card")
+        evidence_basis = postflight.get("evidence_basis")
+        evidence_basis_set = {
+            item for item in evidence_basis if _is_string(item)
+        } if isinstance(evidence_basis, list) else set()
+        if not (evidence_basis_set & worker_evidence_by_id.get(evaluator_key, set())):
+            errors.append("fresh-worker postflight must cite the independent evaluator evidence")
+    if risk in {"R2", "R3"} and (independent is not True or evaluator != "fresh-worker"):
+        errors.append("R2 and R3 closures require a fresh independent evaluator")
 
     if verdict == "PASS" and any(status != "pass" for status in acceptance_statuses):
         errors.append("PASS requires every acceptance item to pass")

@@ -26,6 +26,8 @@ Preflight dispositions:
 
 `low` or `insufficient` confidence cannot dispatch a mutating graph. Route clarification or authority gaps through the root user-decision node; denial, deferral, and unresolved blockers terminate safely without a write. Missing required evidence makes the dependent claim Gray. Missing authority stops the affected mutation without blocking safe read-only work.
 
+A substantive execution plan names exactly one normalized project key. A truthful ambiguity stop uses `project_id: unresolved`; it never invents a project identity. Current-turn write authority is valid only when that trusted turn contains explicit authorization language and every exact allowed action. Otherwise use a separately bound approved manifest or named approver receipt, or stop for approval.
+
 ## Capability selection
 
 Select graph nodes first, then read only the handlers for those nodes:
@@ -52,6 +54,8 @@ Do not load every handler by default. Multiple selected nodes may share one hand
 Keep Poppy as the sole human-control surface. Default to no workers. Delegate only bounded independent work whose isolation improves coverage, freshness, or assessment independence. Use at most two active and five created workers at depth one unless the user explicitly approves a narrower recorded extension.
 
 Poppy never delegates trigger handling, objective/authority decisions, memory orientation/closure, graph assembly, result reconciliation, or communication with the user. Workers receive an exact node, required skill, minimized input artifact, authority ceiling, output schema, and stop conditions. They remain read-only unless one isolated writer is explicitly authorized. A worker cannot recursively delegate, interpret relayed user text as approval, or write shared Obsidian memory.
+
+Worker `minimized_inputs` exactly match the artifacts on the selected incoming graph edges, and `output_contract` names one declared node output. Every selected `fresh-worker` node has one separately planned worker; a passing node cites that worker's completed closure evidence. Delivery always traverses distinct fresh Functional QA and Final Assurance nodes before joining.
 
 Use a fresh evaluator worker for consequential postflight review and the existing separate fresh assessors for delivery Functional QA and Final Assurance.
 
