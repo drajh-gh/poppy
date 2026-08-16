@@ -409,11 +409,17 @@ def _validate_authority(
     if not isinstance(previews, list):
         errors.append("authority.effect_previews must be a list")
         previews = []
+    preview_ids: set[str] = set()
     for index, item in enumerate(previews):
         preview = _object(item, f"authority.effect_previews[{index}]", errors)
-        for field in ("target", "action", "rollback", "handler"):
+        for field in ("effect_id", "target", "action", "rollback", "handler"):
             if not _is_string(preview.get(field)):
                 errors.append(f"authority.effect_previews[{index}].{field} must be non-empty")
+        effect_id = preview.get("effect_id")
+        if _is_string(effect_id):
+            if effect_id in preview_ids:
+                errors.append(f"authority.effect_previews[{index}].effect_id must be unique")
+            preview_ids.add(effect_id)
         if preview.get("action") not in authority.get("allowed_actions", []):
             errors.append(f"authority.effect_previews[{index}].action is outside allowed_actions")
     if interaction == "mutating":
@@ -545,6 +551,17 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
                 f"authority.effect_previews[{index}].handler must identify a selected capability handler"
             )
     _validate_delegation(packet, graph, selected, nodes, errors)
+    if risk_floor in {"R2", "R3"}:
+        evaluator_workers = [
+            worker
+            for worker in packet.get("delegation", {}).get("workers", [])
+            if isinstance(worker, dict)
+            and worker.get("node") == "postflight-evaluate"
+            and worker.get("skill") == "project-ops-evaluate"
+            and worker.get("authority") == "read-only"
+        ]
+        if len(evaluator_workers) != 1:
+            errors.append("R2 and R3 plans require exactly one planned fresh postflight evaluator worker")
 
     stopping = disposition in {"ask-user", "escalate-approval"}
     always_required = {"trigger", "triage", "terminal"}
@@ -739,14 +756,22 @@ def validate_closure(
 
     effects = _list(packet.get("external_effects"), "external_effects", errors)
     unverified_effect = False
-    recorded_effects: set[tuple[str, str, str]] = set()
+    recorded_effects: list[tuple[str, str, str, str]] = []
+    recorded_effect_ids: set[str] = set()
     for index, item in enumerate(effects):
         path = f"external_effects[{index}]"
         effect = _object(item, path, errors)
-        for field in ("target", "action", "handler", "authority_receipt_id"):
+        for field in ("effect_id", "target", "action", "handler", "authority_receipt_id"):
             if not _is_string(effect.get(field)):
                 errors.append(f"{path}.{field} must be non-empty")
-        recorded_effects.add((effect.get("target"), effect.get("action"), effect.get("handler")))
+        effect_id = effect.get("effect_id")
+        if _is_string(effect_id):
+            if effect_id in recorded_effect_ids:
+                errors.append(f"{path}.effect_id must be unique")
+            recorded_effect_ids.add(effect_id)
+        recorded_effects.append(
+            (effect.get("effect_id"), effect.get("target"), effect.get("action"), effect.get("handler"))
+        )
         if effect.get("authority_receipt_id") != packet.get("authority_receipt_id"):
             errors.append(f"{path}.authority_receipt_id must match the closure authority receipt")
         if not isinstance(effect.get("verified"), bool):
@@ -763,11 +788,11 @@ def validate_closure(
     if approval_decision not in {"not-required", "approved", "denied", "deferred"}:
         errors.append("approval_decision is invalid")
     if plan is not None:
-        planned_effects = {
-            (item.get("target"), item.get("action"), item.get("handler"))
+        planned_effects = [
+            (item.get("effect_id"), item.get("target"), item.get("action"), item.get("handler"))
             for item in plan.get("authority", {}).get("effect_previews", [])
             if isinstance(item, dict)
-        }
+        ]
         plan_authority = plan.get("authority", {}).get("status")
         if plan_authority == "approval-required" and approval_decision == "not-required":
             errors.append("approval-required closures must record the root approval decision")
@@ -846,6 +871,20 @@ def validate_closure(
             errors.append("R2 and R3 closures require a fresh independent evaluator")
         if postflight.get("evaluator_task_id") == packet.get("root_task_id"):
             errors.append("the root task cannot claim independent evaluation")
+        if plan is None:
+            errors.append("R2 and R3 closures require the exact bound plan to prove evaluator identity")
+        else:
+            planned_evaluators = {
+                worker.get("id")
+                for worker in plan.get("delegation", {}).get("workers", [])
+                if isinstance(worker, dict)
+                and worker.get("node") == "postflight-evaluate"
+                and worker.get("skill") == "project-ops-evaluate"
+                and worker.get("authority") == "read-only"
+            }
+            evaluator_id = postflight.get("evaluator_task_id")
+            if evaluator_id not in planned_evaluators or evaluator_id not in closure_workers:
+                errors.append("independent evaluator identity must match its planned worker and closure card")
 
     if verdict == "PASS" and any(status != "pass" for status in acceptance_statuses):
         errors.append("PASS requires every acceptance item to pass")

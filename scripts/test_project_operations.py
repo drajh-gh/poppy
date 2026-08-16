@@ -599,6 +599,7 @@ def assert_poppy_orchestration() -> None:
         "forbidden_actions": ["Any external-system mutation"],
         "effect_previews": [
             {
+                "effect_id": "effect-review-mode-001",
                 "target": "local-project-control",
                 "action": "Set review_mode to evidence-first",
                 "rollback": "Restore the prior field value",
@@ -637,6 +638,7 @@ def assert_poppy_orchestration() -> None:
         ],
         "external_effects": [
             {
+                "effect_id": "effect-review-mode-001",
                 "target": "local-project-control",
                 "action": "Set review_mode to evidence-first",
                 "handler": "project-ops-manager",
@@ -664,6 +666,15 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(wrong_effect, graph, mutating)
     if not any("exactly match" in error for error in errors):
         raise AssertionError(f"Poppy closure accepted an effect outside the authority receipt: {errors}")
+    duplicate_effect = copy.deepcopy(mutation_closure)
+    duplicate_effect["external_effects"].append(  # type: ignore[union-attr]
+        copy.deepcopy(duplicate_effect["external_effects"][0])  # type: ignore[index]
+    )
+    errors = validate_poppy_closure(duplicate_effect, graph, mutating)
+    if not any("effect_id must be unique" in error for error in errors) or not any(
+        "exactly match" in error for error in errors
+    ):
+        raise AssertionError(f"Poppy closure accepted duplicate execution of one approved effect: {errors}")
 
     authority_attack = copy.deepcopy(mutating)
     authority_attack["authority"]["receipt_id"] = "fabricated-receipt"  # type: ignore[index]
@@ -776,6 +787,7 @@ def assert_poppy_orchestration() -> None:
         "forbidden_actions": ["Any effect before approval"],
         "effect_previews": [
             {
+                "effect_id": "effect-review-mode-approval-001",
                 "target": "local-project-control",
                 "action": "Set review_mode to evidence-first",
                 "rollback": "Restore the prior field value",
@@ -890,6 +902,57 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(unresolved_worker, graph, worker_plan)
     if not any("selected root decision node" in error for error in errors):
         raise AssertionError(f"Poppy PASS accepted unresolved worker decision relay: {errors}")
+
+    r2_without_evaluator = copy.deepcopy(mutating)
+    r2_without_evaluator["preflight"]["risk"] = "R2"  # type: ignore[index]
+    r2_without_evaluator["authority"]["maximum_risk"] = "R2"  # type: ignore[index]
+    errors = validate_poppy_plan(r2_without_evaluator, graph)
+    if not any("planned fresh postflight evaluator" in error for error in errors):
+        raise AssertionError(f"Poppy R2 plan omitted its independent evaluator worker: {errors}")
+
+    r2_plan = copy.deepcopy(r2_without_evaluator)
+    r2_plan["delegation"] = {  # type: ignore[index]
+        "mode": "bounded",
+        "max_depth": 1,
+        "max_active_workers": 1,
+        "max_created_workers": 1,
+        "workers": [
+            {
+                "id": "worker-postflight-r2-001",
+                "root_task_id": r2_plan["root_task_id"],
+                "parent_task_id": r2_plan["root_task_id"],
+                "depth": 1,
+                "can_delegate": False,
+                "shared_memory_write": False,
+                "decision_protocol": "NEEDS_PARENT_DECISION",
+                "status": "planned",
+                "node": "postflight-evaluate",
+                "skill": "project-ops-evaluate",
+                "authority": "read-only",
+                "minimized_inputs": ["frozen plan and execution evidence"],
+                "stop_conditions": ["candidate identity changes", "human decision required"],
+                "output_contract": "independent postflight verdict",
+                "effort": "high",
+                "effort_rationale": "R2 independent release gate",
+                "remaining_task_allowance": 0,
+            }
+        ],
+    }
+    if errors := validate_poppy_plan(r2_plan, graph):
+        raise AssertionError(f"valid R2 plan with fresh evaluator failed: {errors}")
+    fake_r2_closure = copy.deepcopy(mutation_closure)
+    fake_r2_closure["risk"] = "R2"
+    fake_r2_closure["plan_digest"] = poppy_digest(r2_plan)
+    fake_r2_closure["postflight"].update(  # type: ignore[union-attr]
+        {
+            "evaluator": "fresh-worker",
+            "evaluator_task_id": "worker-postflight-r2-001",
+            "independent": True,
+        }
+    )
+    errors = validate_poppy_closure(fake_r2_closure, graph, r2_plan)
+    if not any("planned worker and closure card" in error for error in errors):
+        raise AssertionError(f"Poppy accepted a fabricated independent evaluator identity: {errors}")
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-simple-plan.json"))
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-plan.json"))
     run(
