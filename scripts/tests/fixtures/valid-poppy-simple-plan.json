@@ -49,6 +49,8 @@
     "status": "read-only",
     "maximum_risk": "R0",
     "receipt_id": "user-turn-simple-001",
+    "source": "current-user-turn",
+    "source_digest": "2983fd9df91538cee9e047f2a616c9e9ad869223f99849dbe129e5c1e67ff127",
     "allowed_actions": [],
     "approval_required": [],
     "effect_previews": [],

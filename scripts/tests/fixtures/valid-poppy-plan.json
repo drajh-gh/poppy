@@ -75,6 +75,8 @@
     "status": "read-only",
     "maximum_risk": "R0",
     "receipt_id": "user-turn-health-001",
+    "source": "current-user-turn",
+    "source_digest": "8fc6e731d074b627b51163779c3e6264cfcd20508c14ed342f0c1969b8cc8bbe",
     "allowed_actions": [
       "Read configured project sources",
       "Prepare internal assessment"

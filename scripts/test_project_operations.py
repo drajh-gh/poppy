@@ -548,6 +548,7 @@ def assert_poppy_orchestration() -> None:
     alias_text = "Project Operations Partner, what does Gray mean?"
     alias_plan["trigger"]["mention"] = alias_text  # type: ignore[index]
     alias_plan["trigger"]["turn_digest"] = hashlib.sha256(alias_text.encode("utf-8")).hexdigest()  # type: ignore[index]
+    alias_plan["authority"]["source_digest"] = alias_plan["trigger"]["turn_digest"]  # type: ignore[index]
     if errors := validate_poppy_plan(alias_plan, graph):
         raise AssertionError(f"Project Operations Partner alias failed: {errors}")
     if errors := validate_poppy_plan(plan, graph):
@@ -585,12 +586,15 @@ def assert_poppy_orchestration() -> None:
             ],
         }
     )
+    mutating["trigger"]["turn_id"] = "user-turn-mutation-001"  # type: ignore[index]
     mutating["preflight"].update({"confidence": "high", "risk": "R1"})  # type: ignore[union-attr]
     mutating["authority"] = {  # type: ignore[index]
         "status": "authorized",
         "maximum_risk": "R1",
         "receipt_id": "user-turn-mutation-001",
-        "allowed_actions": ["Update the approved local project-control field"],
+        "source": "current-user-turn",
+        "source_digest": mutating["trigger"]["turn_digest"],
+        "allowed_actions": ["Set review_mode to evidence-first"],
         "approval_required": [],
         "forbidden_actions": ["Any external-system mutation"],
         "effect_previews": [
@@ -660,6 +664,232 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(wrong_effect, graph, mutating)
     if not any("exactly match" in error for error in errors):
         raise AssertionError(f"Poppy closure accepted an effect outside the authority receipt: {errors}")
+
+    authority_attack = copy.deepcopy(mutating)
+    authority_attack["authority"]["receipt_id"] = "fabricated-receipt"  # type: ignore[index]
+    authority_attack["authority"]["allowed_actions"] = ["Read a dashboard only"]  # type: ignore[index]
+    authority_attack["authority"]["effect_previews"][0]["action"] = "Delete all project items"  # type: ignore[index]
+    errors = validate_poppy_plan(authority_attack, graph)
+    if not any("receipt_id must match" in error for error in errors) or not any(
+        "outside allowed_actions" in error for error in errors
+    ):
+        raise AssertionError(f"Poppy accepted fabricated or out-of-scope authority: {errors}")
+    packet = copy.deepcopy(mutation_closure)
+    packet["risk"] = "R0"
+    errors = validate_poppy_closure(packet, graph, mutating)
+    if not any("risk does not match" in error for error in errors):
+        raise AssertionError(f"Poppy closure lowered the bound plan risk: {errors}")
+    packet = copy.deepcopy(closure)
+    packet["trigger"]["mention"] = "Poppy, do something else"  # type: ignore[index]
+    packet["trigger"]["turn_digest"] = hashlib.sha256(  # type: ignore[index]
+        packet["trigger"]["mention"].encode("utf-8")  # type: ignore[index]
+    ).hexdigest()
+    errors = validate_poppy_closure(packet, graph, plan)
+    if not any("closure trigger does not match" in error for error in errors):
+        raise AssertionError(f"Poppy closure substituted another trigger: {errors}")
+    packet = copy.deepcopy(closure)
+    packet["acceptance_results"] = [
+        {"item": "Unrelated easy assertion", "status": "pass", "evidence_refs": ["unrelated"]}
+    ]
+    errors = validate_poppy_closure(packet, graph, plan)
+    if not any("exactly cover" in error for error in errors):
+        raise AssertionError(f"Poppy closure replaced the acceptance contract: {errors}")
+    packet = copy.deepcopy(simple)
+    false_trigger = "Tell me what poppycock means"
+    packet["trigger"]["mention"] = false_trigger  # type: ignore[index]
+    packet["trigger"]["turn_digest"] = hashlib.sha256(false_trigger.encode("utf-8")).hexdigest()  # type: ignore[index]
+    packet["authority"]["source_digest"] = packet["trigger"]["turn_digest"]  # type: ignore[index]
+    errors = validate_poppy_plan(packet, graph)
+    if not any("explicitly contain Poppy" in error for error in errors):
+        raise AssertionError(f"Poppy substring trigger accepted poppycock: {errors}")
+
+    ask_user = copy.deepcopy(plan)
+    ask_user.update(  # type: ignore[arg-type]
+        {
+            "run_id": "poppy-ask-project-001",
+            "objective": "Resolve an ambiguous project before reading project evidence",
+            "acceptance": ["Stop safely and ask for the project identity"],
+            "selected_nodes": [
+                "trigger", "triage", "project-resolve", "needs-user-decision", "terminal"
+            ],
+            "selected_edges": [
+                {"from": "trigger", "to": "triage"},
+                {"from": "triage", "to": "project-resolve"},
+                {"from": "project-resolve", "to": "needs-user-decision"},
+                {"from": "needs-user-decision", "to": "terminal"},
+            ],
+        }
+    )
+    ask_user["preflight"].update(  # type: ignore[union-attr]
+        {"confidence": "insufficient", "risk": "R0", "disposition": "ask-user"}
+    )
+    ask_user["memory"] = {  # type: ignore[index]
+        "orientation": "not-required", "closure": "not-required", "durable_write": "not-planned"
+    }
+    if errors := validate_poppy_plan(ask_user, graph):
+        raise AssertionError(f"valid ambiguous-project safe-stop plan failed: {errors}")
+
+    approval_plan = copy.deepcopy(mutating)
+    approval_plan.update(  # type: ignore[arg-type]
+        {
+            "run_id": "poppy-approval-001",
+            "objective": "Request authority for one exact local control update",
+            "acceptance": ["Respect a denied or deferred approval without any effect"],
+            "selected_nodes": [
+                "trigger", "triage", "project-resolve", "readiness-screen", "memory-orient",
+                "preflight-evaluate", "needs-user-decision", "dispatch", "operations-control",
+                "join", "reconcile", "human-approval", "authorized-execution",
+                "postflight-evaluate", "memory-close", "terminal",
+            ],
+            "selected_edges": [
+                {"from": "trigger", "to": "triage"},
+                {"from": "triage", "to": "project-resolve"},
+                {"from": "project-resolve", "to": "readiness-screen"},
+                {"from": "readiness-screen", "to": "memory-orient"},
+                {"from": "memory-orient", "to": "preflight-evaluate"},
+                {"from": "preflight-evaluate", "to": "needs-user-decision"},
+                {"from": "needs-user-decision", "to": "dispatch"},
+                {"from": "needs-user-decision", "to": "terminal"},
+                {"from": "dispatch", "to": "operations-control"},
+                {"from": "operations-control", "to": "join"},
+                {"from": "join", "to": "reconcile"},
+                {"from": "reconcile", "to": "human-approval"},
+                {"from": "human-approval", "to": "authorized-execution"},
+                {"from": "human-approval", "to": "terminal"},
+                {"from": "authorized-execution", "to": "postflight-evaluate"},
+                {"from": "postflight-evaluate", "to": "memory-close"},
+                {"from": "memory-close", "to": "terminal"},
+            ],
+        }
+    )
+    approval_plan["preflight"].update(  # type: ignore[union-attr]
+        {"confidence": "medium", "risk": "R1", "disposition": "escalate-approval"}
+    )
+    approval_plan["authority"] = {  # type: ignore[index]
+        "status": "approval-required",
+        "maximum_risk": "R1",
+        "receipt_id": approval_plan["trigger"]["turn_id"],
+        "source": "current-user-turn",
+        "source_digest": approval_plan["trigger"]["turn_digest"],
+        "allowed_actions": ["Set review_mode to evidence-first"],
+        "approval_required": ["Exact local control update"],
+        "forbidden_actions": ["Any effect before approval"],
+        "effect_previews": [
+            {
+                "target": "local-project-control",
+                "action": "Set review_mode to evidence-first",
+                "rollback": "Restore the prior field value",
+                "handler": "project-ops-manager",
+            }
+        ],
+    }
+    if errors := validate_poppy_plan(approval_plan, graph):
+        raise AssertionError(f"valid approval-escalation conditional plan failed: {errors}")
+    denial_closure = {
+        "schema_version": 1,
+        "packet_type": "closure",
+        "run_id": "poppy-approval-001-closure",
+        "plan_run_id": approval_plan["run_id"],
+        "root_task_id": approval_plan["root_task_id"],
+        "project_id": approval_plan["project_id"],
+        "graph_id": approval_plan["graph_id"],
+        "graph_digest": approval_plan["graph_digest"],
+        "plan_digest": poppy_digest(approval_plan),
+        "authority_receipt_id": approval_plan["authority"]["receipt_id"],
+        "approval_decision": "denied",
+        "scope_mode": approval_plan["scope_mode"],
+        "trigger": copy.deepcopy(approval_plan["trigger"]),
+        "interaction_class": approval_plan["interaction_class"],
+        "objective": approval_plan["objective"],
+        "risk": approval_plan["preflight"]["risk"],
+        "selected_nodes": copy.deepcopy(approval_plan["selected_nodes"]),
+        "selected_edges": copy.deepcopy(approval_plan["selected_edges"]),
+        "node_results": [
+            {
+                "node": node,
+                "status": "pass" if node in {
+                    "trigger", "triage", "project-resolve", "readiness-screen", "memory-orient",
+                    "preflight-evaluate", "needs-user-decision", "terminal",
+                } else "skipped",
+                "summary": "Approval denied safely" if node == "terminal" else f"{node} resolved",
+                "evidence_refs": ["approval-denial"] if node in {"needs-user-decision", "terminal"} else [],
+                **({"skip_reason": "Approval denied before execution"} if node not in {
+                    "trigger", "triage", "project-resolve", "readiness-screen", "memory-orient",
+                    "preflight-evaluate", "needs-user-decision", "terminal",
+                } else {}),
+            }
+            for node in approval_plan["selected_nodes"]
+        ],
+        "acceptance_results": [
+            {
+                "item": approval_plan["acceptance"][0],
+                "status": "pass",
+                "evidence_refs": ["approval-denial"],
+            }
+        ],
+        "external_effects": [],
+        "worker_closures": [],
+        "postflight": {
+            "verdict": "ESCALATE",
+            "confidence": "high",
+            "evidence_basis": ["The denied decision is recorded and no effect occurred"],
+            "residual_risks": ["Requested mutation remains unapplied"],
+            "evaluator": "root",
+            "evaluator_task_id": approval_plan["root_task_id"],
+            "independent": False,
+        },
+        "memory": {"closure": "no-change"},
+    }
+    if errors := validate_poppy_closure(denial_closure, graph, approval_plan):
+        raise AssertionError(f"valid approval-denial no-effect closure failed: {errors}")
+
+    worker_plan = copy.deepcopy(plan)
+    worker_plan["delegation"] = {  # type: ignore[index]
+        "mode": "bounded",
+        "max_depth": 1,
+        "max_active_workers": 1,
+        "max_created_workers": 1,
+        "workers": [
+            {
+                "id": "worker-health-decision-001",
+                "root_task_id": worker_plan["root_task_id"],
+                "parent_task_id": worker_plan["root_task_id"],
+                "depth": 1,
+                "can_delegate": False,
+                "shared_memory_write": False,
+                "decision_protocol": "NEEDS_PARENT_DECISION",
+                "status": "complete",
+                "node": "health-reporting",
+                "skill": "project-ops-health",
+                "authority": "read-only",
+                "minimized_inputs": ["bounded health evidence"],
+                "stop_conditions": ["human decision required"],
+                "output_contract": "health-snapshot",
+                "effort": "medium",
+                "effort_rationale": "Independent bounded health assessment",
+                "remaining_task_allowance": 0,
+            }
+        ],
+    }
+    if errors := validate_poppy_plan(worker_plan, graph):
+        raise AssertionError(f"valid bounded-worker Poppy plan failed: {errors}")
+    unresolved_worker = copy.deepcopy(closure)
+    unresolved_worker["plan_digest"] = poppy_digest(worker_plan)
+    unresolved_worker["worker_closures"] = [
+        {
+            "worker_id": "worker-health-decision-001",
+            "root_task_id": worker_plan["root_task_id"],
+            "parent_task_id": worker_plan["root_task_id"],
+            "outcome": "NEEDS_PARENT_DECISION",
+            "evidence_refs": ["worker-decision-packet"],
+            "repository_state": {"status": "not-applicable"},
+            "residual_risk": "Human decision remains unresolved",
+            "next_action": "Poppy must resolve or relay the decision",
+        }
+    ]
+    errors = validate_poppy_closure(unresolved_worker, graph, worker_plan)
+    if not any("selected root decision node" in error for error in errors):
+        raise AssertionError(f"Poppy PASS accepted unresolved worker decision relay: {errors}")
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-simple-plan.json"))
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-plan.json"))
     run(

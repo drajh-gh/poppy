@@ -263,9 +263,12 @@ def validate_graph(graph: dict[str, Any], root: Path = ROOT) -> list[str]:
 def _validate_trigger(packet: dict[str, Any], errors: list[str]) -> None:
     trigger = _object(packet.get("trigger"), "trigger", errors)
     mention = trigger.get("mention")
-    if not _is_string(mention) or not any(
-        alias in mention.casefold() for alias in ("poppy", "project operations partner")
-    ):
+    mention_folded = mention.casefold() if _is_string(mention) else ""
+    explicit_name = re.search(r"(?<![a-z0-9_-])poppy(?![a-z0-9_-])", mention_folded)
+    explicit_alias = re.search(
+        r"(?<![a-z0-9_-])project operations partner(?![a-z0-9_-])", mention_folded
+    )
+    if not explicit_name and not explicit_alias:
         errors.append("trigger.mention must explicitly contain Poppy or Project Operations Partner")
     if trigger.get("matched") is not True:
         errors.append("trigger.matched must be true")
@@ -371,7 +374,8 @@ def _validate_preflight(packet: dict[str, Any], errors: list[str]) -> tuple[str 
 
 
 def _validate_authority(
-    packet: dict[str, Any], interaction: str, selected: list[str], risk_floor: str | None, errors: list[str]
+    packet: dict[str, Any], interaction: str, selected: list[str], risk_floor: str | None,
+    disposition: str | None, errors: list[str]
 ) -> None:
     authority = _object(packet.get("authority"), "authority", errors)
     status = authority.get("status")
@@ -389,6 +393,18 @@ def _validate_authority(
         errors.append("authority.maximum_risk is below the preflight risk floor")
     if not _is_string(authority.get("receipt_id")):
         errors.append("authority.receipt_id must bind the authority source")
+    source = authority.get("source")
+    if source not in {"current-user-turn", "approved-manifest", "named-approver-receipt"}:
+        errors.append("authority.source is invalid")
+    source_digest = authority.get("source_digest")
+    if not isinstance(source_digest, str) or not re.fullmatch(r"[0-9a-f]{64}", source_digest):
+        errors.append("authority.source_digest must be a lowercase SHA-256 digest")
+    if source == "current-user-turn":
+        trigger = packet.get("trigger", {})
+        if authority.get("receipt_id") != trigger.get("turn_id"):
+            errors.append("current-turn authority receipt_id must match trigger.turn_id")
+        if source_digest != trigger.get("turn_digest"):
+            errors.append("current-turn authority source_digest must match trigger.turn_digest")
     previews = authority.get("effect_previews")
     if not isinstance(previews, list):
         errors.append("authority.effect_previews must be a list")
@@ -398,15 +414,18 @@ def _validate_authority(
         for field in ("target", "action", "rollback", "handler"):
             if not _is_string(preview.get(field)):
                 errors.append(f"authority.effect_previews[{index}].{field} must be non-empty")
+        if preview.get("action") not in authority.get("allowed_actions", []):
+            errors.append(f"authority.effect_previews[{index}].action is outside allowed_actions")
     if interaction == "mutating":
-        if status in {"read-only", "denied"}:
+        stopping = disposition in {"ask-user", "escalate-approval"}
+        if status in {"read-only", "denied"} and not stopping:
             errors.append("mutating plans require authorized or approval-required authority")
-        if "authorized-execution" not in selected:
+        if status == "authorized" and "authorized-execution" not in selected:
             errors.append("mutating plans must select authorized-execution")
         if status == "authorized" and not authority.get("allowed_actions"):
             errors.append("authorized mutating plans require bounded allowed_actions")
-        if status == "approval-required" and "human-approval" not in selected:
-            errors.append("approval-required plans must select human-approval")
+        if status == "approval-required" and not ({"human-approval", "needs-user-decision"} & set(selected)):
+            errors.append("approval-required plans must select a root approval or user-decision node")
         if not previews:
             errors.append("mutating plans require exact effect previews")
     elif previews:
@@ -514,7 +533,7 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
     selected_set = set(selected)
     confidence, disposition = _validate_preflight(packet, errors)
     risk_floor = packet.get("preflight", {}).get("risk")
-    _validate_authority(packet, interaction, selected, risk_floor, errors)
+    _validate_authority(packet, interaction, selected, risk_floor, disposition, errors)
     selected_handlers = {
         nodes[node_id].get("handler")
         for node_id in selected
@@ -527,11 +546,14 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
             )
     _validate_delegation(packet, graph, selected, nodes, errors)
 
-    always_required = {"trigger", "triage", "readiness-screen", "postflight-evaluate", "terminal"}
+    stopping = disposition in {"ask-user", "escalate-approval"}
+    always_required = {"trigger", "triage", "terminal"}
+    if not stopping:
+        always_required.update({"readiness-screen", "postflight-evaluate"})
     missing = sorted(always_required - selected_set)
     if missing:
         errors.append(f"plan is missing required control nodes: {', '.join(missing)}")
-    if interaction == "simple":
+    if interaction == "simple" and not stopping:
         if "direct-answer" not in selected_set:
             errors.append("simple plans must select direct-answer")
         forbidden = selected_set & {"memory-orient", "preflight-evaluate", "dispatch", "memory-close"}
@@ -539,7 +561,7 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
             errors.append("simple plans cannot force substantive lifecycle nodes")
         if disposition != "answer-directly":
             errors.append("simple plans require answer-directly disposition")
-    if interaction in {"substantive-read", "mutating"}:
+    if interaction in {"substantive-read", "mutating"} and not stopping:
         missing = sorted(SUBSTANTIVE_LIFECYCLE - selected_set)
         if missing:
             errors.append(f"substantive plans are missing lifecycle nodes: {', '.join(missing)}")
@@ -567,7 +589,15 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
             errors.append("substantive plans require join->reconcile")
         if disposition not in {"orient-then-answer", "discover-then-plan", "execute-graph"}:
             errors.append("substantive execution has an incompatible preflight disposition")
-    if interaction == "mutating" and confidence in {"low", "insufficient"}:
+    if stopping:
+        if "needs-user-decision" not in selected_set and "human-approval" not in selected_set:
+            errors.append("ask-user or escalate-approval must select a root decision node")
+        if "authorized-execution" in selected_set and packet.get("authority", {}).get("status") in {
+            "read-only",
+            "denied",
+        }:
+            errors.append("a stopped plan cannot select authorized execution")
+    if interaction == "mutating" and confidence in {"low", "insufficient"} and not stopping:
         errors.append("mutating plans require medium or high preflight confidence")
 
     scope_mode = packet.get("scope_mode")
@@ -585,12 +615,14 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
         errors.append("memory.closure is invalid")
     if memory.get("durable_write") not in {"not-planned", "conditional", "planned"}:
         errors.append("memory.durable_write is invalid")
-    if interaction == "simple" and (
+    if interaction == "simple" and not stopping and (
         memory.get("orientation") != "not-required" or memory.get("closure") != "not-required"
     ):
         errors.append("simple plans must keep memory orientation and closure not-required")
-    if interaction in {"substantive-read", "mutating"} and memory.get("closure") != "required":
+    if interaction in {"substantive-read", "mutating"} and not stopping and memory.get("closure") != "required":
         errors.append("substantive plans require a memory-close disposition")
+    if stopping and memory.get("closure") not in {"not-required", "required"}:
+        errors.append("stopped plans require an explicit memory disposition")
     if scope_mode in {"read-only", "review-only", "diagnosis-only"} and memory.get("durable_write") != "not-planned":
         errors.append("explicit non-write scope must suppress every durable memory write and receipt")
     return errors
@@ -633,6 +665,7 @@ def validate_closure(
             "project_id": plan.get("project_id"),
             "interaction_class": plan.get("interaction_class"),
             "scope_mode": plan.get("scope_mode"),
+            "trigger": plan.get("trigger"),
             "selected_nodes": plan.get("selected_nodes"),
             "selected_edges": plan.get("selected_edges"),
         }
@@ -641,6 +674,8 @@ def validate_closure(
                 errors.append(f"closure {field} does not match the bound plan")
         if packet.get("authority_receipt_id") != plan.get("authority", {}).get("receipt_id"):
             errors.append("closure authority receipt does not match the bound plan")
+        if packet.get("risk") != plan.get("preflight", {}).get("risk"):
+            errors.append("closure risk does not match the bound plan risk floor")
     _validate_trigger(packet, errors)
     interaction = packet.get("interaction_class")
     if interaction not in INTERACTION_CLASSES:
@@ -694,6 +729,13 @@ def validate_closure(
             errors.append(f"{path}.evidence_refs must be a string list")
     if not acceptance:
         errors.append("acceptance_results must be non-empty")
+    if plan is not None:
+        planned_acceptance = plan.get("acceptance", [])
+        recorded_acceptance = [
+            item.get("item") for item in acceptance if isinstance(item, dict)
+        ]
+        if recorded_acceptance != planned_acceptance:
+            errors.append("acceptance_results must exactly cover the bound plan acceptance contract")
 
     effects = _list(packet.get("external_effects"), "external_effects", errors)
     unverified_effect = False
@@ -717,17 +759,27 @@ def validate_closure(
         if effect.get("verified") is True and not effect.get("evidence_refs"):
             errors.append(f"{path}.evidence_refs must include read-back evidence")
 
+    approval_decision = packet.get("approval_decision", "not-required")
+    if approval_decision not in {"not-required", "approved", "denied", "deferred"}:
+        errors.append("approval_decision is invalid")
     if plan is not None:
         planned_effects = {
             (item.get("target"), item.get("action"), item.get("handler"))
             for item in plan.get("authority", {}).get("effect_previews", [])
             if isinstance(item, dict)
         }
-        if recorded_effects != planned_effects:
+        plan_authority = plan.get("authority", {}).get("status")
+        if plan_authority == "approval-required" and approval_decision == "not-required":
+            errors.append("approval-required closures must record the root approval decision")
+        if approval_decision in {"denied", "deferred"}:
+            if recorded_effects:
+                errors.append("denied or deferred approval cannot produce external effects")
+        elif recorded_effects != planned_effects:
             errors.append("external effects must exactly match the bound plan effect previews")
 
     worker_closures = _list(packet.get("worker_closures"), "worker_closures", errors)
     closure_workers: set[str] = set()
+    worker_needed_parent_decision = False
     for index, item in enumerate(worker_closures):
         path = f"worker_closures[{index}]"
         card = _object(item, path, errors)
@@ -738,8 +790,13 @@ def validate_closure(
             closure_workers.add(worker_id)
         if card.get("root_task_id") != packet.get("root_task_id") or card.get("parent_task_id") != packet.get("root_task_id"):
             errors.append(f"{path} must bind to the root task")
-        if card.get("outcome") not in {"complete", "limited", "NEEDS_PARENT_DECISION", "failed"}:
+        outcome = card.get("outcome")
+        if outcome not in {"complete", "limited", "NEEDS_PARENT_DECISION", "failed"}:
             errors.append(f"{path}.outcome is invalid")
+        if outcome == "NEEDS_PARENT_DECISION":
+            worker_needed_parent_decision = True
+            if not _is_string(card.get("parent_resolution_receipt")):
+                errors.append(f"{path}.parent_resolution_receipt is required after NEEDS_PARENT_DECISION")
         if not _string_list(card.get("evidence_refs")):
             errors.append(f"{path}.evidence_refs must be a non-empty string list")
         repository = _object(card.get("repository_state"), f"{path}.repository_state", errors)
@@ -760,6 +817,8 @@ def validate_closure(
         }
         if closure_workers != planned_workers:
             errors.append("worker_closures must exactly cover the bound plan workers")
+    if worker_needed_parent_decision and not ({"needs-user-decision", "human-approval"} & set(selected)):
+        errors.append("worker NEEDS_PARENT_DECISION requires a selected root decision node")
 
     postflight = _object(packet.get("postflight"), "postflight", errors)
     verdict = postflight.get("verdict")

@@ -7,7 +7,7 @@
   "project_id": "sample-project",
   "graph_id": "poppy-project-operations",
   "graph_digest": "df833cdcf4cd49a5efbc7fb9566ad6d045b1e02a2ed91dc4b6f7119ef77d1990",
-  "plan_digest": "ddad306d65e92d6c45f0c51a68cdc039a69533a1d6a6cbe57f412798b98f30cd",
+  "plan_digest": "0e6c7f85167a5b396e5fd8c7575d4b6f411bfc8eb373632b89c71f826e99fb33",
   "authority_receipt_id": "user-turn-health-001",
   "scope_mode": "read-only",
   "trigger": {
