@@ -8,6 +8,7 @@ import hashlib
 import json
 import re
 import sys
+import unicodedata
 from collections import deque
 from pathlib import Path
 from typing import Any
@@ -77,7 +78,28 @@ def _is_string(value: Any) -> bool:
 
 
 def _string_list(value: Any) -> bool:
-    return isinstance(value, list) and all(_is_string(item) for item in value)
+    return isinstance(value, list) and bool(value) and all(_is_string(item) for item in value)
+
+
+def _name_continuation(character: str) -> bool:
+    category = unicodedata.category(character)
+    return category[0] in {"L", "M", "N"} or category in {"Pc", "Cf"} or character == "-"
+
+
+def _has_explicit_alias(text: str, alias: str) -> bool:
+    start = 0
+    while True:
+        index = text.find(alias, start)
+        if index < 0:
+            return False
+        before = text[index - 1] if index else ""
+        after_index = index + len(alias)
+        after = text[after_index] if after_index < len(text) else ""
+        if (not before or not _name_continuation(before)) and (
+            not after or not _name_continuation(after)
+        ):
+            return True
+        start = index + 1
 
 
 def _object(value: Any, path: str, errors: list[str]) -> dict[str, Any]:
@@ -264,10 +286,8 @@ def _validate_trigger(packet: dict[str, Any], errors: list[str]) -> None:
     trigger = _object(packet.get("trigger"), "trigger", errors)
     mention = trigger.get("mention")
     mention_folded = mention.casefold() if _is_string(mention) else ""
-    explicit_name = re.search(r"(?<![\w-])poppy(?![\w-])", mention_folded)
-    explicit_alias = re.search(
-        r"(?<![\w-])project operations partner(?![\w-])", mention_folded
-    )
+    explicit_name = _has_explicit_alias(mention_folded, "poppy")
+    explicit_alias = _has_explicit_alias(mention_folded, "project operations partner")
     if not explicit_name and not explicit_alias:
         errors.append("trigger.mention must explicitly contain Poppy or Project Operations Partner")
     if trigger.get("matched") is not True:
@@ -458,6 +478,8 @@ def _validate_authority(
             errors.append("mutating plans require exact effect previews")
     elif previews:
         errors.append("read-only plans cannot carry mutation effect previews")
+    if interaction != "mutating" and "authorized-execution" in selected:
+        errors.append("non-mutating plans cannot select authorized-execution")
     if status == "denied" and "authorized-execution" in selected:
         errors.append("denied authority cannot select authorized-execution")
 
@@ -553,6 +575,16 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
     if interaction not in INTERACTION_CLASSES:
         errors.append("interaction_class is invalid")
         interaction = "simple"
+    project_id = packet.get("project_id")
+    normalized_project = project_id.strip().casefold() if isinstance(project_id, str) else ""
+    exact_project = (
+        isinstance(project_id, str)
+        and project_id == project_id.strip()
+        and bool(ID_RE.fullmatch(project_id))
+        and normalized_project not in {"not-required", "unresolved", "unknown"}
+    )
+    if interaction in {"substantive-read", "mutating"} and not exact_project:
+        errors.append("substantive plans require one exact resolved project_id")
     acceptance = packet.get("acceptance")
     if not _string_list(acceptance):
         errors.append("acceptance must be a non-empty string list")
@@ -583,6 +615,25 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
                 f"authority.effect_previews[{index}].handler must identify a selected capability handler"
             )
     _validate_delegation(packet, graph, selected, nodes, errors)
+    planned_workers = [
+        worker
+        for worker in packet.get("delegation", {}).get("workers", [])
+        if isinstance(worker, dict) and worker.get("status") in {"planned", "active"}
+    ]
+    for assessment_node in sorted(
+        node_id for node_id in selected_set if nodes.get(node_id, {}).get("execution") == "fresh-worker"
+    ):
+        assessors = [
+            worker
+            for worker in planned_workers
+            if worker.get("node") == assessment_node
+            and worker.get("skill") == nodes[assessment_node].get("handler")
+            and worker.get("authority") == "read-only"
+        ]
+        if len(assessors) != 1:
+            errors.append(
+                f"selected fresh-worker node {assessment_node} requires exactly one separately planned worker"
+            )
     if risk_floor in {"R2", "R3"}:
         evaluator_workers = [
             worker
@@ -638,6 +689,8 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
             errors.append("substantive plans require join->reconcile")
         if disposition not in {"orient-then-answer", "discover-then-plan", "execute-graph"}:
             errors.append("substantive execution has an incompatible preflight disposition")
+        if interaction == "mutating" and disposition != "execute-graph":
+            errors.append("authorized mutation requires execute-graph disposition")
     if stopping:
         if "needs-user-decision" not in selected_set and "human-approval" not in selected_set:
             errors.append("ask-user or escalate-approval must select a root decision node")
@@ -954,11 +1007,15 @@ def validate_closure(
         errors.append("PASS requires every acceptance item to pass")
     if verdict == "PASS" and (any(status != "pass" for status in node_statuses) or unverified_effect):
         errors.append("PASS requires every selected node to pass and every effect to be verified")
+    if verdict == "PASS" and any(outcome in {"limited", "failed"} for outcome in worker_outcomes.values()):
+        errors.append("PASS cannot include limited or failed worker outcomes")
     if verdict == "PASS_WITH_LIMITATIONS":
         if any(status in {"fail", "unverified"} for status in acceptance_statuses):
             errors.append("PASS_WITH_LIMITATIONS cannot include failed or unverified acceptance")
         if any(status in {"failed", "skipped"} for status in node_statuses) or unverified_effect:
             errors.append("PASS_WITH_LIMITATIONS cannot include failed/skipped nodes or unverified effects")
+        if any(outcome == "failed" for outcome in worker_outcomes.values()):
+            errors.append("PASS_WITH_LIMITATIONS cannot include failed worker outcomes")
     if verdict in {"PASS", "PASS_WITH_LIMITATIONS"} and postflight.get("confidence") == "insufficient":
         errors.append("a passing verdict cannot have insufficient final confidence")
 

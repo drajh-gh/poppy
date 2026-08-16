@@ -744,16 +744,24 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_plan(packet, graph)
     if not any("explicitly contain Poppy" in error for error in errors):
         raise AssertionError(f"Poppy substring trigger accepted poppycock: {errors}")
-    packet = copy.deepcopy(simple)
-    unicode_false_trigger = "Tell me about äppoppyβ"
-    packet["trigger"]["mention"] = unicode_false_trigger  # type: ignore[index]
-    packet["trigger"]["turn_digest"] = hashlib.sha256(  # type: ignore[index]
-        unicode_false_trigger.encode("utf-8")
-    ).hexdigest()
-    packet["authority"]["source_digest"] = packet["trigger"]["turn_digest"]  # type: ignore[index]
-    errors = validate_poppy_plan(packet, graph)
-    if not any("explicitly contain Poppy" in error for error in errors):
-        raise AssertionError(f"Poppy accepted a Unicode-adjacent false trigger: {errors}")
+    for unicode_false_trigger in (
+        "Tell me about äppoppyβ",
+        "Tell me about Poppy\u0301",
+        "Tell me about Poppy\u200dX",
+        "Tell me about Poppy\u00adX",
+        "Tell me about Poppy\ufe0fX",
+    ):
+        packet = copy.deepcopy(simple)
+        packet["trigger"]["mention"] = unicode_false_trigger  # type: ignore[index]
+        packet["trigger"]["turn_digest"] = hashlib.sha256(  # type: ignore[index]
+            unicode_false_trigger.encode("utf-8")
+        ).hexdigest()
+        packet["authority"]["source_digest"] = packet["trigger"]["turn_digest"]  # type: ignore[index]
+        errors = validate_poppy_plan(packet, graph)
+        if not any("explicitly contain Poppy" in error for error in errors):
+            raise AssertionError(
+                f"Poppy accepted a Unicode-adjacent false trigger {unicode_false_trigger!r}: {errors}"
+            )
 
     ask_user = copy.deepcopy(plan)
     ask_user.update(  # type: ignore[arg-type]
@@ -994,6 +1002,12 @@ def assert_poppy_orchestration() -> None:
     ]
     if errors := validate_poppy_closure(resolved_worker, graph, resolved_worker_plan):
         raise AssertionError(f"valid resolved-worker decision closure failed: {errors}")
+    failed_worker = copy.deepcopy(resolved_worker)
+    failed_worker["worker_closures"][0]["outcome"] = "failed"  # type: ignore[index]
+    failed_worker["worker_closures"][0].pop("parent_resolution_receipt")  # type: ignore[index]
+    errors = validate_poppy_closure(failed_worker, graph, resolved_worker_plan)
+    if not any("failed worker outcomes" in error for error in errors):
+        raise AssertionError(f"Poppy PASS accepted a failed ordinary worker: {errors}")
 
     r2_without_evaluator = copy.deepcopy(mutating)
     r2_without_evaluator["preflight"]["risk"] = "R2"  # type: ignore[index]
@@ -1084,6 +1098,70 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(failed_evaluator, graph, r2_plan)
     if not any("planned worker and closure card" in error for error in errors):
         raise AssertionError(f"Poppy PASS accepted a failed R2 evaluator: {errors}")
+
+    delivery_plan = copy.deepcopy(mutating)
+    delivery_plan["selected_nodes"] = [  # type: ignore[index]
+        "trigger", "triage", "project-resolve", "readiness-screen", "memory-orient",
+        "preflight-evaluate", "dispatch", "delivery", "functional-qa", "final-assurance",
+        "join", "reconcile", "authorized-execution", "postflight-evaluate", "memory-close",
+        "terminal",
+    ]
+    delivery_plan["selected_edges"] = [  # type: ignore[index]
+        {"from": "trigger", "to": "triage"},
+        {"from": "triage", "to": "project-resolve"},
+        {"from": "project-resolve", "to": "readiness-screen"},
+        {"from": "readiness-screen", "to": "memory-orient"},
+        {"from": "memory-orient", "to": "preflight-evaluate"},
+        {"from": "preflight-evaluate", "to": "dispatch"},
+        {"from": "dispatch", "to": "delivery"},
+        {"from": "delivery", "to": "functional-qa"},
+        {"from": "functional-qa", "to": "final-assurance"},
+        {"from": "final-assurance", "to": "join"},
+        {"from": "join", "to": "reconcile"},
+        {"from": "reconcile", "to": "authorized-execution"},
+        {"from": "authorized-execution", "to": "postflight-evaluate"},
+        {"from": "postflight-evaluate", "to": "memory-close"},
+        {"from": "memory-close", "to": "terminal"},
+    ]
+    delivery_plan["authority"]["effect_previews"][0]["handler"] = "project-ops-delivery"  # type: ignore[index]
+    errors = validate_poppy_plan(delivery_plan, graph)
+    if not all(
+        any(f"selected fresh-worker node {node} requires exactly one separately planned worker" in error for error in errors)
+        for node in ("functional-qa", "final-assurance")
+    ):
+        raise AssertionError(f"Poppy delivery chain omitted fresh stage-separated assessors: {errors}")
+    delivery_plan["delegation"] = {  # type: ignore[index]
+        "mode": "bounded",
+        "max_depth": 1,
+        "max_active_workers": 1,
+        "max_created_workers": 2,
+        "workers": [
+            {
+                "id": f"worker-{node}-001",
+                "root_task_id": delivery_plan["root_task_id"],
+                "parent_task_id": delivery_plan["root_task_id"],
+                "depth": 1,
+                "can_delegate": False,
+                "shared_memory_write": False,
+                "decision_protocol": "NEEDS_PARENT_DECISION",
+                "status": "planned",
+                "node": node,
+                "skill": "project-ops-assess",
+                "authority": "read-only",
+                "minimized_inputs": [
+                    "frozen delivery evidence" if node == "functional-qa" else "passing exact-candidate Functional QA verdict"
+                ],
+                "stop_conditions": ["candidate identity changes", "required prior-stage evidence is missing"],
+                "output_contract": "functional-qa-verdict" if node == "functional-qa" else "final-assurance-verdict",
+                "effort": "high",
+                "effort_rationale": "Fresh stage-separated delivery assessment",
+                "remaining_task_allowance": 0,
+            }
+            for node in ("functional-qa", "final-assurance")
+        ],
+    }
+    if errors := validate_poppy_plan(delivery_plan, graph):
+        raise AssertionError(f"valid delivery plan with fresh stage-separated assessors failed: {errors}")
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-simple-plan.json"))
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-plan.json"))
     run(
@@ -1103,6 +1181,34 @@ def assert_poppy_orchestration() -> None:
     packet = copy.deepcopy(plan)
     packet["preflight"]["risk"] = "R1"  # type: ignore[index]
     plan_cases.append(("authority below risk floor", packet, "below the preflight risk floor"))
+    for invalid_project in ("not-required", "unknown", "sample-project,other-project"):
+        packet = copy.deepcopy(plan)
+        packet["project_id"] = invalid_project
+        plan_cases.append((f"unresolved substantive project {invalid_project}", packet, "exact resolved project_id"))
+    packet = copy.deepcopy(plan)
+    packet["acceptance"] = []
+    plan_cases.append(("empty acceptance", packet, "acceptance must be a non-empty string list"))
+    packet = copy.deepcopy(plan)
+    packet["preflight"]["evidence_basis"] = []  # type: ignore[index]
+    plan_cases.append(("empty preflight evidence", packet, "preflight.evidence_basis must be a non-empty"))
+    packet = copy.deepcopy(mutating)
+    packet["interaction_class"] = "substantive-read"
+    packet["scope_mode"] = "read-only"
+    packet["authority"]["status"] = "read-only"  # type: ignore[index]
+    packet["authority"]["allowed_actions"] = []  # type: ignore[index]
+    packet["authority"]["effect_previews"] = []  # type: ignore[index]
+    packet["memory"]["durable_write"] = "not-planned"  # type: ignore[index]
+    plan_cases.append(("read-only authorized execution", packet, "non-mutating plans cannot select"))
+    for non_execution_disposition in ("discover-then-plan", "orient-then-answer"):
+        packet = copy.deepcopy(mutating)
+        packet["preflight"]["disposition"] = non_execution_disposition  # type: ignore[index]
+        plan_cases.append(
+            (
+                f"mutation under {non_execution_disposition}",
+                packet,
+                "authorized mutation requires execute-graph disposition",
+            )
+        )
     packet = copy.deepcopy(plan)
     packet["selected_nodes"].remove("join")  # type: ignore[union-attr]
     packet["selected_edges"] = [  # type: ignore[index]
@@ -1141,6 +1247,12 @@ def assert_poppy_orchestration() -> None:
     packet = copy.deepcopy(simple)
     packet["memory"]["durable_write"] = "conditional"  # type: ignore[index]
     plan_cases.append(("read-only memory write", packet, "suppress every durable memory write"))
+    packet = copy.deepcopy(worker_plan)
+    packet["delegation"]["workers"][0]["minimized_inputs"] = []  # type: ignore[index]
+    plan_cases.append(("empty worker inputs", packet, "minimized_inputs must be a non-empty"))
+    packet = copy.deepcopy(worker_plan)
+    packet["delegation"]["workers"][0]["stop_conditions"] = []  # type: ignore[index]
+    plan_cases.append(("empty worker stops", packet, "stop_conditions must be a non-empty"))
     for label, packet, expected in plan_cases:
         errors = validate_poppy_plan(packet, graph)
         if not any(expected in error for error in errors):
@@ -1161,6 +1273,16 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(packet, graph, plan)
     if not any("non-write scope cannot update memory" in error for error in errors):
         raise AssertionError(f"Poppy read-only closure accepted a memory update: {errors}")
+    packet = copy.deepcopy(closure)
+    packet["postflight"]["evidence_basis"] = []  # type: ignore[index]
+    errors = validate_poppy_closure(packet, graph, plan)
+    if not any("postflight.evidence_basis must be a non-empty" in error for error in errors):
+        raise AssertionError(f"Poppy closure accepted an evidence-free postflight: {errors}")
+    packet = copy.deepcopy(resolved_worker)
+    packet["worker_closures"][0]["evidence_refs"] = []  # type: ignore[index]
+    errors = validate_poppy_closure(packet, graph, resolved_worker_plan)
+    if not any("evidence_refs must be a non-empty" in error for error in errors):
+        raise AssertionError(f"Poppy closure accepted an evidence-free worker card: {errors}")
     packet = copy.deepcopy(closure)
     packet["risk"] = "R2"
     packet["postflight"].update(  # type: ignore[union-attr]
