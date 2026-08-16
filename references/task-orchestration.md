@@ -1,6 +1,6 @@
 # Task orchestration
 
-Use this project-neutral contract whenever one Codex task coordinates workers.
+Use this project-neutral contract whenever one Codex task coordinates workers. In Project Operations, Poppy is the root task and sole human-control surface; capability-specific workflows may add stricter controls.
 Project adapters may narrow it, but may not create another human-authority surface or silently
 raise its task budget.
 
@@ -13,6 +13,7 @@ raise its task budget.
   smallest decision packet to the root and stops safely with `NEEDS_PARENT_DECISION`; it never
   interprets that input as approval.
 - Create workers directly from the root at delegation depth 1. Recursive delegation is forbidden.
+- Poppy workers are read-only and never write shared Obsidian memory. Capability-owned Delivery may allocate its one isolated implementation writer only under an approved frozen manifest and its stricter closure contract.
 - Default to no more than two active workers and five created workers per root. A wider budget
   requires a recorded human-approved extension with approver, rationale, and the new limits.
 

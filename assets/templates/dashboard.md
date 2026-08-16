@@ -53,7 +53,7 @@ sensitivity: internal
 
 ![[{{project_name}} Decisions.base#Decisions]]
 
-## Orchestration runs
+## Poppy orchestration runs
 
 ![[{{project_name}} Orchestration.base#Runs]]
 

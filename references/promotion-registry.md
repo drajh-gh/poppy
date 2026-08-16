@@ -2,12 +2,11 @@
 
 ## Task orchestration v1
 
-- Classification: plugin candidate
-- Status: implementation prepared; not activated
-- Evidence: one project plus project-neutral plan, closure, title, authority, fan-out, reasoning-effort, archival, and privacy-minimized hygiene fixtures exercise the proposed contract. The implementation was transplanted onto the Researcher release without replacing current plugin content.
+- Classification: plugin upgrade
+- Status: integrated through the Poppy root; activation pending deterministic and independent assessment of the exact release
+- Evidence: the original project-neutral plan, closure, title, authority, fan-out, reasoning-effort, archival, and privacy-minimized hygiene fixtures remain. Poppy adds trusted-turn trigger provenance, exact graph and plan digests, project identity, authority/risk reconciliation, root/parent/depth constraints, active-worker budgets, stop conditions, closure cards, join completeness, safe terminal paths, and postflight binding.
 - Proposed contract: one root human-control surface; direct depth-1 workers; default two-active/five-created budget; structured no-prefix titles; event-only updates; relayed decisions; closure cards; clean or commit-recoverable worker archival; user-approved root archival; cleanup separation.
-- Promotion blocker: product-level forward validation is incomplete for title fallback, capacity, wait/attention handling, decision relay, closure, and archive behavior. Live task snapshots also require an explicit normalized exporter; the analyzer must never read private Codex databases.
-- Next validation: run a bounded live Codex task cohort and independent assessment of the exact candidate. Keep operational skills on their current task behavior and snapshot coverage Gray until the gate passes.
+- Activation gate: the exact Poppy release must pass graph/plan/closure adversarial fixtures, the legacy task-orchestration suite, bounded live forward tests for worker start/decision/closure behavior, and fresh independent Functional QA and Final Assurance. Snapshot coverage remains Gray unless an explicitly normalized snapshot is supplied; analyzers never read private Codex databases.
 
 ## Generic owned-process supervisor
 

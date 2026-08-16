@@ -8,7 +8,7 @@ Researcher converts evidence of current work into externally researched improvem
 - `portfolio`: compare multiple isolated projects, preserving client separation and publishing only sanitized cross-project patterns.
 - `global`: investigate a project-neutral Project Operations capability. Use project evidence only as minimized references.
 
-The persistent core-agent triad is Chief of Staff, Researcher, and Upgrader. Chief of Staff surfaces operational needs; Researcher discovers and tests the external evidence case; Upgrader decides project-versus-plugin disposition and governs change.
+Poppy is the persistent conversational root. Its operations-control node surfaces evidence gaps; Researcher discovers and tests an explicitly bounded external evidence case; Upgrader decides project-versus-plugin disposition and governs change. Researcher and Upgrader remain capability handlers and never become separate human-authority surfaces.
 
 ## Context before search
 

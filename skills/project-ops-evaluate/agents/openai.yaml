@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Operations Evaluator"
+  short_description: "Evaluate readiness, confidence, and outcomes"
+  default_prompt: "Use $project-ops-evaluate to assess this work before and after execution."

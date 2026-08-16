@@ -1,4 +1,4 @@
 interface:
-  display_name: "Upgrader"
+  display_name: "Poppy / Improvement"
   short_description: "Improve operations from real work evidence"
-  default_prompt: "Use $project-ops-upgrader to review recent work evidence and improve the operating system."
+  default_prompt: "Poppy, use $project-ops-upgrader to govern this evidence-backed improvement and reconcile the outcome."

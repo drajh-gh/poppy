@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "packet_type": "plan",
+  "run_id": "poppy-health-001",
+  "root_task_id": "root-poppy-health-001",
+  "project_id": "sample-project",
+  "graph_id": "poppy-project-operations",
+  "graph_digest": "df833cdcf4cd49a5efbc7fb9566ad6d045b1e02a2ed91dc4b6f7119ef77d1990",
+  "scope_mode": "read-only",
+  "trigger": {
+    "mention": "Poppy, assess this project's health and commercial exposure",
+    "matched": true,
+    "provenance": "current-user-turn",
+    "turn_id": "user-turn-health-001",
+    "turn_digest": "8fc6e731d074b627b51163779c3e6264cfcd20508c14ed342f0c1969b8cc8bbe"
+  },
+  "interaction_class": "substantive-read",
+  "objective": "Prepare a current health and commercial-control assessment",
+  "acceptance": [
+    "Orient from the smallest current Project Operations working set",
+    "Assess every configured health dimension without false Green",
+    "Reconcile commercial exposure from authoritative evidence",
+    "Return one evidence-backed decision summary"
+  ],
+  "selected_nodes": [
+    "trigger",
+    "triage",
+    "project-resolve",
+    "readiness-screen",
+    "memory-orient",
+    "preflight-evaluate",
+    "dispatch",
+    "operations-control",
+    "health-reporting",
+    "commercial-control",
+    "join",
+    "reconcile",
+    "postflight-evaluate",
+    "memory-close",
+    "terminal"
+  ],
+  "selected_edges": [
+    {"from": "trigger", "to": "triage"},
+    {"from": "triage", "to": "project-resolve"},
+    {"from": "project-resolve", "to": "readiness-screen"},
+    {"from": "readiness-screen", "to": "memory-orient"},
+    {"from": "memory-orient", "to": "preflight-evaluate"},
+    {"from": "preflight-evaluate", "to": "dispatch"},
+    {"from": "dispatch", "to": "operations-control"},
+    {"from": "operations-control", "to": "health-reporting"},
+    {"from": "health-reporting", "to": "commercial-control"},
+    {"from": "commercial-control", "to": "join"},
+    {"from": "join", "to": "reconcile"},
+    {"from": "reconcile", "to": "postflight-evaluate"},
+    {"from": "postflight-evaluate", "to": "memory-close"},
+    {"from": "memory-close", "to": "terminal"}
+  ],
+  "preflight": {
+    "confidence": "medium",
+    "risk": "R0",
+    "disposition": "execute-graph",
+    "evidence_basis": [
+      "Project profile and current page resolve the requested project",
+      "Required health and finance authorities are mapped"
+    ],
+    "assumptions": [
+      "No external write is requested"
+    ],
+    "missing_evidence": [
+      "One noncritical stakeholder update may be stale"
+    ],
+    "contradictions": []
+  },
+  "authority": {
+    "status": "read-only",
+    "maximum_risk": "R0",
+    "receipt_id": "user-turn-health-001",
+    "allowed_actions": [
+      "Read configured project sources",
+      "Prepare internal assessment"
+    ],
+    "approval_required": [],
+    "effect_previews": [],
+    "forbidden_actions": [
+      "Send communications",
+      "Change trackers, baselines, finance systems, or production"
+    ]
+  },
+  "delegation": {
+    "mode": "none",
+    "max_depth": 0,
+    "max_active_workers": 0,
+    "max_created_workers": 0,
+    "workers": []
+  },
+  "memory": {
+    "orientation": "complete",
+    "closure": "required",
+    "durable_write": "not-planned"
+  }
+}

@@ -12,6 +12,8 @@ sensitivity: internal
 
 Start with [[wiki/{{project_key}}/current|Current state]], then use [[wiki/{{project_key}}/index|the index]] and [[dashboards/{{project_name}} PM|the PM cockpit]].
 
+Address **Poppy** for one conversational Project Operations partner. Poppy will answer stable questions directly or assemble the smallest evidence-backed capability graph, assess readiness and confidence, and close durable memory only when authorized understanding changed.
+
 The tracker owns tasks. Obsidian owns evidence-backed context, decisions, PM control records, and historical snapshots.
 
 ## Agent loading order

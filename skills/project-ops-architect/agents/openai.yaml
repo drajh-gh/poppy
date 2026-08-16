@@ -1,4 +1,4 @@
 interface:
-  display_name: "Solution Architect"
+  display_name: "Poppy / Architecture"
   short_description: "Design the project operating system"
-  default_prompt: "Use $project-ops-architect to design or improve this project's operating model and adapters."
+  default_prompt: "Poppy, use $project-ops-architect as the architecture node and reconcile the operating design."

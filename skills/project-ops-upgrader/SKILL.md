@@ -1,6 +1,6 @@
 ---
 name: project-ops-upgrader
-description: Continuously improve Project Operations from evidence of actual work. Use for daily or periodic workflow retrospectives, Codex task-history analysis, friction and time-loss diagnosis, successful-pattern extraction, project-versus-plugin classification, promotion governance, workflow experiments, or proposing and validating Project Operations plugin upgrades.
+description: Run Poppy's improvement-governance capability from evidence of actual work. Use behind Poppy for workflow retrospectives, task-history analysis, friction diagnosis, successful-pattern extraction, project-versus-plugin classification, promotion governance, experiments, or validated plugin upgrades; direct invocation remains available when explicitly named.
 ---
 
 # Project Operations Upgrader

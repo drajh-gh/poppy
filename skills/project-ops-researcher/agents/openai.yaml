@@ -1,4 +1,4 @@
 interface:
-  display_name: "Researcher"
+  display_name: "Poppy / Research"
   short_description: "Research evidence for better project operations"
-  default_prompt: "Use $project-ops-researcher to identify proven workflow improvements from reputable sources and hand the strongest candidates to Upgrader."
+  default_prompt: "Poppy, use $project-ops-researcher for this bounded external evidence gap and reconcile the result into your graph."

@@ -1,11 +1,11 @@
 ---
 name: project-ops-manager
-description: Run the evidence-backed project-management control loop for an onboarded project. Use for daily PM briefs, weekly planning, scope/timeline/capacity oversight, ticket and GitHub progress, communication triage, commitments, decisions, risks, stakeholder follow-up, action ranking, or preparing approved external changes.
+description: Run Poppy's evidence-backed operations-control capability for an onboarded project. Use behind Poppy for daily PM briefs, weekly planning, intake reconciliation, focused RAID, scope/timeline/capacity oversight, communication triage, commitments, decisions, stakeholder follow-up, action ranking, or approved external changes; direct invocation remains available when the user explicitly names this skill.
 ---
 
-# Project Operations Chief of Staff
+# Project Operations operations control
 
-Read the project's `project-ops.json`, Obsidian `AGENTS.md`, index, current page, and source map. Then read [architecture](../../references/architecture.md), [health and cadence](../../references/health-and-cadence.md), [operational controls](../../references/operational-controls.md), and [PM records](../../references/pm-records.md). Route operating-system redesign to `project-ops-architect`, external evidence and repository discovery to `project-ops-researcher`, and change classification or implementation governance to `project-ops-upgrader`.
+Read the project's `project-ops.json`, Obsidian `AGENTS.md`, index, current page, and source map. Then read [architecture](../../references/architecture.md), [health and cadence](../../references/health-and-cadence.md), [operational controls](../../references/operational-controls.md), and [PM records](../../references/pm-records.md). When Poppy is active, return typed architecture, research, delivery, or improvement needs to Poppy for graph expansion; do not create a second orchestration surface.
 
 1. Identify the requested horizon and decision.
 2. Refresh only sources required for current or high-impact claims. Preflight canonical identity, deduplicate logical requests in one retrieval ledger, keep retries as physical attempts, and advance checkpoints only on success.

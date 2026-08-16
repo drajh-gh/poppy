@@ -12,7 +12,7 @@ Read [automation and cadence](../../references/automation-and-cadence.md), [proj
 3. Recommend the smallest useful cadence and notification policy. Prefer a heartbeat attached to the current task unless the user explicitly asks for standalone project work.
 4. Show the proposed name, purpose, schedule in local human-readable time, target, expected outputs, no-change behavior, and external side effects.
 5. Ask for explicit confirmation before creating, changing, enabling, disabling, or deleting an automation.
-6. Rehearse the proposed prompt manually against the project contract before activation. Operational prompts explicitly invoke `project-ops-manager` and `project-ops-memory`. Research prompts explicitly invoke `project-ops-researcher` and `project-ops-memory`, keep repositories `inspect-only`, and hand actionable findings to `project-ops-upgrader` without applying them.
+6. Rehearse the proposed prompt manually against the project contract before activation. Every Project Operations automation addresses `Poppy` and states the intended outcome; Poppy selects operations, memory, research, or improvement nodes at runtime. Research prompts keep repositories `inspect-only` and prohibit applying findings without a separately authorized graph.
 7. Use the automation tool, preserving all unspecified fields when updating.
 8. Record the automation identifier and purpose in the project profile or onboarding receipt only after successful creation or update.
 

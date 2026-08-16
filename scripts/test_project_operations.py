@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import subprocess
 import sys
@@ -22,6 +23,12 @@ from validate_research_packet import validate_packet as validate_research_packet
 from summarize_task_hygiene import summarize as summarize_task_hygiene
 from validate_local_execution_preflight import validate_packet as validate_local_packet
 from validate_task_orchestration import validate_packet as validate_task_packet
+from validate_poppy_orchestration import (
+    canonical_digest as poppy_digest,
+    validate_closure as validate_poppy_closure,
+    validate_graph as validate_poppy_graph,
+    validate_plan as validate_poppy_plan,
+)
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -159,17 +166,20 @@ def assert_researcher_contract() -> None:
             raise AssertionError(f"Researcher {label} adversary was accepted: {errors}")
 
     skill = (ROOT / "skills" / "project-ops-researcher" / "SKILL.md").read_text(encoding="utf-8")
-    manager = (ROOT / "skills" / "project-ops-manager" / "SKILL.md").read_text(encoding="utf-8")
     upgrader = (ROOT / "skills" / "project-ops-upgrader" / "SKILL.md").read_text(encoding="utf-8")
     architecture = (ROOT / "references" / "architecture.md").read_text(encoding="utf-8")
     for term in ("repair-existing", "inspect-only", "project-ops-upgrader", "validate_research_packet.py"):
         if term not in skill:
             raise AssertionError(f"Researcher skill is missing required contract term: {term}")
-    if "project-ops-researcher" not in manager:
-        raise AssertionError("Chief of Staff does not route external discovery to Researcher")
+    capability_graph = json.loads(
+        (ROOT / "references" / "poppy-capability-graph.json").read_text(encoding="utf-8")
+    )
+    research_nodes = [node for node in capability_graph["nodes"] if node.get("id") == "research"]
+    if len(research_nodes) != 1 or research_nodes[0].get("handler") != "project-ops-researcher":
+        raise AssertionError("Poppy graph does not route bounded external discovery to Researcher")
     if "research-handoff.md" not in upgrader:
         raise AssertionError("Upgrader does not load the Researcher handoff contract")
-    for term in ("Researcher", "core-agent triad", "Research loop"):
+    for term in ("Poppy", "Researcher", "selected capability"):
         if term.casefold() not in architecture.casefold():
             raise AssertionError(f"architecture is missing Researcher term: {term}")
 
@@ -522,6 +532,237 @@ def assert_local_execution_safety() -> None:
         raise AssertionError("Sloski adapter still treats the retired checkout as canonical")
 
 
+def assert_poppy_orchestration() -> None:
+    graph = json.loads((ROOT / "references" / "poppy-capability-graph.json").read_text(encoding="utf-8"))
+    graph_errors = validate_poppy_graph(graph)
+    if graph_errors:
+        raise AssertionError(f"Poppy capability graph failed: {graph_errors}")
+    run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(ROOT / "references" / "poppy-capability-graph.json"))
+
+    simple = load_fixture("valid-poppy-simple-plan.json")
+    plan = load_fixture("valid-poppy-plan.json")
+    closure = load_fixture("valid-poppy-closure.json")
+    if errors := validate_poppy_plan(simple, graph):
+        raise AssertionError(f"valid simple Poppy plan failed: {errors}")
+    alias_plan = copy.deepcopy(simple)
+    alias_text = "Project Operations Partner, what does Gray mean?"
+    alias_plan["trigger"]["mention"] = alias_text  # type: ignore[index]
+    alias_plan["trigger"]["turn_digest"] = hashlib.sha256(alias_text.encode("utf-8")).hexdigest()  # type: ignore[index]
+    if errors := validate_poppy_plan(alias_plan, graph):
+        raise AssertionError(f"Project Operations Partner alias failed: {errors}")
+    if errors := validate_poppy_plan(plan, graph):
+        raise AssertionError(f"valid substantive Poppy plan failed: {errors}")
+    if errors := validate_poppy_closure(closure, graph, plan):
+        raise AssertionError(f"valid Poppy closure failed: {errors}")
+
+    mutating = copy.deepcopy(plan)
+    mutating.update(  # type: ignore[arg-type]
+        {
+            "run_id": "poppy-mutation-001",
+            "interaction_class": "mutating",
+            "scope_mode": "write-authorized",
+            "objective": "Update one approved local project-control field and verify it",
+            "acceptance": ["Apply exactly the approved field update and verify the read-back"],
+            "selected_nodes": [
+                "trigger", "triage", "project-resolve", "readiness-screen", "memory-orient",
+                "preflight-evaluate", "dispatch", "operations-control", "join", "reconcile",
+                "authorized-execution", "postflight-evaluate", "memory-close", "terminal",
+            ],
+            "selected_edges": [
+                {"from": "trigger", "to": "triage"},
+                {"from": "triage", "to": "project-resolve"},
+                {"from": "project-resolve", "to": "readiness-screen"},
+                {"from": "readiness-screen", "to": "memory-orient"},
+                {"from": "memory-orient", "to": "preflight-evaluate"},
+                {"from": "preflight-evaluate", "to": "dispatch"},
+                {"from": "dispatch", "to": "operations-control"},
+                {"from": "operations-control", "to": "join"},
+                {"from": "join", "to": "reconcile"},
+                {"from": "reconcile", "to": "authorized-execution"},
+                {"from": "authorized-execution", "to": "postflight-evaluate"},
+                {"from": "postflight-evaluate", "to": "memory-close"},
+                {"from": "memory-close", "to": "terminal"},
+            ],
+        }
+    )
+    mutating["preflight"].update({"confidence": "high", "risk": "R1"})  # type: ignore[union-attr]
+    mutating["authority"] = {  # type: ignore[index]
+        "status": "authorized",
+        "maximum_risk": "R1",
+        "receipt_id": "user-turn-mutation-001",
+        "allowed_actions": ["Update the approved local project-control field"],
+        "approval_required": [],
+        "forbidden_actions": ["Any external-system mutation"],
+        "effect_previews": [
+            {
+                "target": "local-project-control",
+                "action": "Set review_mode to evidence-first",
+                "rollback": "Restore the prior field value",
+                "handler": "project-ops-manager",
+            }
+        ],
+    }
+    mutating["memory"]["durable_write"] = "planned"  # type: ignore[index]
+    if errors := validate_poppy_plan(mutating, graph):
+        raise AssertionError(f"valid mutating Poppy plan failed: {errors}")
+
+    mutation_closure = {
+        "schema_version": 1,
+        "packet_type": "closure",
+        "run_id": "poppy-mutation-001-closure",
+        "plan_run_id": mutating["run_id"],
+        "root_task_id": mutating["root_task_id"],
+        "project_id": mutating["project_id"],
+        "graph_id": mutating["graph_id"],
+        "graph_digest": mutating["graph_digest"],
+        "plan_digest": poppy_digest(mutating),
+        "authority_receipt_id": "user-turn-mutation-001",
+        "scope_mode": "write-authorized",
+        "trigger": copy.deepcopy(mutating["trigger"]),
+        "interaction_class": "mutating",
+        "objective": mutating["objective"],
+        "risk": "R1",
+        "selected_nodes": copy.deepcopy(mutating["selected_nodes"]),
+        "selected_edges": copy.deepcopy(mutating["selected_edges"]),
+        "node_results": [
+            {"node": node, "status": "pass", "summary": f"{node} completed", "evidence_refs": []}
+            for node in mutating["selected_nodes"]
+        ],
+        "acceptance_results": [
+            {"item": mutating["acceptance"][0], "status": "pass", "evidence_refs": ["effect-readback"]}
+        ],
+        "external_effects": [
+            {
+                "target": "local-project-control",
+                "action": "Set review_mode to evidence-first",
+                "handler": "project-ops-manager",
+                "authority_receipt_id": "user-turn-mutation-001",
+                "verified": True,
+                "evidence_refs": ["effect-readback"],
+            }
+        ],
+        "worker_closures": [],
+        "postflight": {
+            "verdict": "PASS",
+            "confidence": "high",
+            "evidence_basis": ["The exact authorized effect was read back"],
+            "residual_risks": [],
+            "evaluator": "root",
+            "evaluator_task_id": mutating["root_task_id"],
+            "independent": False,
+        },
+        "memory": {"closure": "updated"},
+    }
+    if errors := validate_poppy_closure(mutation_closure, graph, mutating):
+        raise AssertionError(f"valid mutating Poppy closure failed: {errors}")
+    wrong_effect = copy.deepcopy(mutation_closure)
+    wrong_effect["external_effects"][0]["action"] = "Set a different field"  # type: ignore[index]
+    errors = validate_poppy_closure(wrong_effect, graph, mutating)
+    if not any("exactly match" in error for error in errors):
+        raise AssertionError(f"Poppy closure accepted an effect outside the authority receipt: {errors}")
+    run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-simple-plan.json"))
+    run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-plan.json"))
+    run(
+        str(SCRIPTS / "validate_poppy_orchestration.py"),
+        str(FIXTURES / "valid-poppy-closure.json"),
+        "--plan",
+        str(FIXTURES / "valid-poppy-plan.json"),
+    )
+
+    plan_cases: list[tuple[str, dict[str, object], str]] = []
+    packet = copy.deepcopy(plan)
+    packet["trigger"]["provenance"] = "retrieved-document"  # type: ignore[index]
+    plan_cases.append(("untrusted trigger", packet, "current-user-turn"))
+    packet = copy.deepcopy(plan)
+    packet["preflight"]["confidence"] = "low"  # type: ignore[index]
+    plan_cases.append(("low-confidence execution", packet, "cannot dispatch execution"))
+    packet = copy.deepcopy(plan)
+    packet["preflight"]["risk"] = "R1"  # type: ignore[index]
+    plan_cases.append(("authority below risk floor", packet, "below the preflight risk floor"))
+    packet = copy.deepcopy(plan)
+    packet["selected_nodes"].remove("join")  # type: ignore[union-attr]
+    packet["selected_edges"] = [  # type: ignore[index]
+        edge for edge in packet["selected_edges"] if "join" not in (edge["from"], edge["to"])
+    ]
+    plan_cases.append(("missing join barrier", packet, "join"))
+    packet = copy.deepcopy(plan)
+    packet["delegation"] = {  # type: ignore[index]
+        "mode": "bounded",
+        "max_depth": 1,
+        "max_active_workers": 1,
+        "max_created_workers": 1,
+        "workers": [
+            {
+                "id": "worker-health-001",
+                "root_task_id": packet["root_task_id"],
+                "parent_task_id": packet["root_task_id"],
+                "depth": 1,
+                "can_delegate": True,
+                "shared_memory_write": False,
+                "decision_protocol": "NEEDS_PARENT_DECISION",
+                "status": "planned",
+                "node": "health-reporting",
+                "skill": "project-ops-health",
+                "authority": "read-only",
+                "minimized_inputs": ["bounded health evidence"],
+                "stop_conditions": ["human decision required"],
+                "output_contract": "health-snapshot",
+                "effort": "medium",
+                "effort_rationale": "Independent bounded health assessment",
+                "remaining_task_allowance": 0,
+            }
+        ],
+    }
+    plan_cases.append(("recursive worker", packet, "can_delegate must be false"))
+    packet = copy.deepcopy(simple)
+    packet["memory"]["durable_write"] = "conditional"  # type: ignore[index]
+    plan_cases.append(("read-only memory write", packet, "suppress every durable memory write"))
+    for label, packet, expected in plan_cases:
+        errors = validate_poppy_plan(packet, graph)
+        if not any(expected in error for error in errors):
+            raise AssertionError(f"Poppy {label} adversary was accepted: {errors}")
+
+    packet = copy.deepcopy(closure)
+    packet["plan_digest"] = "0" * 64
+    errors = validate_poppy_closure(packet, graph, plan)
+    if not any("plan_digest does not match" in error for error in errors):
+        raise AssertionError(f"Poppy closure accepted the wrong plan digest: {errors}")
+    packet = copy.deepcopy(closure)
+    packet["node_results"][0]["status"] = "limited"  # type: ignore[index]
+    errors = validate_poppy_closure(packet, graph, plan)
+    if not any("every selected node to pass" in error for error in errors):
+        raise AssertionError(f"Poppy PASS accepted a limited required node: {errors}")
+    packet = copy.deepcopy(closure)
+    packet["memory"]["closure"] = "updated"  # type: ignore[index]
+    errors = validate_poppy_closure(packet, graph, plan)
+    if not any("non-write scope cannot update memory" in error for error in errors):
+        raise AssertionError(f"Poppy read-only closure accepted a memory update: {errors}")
+    packet = copy.deepcopy(closure)
+    packet["risk"] = "R2"
+    packet["postflight"].update(  # type: ignore[union-attr]
+        {"evaluator": "fresh-worker", "evaluator_task_id": packet["root_task_id"], "independent": True}
+    )
+    errors = validate_poppy_closure(packet, graph)
+    if not any("root task cannot claim independent" in error for error in errors):
+        raise AssertionError(f"Poppy root claimed independent R2 evaluation: {errors}")
+
+    poppy = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8")
+    evaluator = (ROOT / "skills" / "project-ops-evaluate" / "SKILL.md").read_text(encoding="utf-8")
+    for required in (
+        "trusted current user turn",
+        "sole Project Operations counterpart",
+        "join barrier",
+        "NEEDS_PARENT_DECISION",
+        "Explicit read-only, review-only, or diagnosis-only scope suppresses every vault write",
+        "orchestration-run",
+    ):
+        if required.casefold() not in poppy.casefold():
+            raise AssertionError(f"Poppy skill is missing {required}")
+    for required in ("Readiness screen", "Substantive preflight", "Postflight", "Confidence never creates authority"):
+        if required.casefold() not in evaluator.casefold():
+            raise AssertionError(f"Poppy evaluator is missing {required}")
+
+
 def assert_task_orchestration() -> None:
     valid_plan = load_fixture("valid-task-plan.json")
     valid_closure = load_fixture("valid-task-closure.json")
@@ -637,16 +878,9 @@ def assert_task_orchestration() -> None:
         if required.casefold() not in task_reference.casefold():
             raise AssertionError(f"task-orchestration contract is missing {required}")
 
-    for skill_name in (
-        "project-ops-manager",
-        "project-ops-delivery",
-        "project-ops-assess",
-        "project-ops-automate",
-        "project-ops-upgrader",
-    ):
-        skill = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
-        if "../../references/task-orchestration.md" in skill:
-            raise AssertionError(f"{skill_name} activates the unpromoted task-orchestration candidate")
+    poppy = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8")
+    if "../../references/task-orchestration.md" not in poppy:
+        raise AssertionError("Poppy does not load the promoted task-orchestration contract")
 
     run(str(SCRIPTS / "test_owned_process_supervisor.py"))
     promotion = (ROOT / "references" / "promotion-registry.md").read_text(encoding="utf-8")
@@ -669,6 +903,25 @@ def main() -> int:
     control_errors, _ = validate_profile(invalid_controls)
     if not any("checkpoint_policy must be success-only" in error for error in control_errors):
         raise AssertionError(f"profile accepted unsafe retrieval checkpoint policy: {control_errors}")
+    poppy_profile = copy.deepcopy(load_fixture("valid-project.json"))
+    poppy_profile["controls"]["poppy"] = {  # type: ignore[index]
+        "trigger_name": "Poppy",
+        "substantive_memory": "required",
+        "preflight": "required",
+        "postflight": "required",
+        "confidence_scale": ["high", "medium", "low", "insufficient"],
+        "max_delegation_depth": 1,
+        "max_active_workers": 2,
+        "max_created_workers": 5,
+    }
+    profile_errors, _ = validate_profile(poppy_profile)
+    if profile_errors:
+        raise AssertionError(f"profile rejected safe Poppy controls: {profile_errors}")
+    unsafe_poppy = copy.deepcopy(poppy_profile)
+    unsafe_poppy["controls"]["poppy"]["max_delegation_depth"] = 2  # type: ignore[index]
+    profile_errors, _ = validate_profile(unsafe_poppy)
+    if not any("max_delegation_depth" in error for error in profile_errors):
+        raise AssertionError(f"profile allowed Poppy controls to widen delegation: {profile_errors}")
     run(str(SCRIPTS / "validate_delivery_manifest.py"), str(FIXTURES / "valid-manifest.json"))
     run(
         str(SCRIPTS / "validate_delivery_manifest.py"),
@@ -692,6 +945,7 @@ def main() -> int:
         )
     assert_delivery_execution_policy()
     assert_local_execution_safety()
+    assert_poppy_orchestration()
     assert_task_orchestration()
 
     with tempfile.TemporaryDirectory(prefix="project-operations-") as temporary:
@@ -731,6 +985,7 @@ def main() -> int:
             "templates/operational-control-run.md",
             "templates/human-authority-receipt.md",
             "templates/release-evidence.md",
+            "templates/orchestration-run.md",
             "wiki/test-project/pm/records/improvements",
             "dashboards/Test Project Improvements.base",
             "wiki/test-project/pm/records/research",
@@ -739,6 +994,8 @@ def main() -> int:
             "wiki/test-project/pm/records/authority",
             "wiki/test-project/pm/records/releases",
             "raw/test-project/pm-os/controls",
+            "raw/test-project/pm-os/runs",
+            "dashboards/Test Project Orchestration.base",
         ]
         for relative in required:
             if not (vault / relative).exists():
@@ -806,6 +1063,9 @@ def main() -> int:
             raise AssertionError("explicit reconfigure path did not remain available")
 
         assert_base_yaml(vault)
+        orchestration_base = (vault / "dashboards/Test Project Orchestration.base").read_text(encoding="utf-8")
+        if 'record_kind == "orchestration-run"' not in orchestration_base or "poppy" not in orchestration_base.casefold():
+            raise AssertionError("generated Orchestration Base does not isolate Poppy orchestration receipts")
         run(str(SCRIPTS / "validate_project_vault.py"), str(vault), "--project-key", "test-project")
         graph = json.loads((vault / ".obsidian/graph.json").read_text(encoding="utf-8"))
         if graph.get("search") != 'path:"wiki" OR path:"dashboards" OR file:"Start Here"':

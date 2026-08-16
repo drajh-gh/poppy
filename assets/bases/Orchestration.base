@@ -1,10 +1,9 @@
 filters:
   and:
-    - file.inFolder("raw/{{project_key}}")
+    - file.inFolder("raw/{{project_key}}/pm-os/runs")
     - 'type == "source"'
-    - or:
-        - 'source_system == "delivery-os"'
-        - 'source_system == "pm-os"'
+    - 'record_kind == "orchestration-run"'
+    - 'orchestrator == "poppy"'
 properties:
   file.name:
     displayName: Run
@@ -12,22 +11,31 @@ properties:
     displayName: System
   source_id:
     displayName: Run ID
+  orchestrator:
+    displayName: Partner
   captured:
     displayName: Captured
-  outcome:
-    displayName: Outcome
+  interaction_class:
+    displayName: Class
   risk:
     displayName: Risk
-  confidence:
-    displayName: Confidence
+  preflight_confidence:
+    displayName: Preflight
+  postflight_confidence:
+    displayName: Postflight
+  verdict:
+    displayName: Verdict
 views:
   - type: table
     name: Runs
     order:
       - file.name
       - source_system
+      - orchestrator
       - source_id
       - captured
-      - outcome
+      - interaction_class
       - risk
-      - confidence
+      - preflight_confidence
+      - postflight_confidence
+      - verdict

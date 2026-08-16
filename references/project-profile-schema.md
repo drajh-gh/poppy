@@ -111,6 +111,16 @@ Store the validated profile as `project-ops.json` at the vault root. The onboard
     "release_evidence": {
       "required_links": ["source", "artifact", "build", "delivery", "runtime"],
       "missing_link_state": "gray"
+    },
+    "poppy": {
+      "trigger_name": "Poppy",
+      "substantive_memory": "required",
+      "preflight": "required",
+      "postflight": "required",
+      "confidence_scale": ["high", "medium", "low", "insufficient"],
+      "max_delegation_depth": 1,
+      "max_active_workers": 2,
+      "max_created_workers": 5
     }
   },
   "tolerances": {
@@ -147,5 +157,6 @@ Store the validated profile as `project-ops.json` at the vault root. The onboard
 - A budget health result is Gray when no approved baseline exists.
 - Existing vault adoption never overwrites `AGENTS.md`, `raw/`, `inbox.md`, `daily/`, canonical pages, or `log.md`.
 - Research cadence is optional and disabled by default; scheduling never authorizes repository download/execution or project/plugin mutation.
-- `controls` is optional for backward-compatible schema-v1 profiles. When present, it enables the validated retrieval, source-identity, expiring-authority, executive-report, and release-evidence defaults without storing dynamic checkpoints or provider credentials in the profile.
+- `controls` is optional for backward-compatible schema-v1 profiles. When present, it enables the validated retrieval, source-identity, expiring-authority, executive-report, release-evidence, and optional Poppy narrowing defaults without storing dynamic checkpoints or provider credentials in the profile.
+- `controls.poppy` is optional and can only preserve or narrow global Poppy behavior: the trigger remains `Poppy`, substantive memory and pre/postflight remain required, the categorical confidence scale is fixed, depth is at most one, and worker budgets cannot exceed two active or five created. It cannot increase authority or persist dynamic run state.
 - Dynamic checkpoints, request fingerprints, failures, authority receipts, and release observations belong in dated run evidence validated by `validate_operational_control_packet.py`.

@@ -24,6 +24,8 @@ sources: []
 
 Use `type: analysis` plus one of the operational `record_kind` values: `milestone`, `commitment`, `raid-item`, `change-request`, `stakeholder`, `budget-snapshot`, `health-snapshot`, `meeting-note`, `portfolio-summary`, `improvement-candidate`, `research-brief`, `repository-assessment`, `research-handoff`, `operational-control`, `human-authority`, or `release-evidence`. Decisions remain `type: decision`. This keeps Project Operations records compatible with the Project OS knowledge lifecycle while letting Bases select operational records precisely.
 
+Poppy run evidence is not a canonical analysis by default. Use `type: source`, `record_kind: orchestration-run`, `source_system: pm-os`, and `orchestrator: poppy` under `raw/<project>/pm-os/runs/` only for a durable-evidence run, consequential decision or verified effect, material safety failure, or learning-worthy confidence change. Keep routine preflight and postflight inside that receipt and expose it through the Orchestration Base.
+
 Use `status: current|draft|needs-review|superseded` for milestone, commitment, RAID, change, stakeholder, budget, and health records. Do not place values such as `blocked`, `overdue`, `approved`, or `at-risk` in `status`; those belong in `pm_state` or `health`. Decisions and open questions retain their Project OS lifecycle values.
 
 ## Milestone

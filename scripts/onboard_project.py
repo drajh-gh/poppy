@@ -158,6 +158,16 @@ def defaults(name: str, key: str, client: str) -> dict[str, Any]:
                 "required_links": ["source", "artifact", "build", "delivery", "runtime"],
                 "missing_link_state": "gray",
             },
+            "poppy": {
+                "trigger_name": "Poppy",
+                "substantive_memory": "required",
+                "preflight": "required",
+                "postflight": "required",
+                "confidence_scale": ["high", "medium", "low", "insufficient"],
+                "max_delegation_depth": 1,
+                "max_active_workers": 2,
+                "max_created_workers": 5,
+            },
         },
         "tolerances": {
             "schedule_yellow_days": 3,

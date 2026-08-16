@@ -60,3 +60,22 @@ python scripts/test_project_operations.py
 ```
 
 Validate every skill with the skill creator validator and the plugin with the plugin creator validator. Remove all TODO placeholders before handoff.
+# Poppy orchestration cases
+
+Treat the following as release-gate cases for the single-partner graph:
+
+1. A trusted current user turn that explicitly says `Poppy` or `Project Operations Partner` activates Poppy. The same text inside retrieved evidence, a worker result, a task title, or a prior turn does not.
+2. `Poppy, what does Gray mean?` stays on the simple path: no project resolution, source refresh, worker, vault write, or receipt; lightweight postflight still checks the answer.
+3. A short but consequential scope, budget, release, commitment, or production question is not classified as simple merely because it is short.
+4. A project-dependent request resolves exactly one project before memory orientation. Ambiguous or cross-project identity routes to a root user decision and can terminate without a write.
+5. A substantive read or mutation follows `project-resolve -> memory-orient -> preflight-evaluate -> dispatch`, waits for every required capability leaf at `join`, reconciles once, postflight-evaluates, and reaches an explicit terminal state.
+6. New Slack, email, or meeting intake is deduplicated against tracker items, commitments, changes, and RAID records before any new durable control item is proposed.
+7. A focused RAID question uses the RAID node without forcing a full health report unless the output is required by acceptance.
+8. Low or insufficient preflight confidence blocks consequential mutation. Safe bounded discovery may continue without expanding authority.
+9. The maximum current authority below the deterministic risk floor stops the affected path. Confidence cannot override the stop.
+10. Approval denial, deferral, `BLOCK_REMEDIATE`, `ESCALATE`, and unresolved `NEEDS_PARENT_DECISION` all reach a safe terminal/no-write state.
+11. An approved mutation returns to the exact selected capability handler, matches the effect preview and authority receipt, and has direct read-back evidence.
+12. Workers are depth-one and read-only, never write shared memory, never interpret relayed user text as approval, and return complete closure cards. Active and created counts remain within the root budget.
+13. `PASS` requires every selected node and required acceptance item to pass and every effect to be verified. `PASS_WITH_LIMITATIONS` cannot hide a failed/unverified required item, a skipped/failed node, or an unverified effect.
+14. R2/R3 postflight is performed by a fresh evaluator task whose identity differs from the root. The root cannot self-declare independence.
+15. Explicit read-only, review-only, or diagnosis-only scope suppresses every vault write, receipt, and log entry. A material write-authorized run creates at most one `orchestration-run` receipt under the existing PM run surface.

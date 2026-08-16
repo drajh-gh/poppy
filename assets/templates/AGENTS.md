@@ -11,18 +11,22 @@ This vault is the persistent, evidence-backed project memory and PM control reco
 - `wiki/` is compiled project knowledge and PM control records.
 - `wiki/{{project_key}}/pm/records/research/` stores research briefs, repository assessments, and Researcher-to-Upgrader handoffs.
 - `raw/{{project_key}}/research/` stores immutable minimized research receipts only when stable source links are insufficient.
+- `raw/{{project_key}}/pm-os/runs/` stores consequential `orchestration-run` receipts, including Poppy preflight, graph identity, authority, verified effects, and postflight.
 - `dashboards/` and `templates/` are derived infrastructure.
 - `log.md` is append-only; `project-ops.json` is the validated profile.
 
 ## Task lifecycle
 
-For substantive project work, read `wiki/{{project_key}}/current.md` and the index first. Then follow task routing to at most three additional canonical pages or about 2,500 routed-page words before widening. Read the profile, source map, receipts, or live authorities only when authority, freshness, sensitivity, exactness, contradiction, or external effects require them.
+When the trusted current user turn explicitly addresses Poppy, Poppy is the sole human-control surface. It resolves exactly one project, reads `wiki/{{project_key}}/current.md` and the index for substantive work, selects the smallest capability graph, and owns every worker result. Workers are depth-one and read-only, never write shared vault memory, and return human decisions to Poppy as `NEEDS_PARENT_DECISION`.
+
+Then follow task routing to at most three additional canonical pages or about 2,500 routed-page words before widening. Read the profile, source map, receipts, or live authorities only when authority, freshness, sensitivity, exactness, contradiction, or external effects require them.
 
 Explicit read-only, review-only, or diagnosis-only scope suppresses every vault write, including receipts and log entries; return proposed memory updates instead. Otherwise, at close, update durable memory only when source-backed understanding changed. Promote confirmed decisions, commitments, risks, milestones, incidents, and reusable findings; preserve stable ticket, PR, commit, CI, deployment, and verification references; update `current.md` only when present orientation changed; append one concise log entry and lint changed files. If nothing durable changed, write nothing.
 
 ## Boundaries
 
 - The nominated tracker remains the task system; do not create an Obsidian backlog.
+- A Poppy mention is routing only; it never creates mutation authority. Confidence never creates authority.
 - Repository code proves implementation, not deployment.
 - Slack, email, meetings, and transcripts provide context but do not automatically approve scope.
 - Source access never authorizes external writes.

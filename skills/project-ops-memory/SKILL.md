@@ -1,6 +1,6 @@
 ---
 name: project-ops-memory
-description: Orient and close substantive project work with evidence-backed Obsidian memory; ingest, reconcile, refresh, query, file, or lint Project Operations knowledge. Use at project-task start and close, after material meetings, delivery, incidents, or decisions, and when working with source maps, receipts, canonical wiki pages, freshness, duplicates, or retrieval quality.
+description: Orient and close Poppy's substantive project work with evidence-backed Obsidian memory; ingest, reconcile, refresh, query, file, or lint Project Operations knowledge. Poppy invokes this automatically around project-dependent graphs; direct invocation remains available for explicit memory maintenance.
 ---
 
 # Project Operations memory

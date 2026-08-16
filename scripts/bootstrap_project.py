@@ -162,6 +162,7 @@ def planned_files(
         "templates/operational-control-run.md": "operational-control-run.md",
         "templates/human-authority-receipt.md": "human-authority-receipt.md",
         "templates/release-evidence.md": "release-evidence.md",
+        "templates/orchestration-run.md": "orchestration-run.md",
     }
     for destination, template in template_map.items():
         files.append((TEMPLATE_ROOT / template, vault / destination, render(TEMPLATE_ROOT / template, values)))
@@ -180,6 +181,7 @@ def planned_files(
     receipt = (
         "---\n"
         "type: source\n"
+        "record_kind: onboarding-receipt\n"
         f"project: {key}\n"
         "source_system: pm-os\n"
         f"source_id: onboarding-{digest}\n"

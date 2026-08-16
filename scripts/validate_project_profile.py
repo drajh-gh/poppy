@@ -298,6 +298,31 @@ def _validate_controls(controls: Any, errors: list[str]) -> None:
         if release.get("missing_link_state") != "gray":
             errors.append("controls.release_evidence.missing_link_state must be gray")
 
+    poppy = controls.get("poppy")
+    if poppy is not None:
+        if not isinstance(poppy, dict):
+            errors.append("controls.poppy must be an object")
+        else:
+            if poppy.get("trigger_name") != "Poppy":
+                errors.append("controls.poppy.trigger_name must be Poppy")
+            for field in ("substantive_memory", "preflight", "postflight"):
+                if poppy.get(field) != "required":
+                    errors.append(f"controls.poppy.{field} must be required")
+            if poppy.get("confidence_scale") != ["high", "medium", "low", "insufficient"]:
+                errors.append("controls.poppy.confidence_scale must preserve the categorical scale")
+            for field, maximum in (
+                ("max_delegation_depth", 1),
+                ("max_active_workers", 2),
+                ("max_created_workers", 5),
+            ):
+                value = poppy.get(field)
+                if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= maximum:
+                    errors.append(f"controls.poppy.{field} must be an integer from 0 to {maximum}")
+            active = poppy.get("max_active_workers")
+            created = poppy.get("max_created_workers")
+            if isinstance(active, int) and isinstance(created, int) and active > created:
+                errors.append("controls.poppy.max_active_workers cannot exceed max_created_workers")
+
 
 def validate_profile(profile: dict[str, Any], allow_draft: bool = False) -> tuple[list[str], list[str]]:
     errors: list[str] = []

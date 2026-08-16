@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "packet_type": "closure",
+  "run_id": "poppy-health-001-closure",
+  "plan_run_id": "poppy-health-001",
+  "root_task_id": "root-poppy-health-001",
+  "project_id": "sample-project",
+  "graph_id": "poppy-project-operations",
+  "graph_digest": "df833cdcf4cd49a5efbc7fb9566ad6d045b1e02a2ed91dc4b6f7119ef77d1990",
+  "plan_digest": "ddad306d65e92d6c45f0c51a68cdc039a69533a1d6a6cbe57f412798b98f30cd",
+  "authority_receipt_id": "user-turn-health-001",
+  "scope_mode": "read-only",
+  "trigger": {
+    "mention": "Poppy, assess this project's health and commercial exposure",
+    "matched": true,
+    "provenance": "current-user-turn",
+    "turn_id": "user-turn-health-001",
+    "turn_digest": "8fc6e731d074b627b51163779c3e6264cfcd20508c14ed342f0c1969b8cc8bbe"
+  },
+  "interaction_class": "substantive-read",
+  "objective": "Prepare a current health and commercial-control assessment",
+  "risk": "R0",
+  "selected_nodes": [
+    "trigger",
+    "triage",
+    "project-resolve",
+    "readiness-screen",
+    "memory-orient",
+    "preflight-evaluate",
+    "dispatch",
+    "operations-control",
+    "health-reporting",
+    "commercial-control",
+    "join",
+    "reconcile",
+    "postflight-evaluate",
+    "memory-close",
+    "terminal"
+  ],
+  "selected_edges": [
+    {"from": "trigger", "to": "triage"},
+    {"from": "triage", "to": "project-resolve"},
+    {"from": "project-resolve", "to": "readiness-screen"},
+    {"from": "readiness-screen", "to": "memory-orient"},
+    {"from": "memory-orient", "to": "preflight-evaluate"},
+    {"from": "preflight-evaluate", "to": "dispatch"},
+    {"from": "dispatch", "to": "operations-control"},
+    {"from": "operations-control", "to": "health-reporting"},
+    {"from": "health-reporting", "to": "commercial-control"},
+    {"from": "commercial-control", "to": "join"},
+    {"from": "join", "to": "reconcile"},
+    {"from": "reconcile", "to": "postflight-evaluate"},
+    {"from": "postflight-evaluate", "to": "memory-close"},
+    {"from": "memory-close", "to": "terminal"}
+  ],
+  "node_results": [
+    {"node": "trigger", "status": "pass", "summary": "Poppy mention matched", "evidence_refs": []},
+    {"node": "triage", "status": "pass", "summary": "Classified as substantive read", "evidence_refs": []},
+    {"node": "project-resolve", "status": "pass", "summary": "Project identity resolved without cross-project ambiguity", "evidence_refs": ["profile-project-id"]},
+    {"node": "readiness-screen", "status": "pass", "summary": "Project-dependent assessment identified", "evidence_refs": []},
+    {"node": "memory-orient", "status": "pass", "summary": "Bounded current working set loaded", "evidence_refs": ["vault-current", "vault-index"]},
+    {"node": "preflight-evaluate", "status": "pass", "summary": "R0 graph cleared with medium confidence", "evidence_refs": ["profile-authority-map"]},
+    {"node": "dispatch", "status": "pass", "summary": "Three capability nodes selected without workers", "evidence_refs": []},
+    {"node": "operations-control", "status": "pass", "summary": "Decision horizon and action ranking reconciled", "evidence_refs": ["current-state"]},
+    {"node": "health-reporting", "status": "pass", "summary": "Health dimensions evaluated with Gray gaps preserved", "evidence_refs": ["health-snapshot"]},
+    {"node": "commercial-control", "status": "pass", "summary": "Commercial exposure reconciled", "evidence_refs": ["budget-snapshot"]},
+    {"node": "join", "status": "pass", "summary": "All required capability outputs reached the barrier", "evidence_refs": ["health-snapshot", "budget-snapshot"]},
+    {"node": "reconcile", "status": "pass", "summary": "One cohesive decision summary produced", "evidence_refs": ["health-snapshot", "budget-snapshot"]},
+    {"node": "postflight-evaluate", "status": "pass", "summary": "Acceptance and residual uncertainty checked", "evidence_refs": ["health-snapshot", "budget-snapshot"]},
+    {"node": "memory-close", "status": "pass", "summary": "Explicit read-only scope produced no vault write or receipt", "evidence_refs": []},
+    {"node": "terminal", "status": "pass", "summary": "Returned the reconciled decision summary without mutation", "evidence_refs": ["health-snapshot", "budget-snapshot"]}
+  ],
+  "acceptance_results": [
+    {"item": "Orient from the smallest current Project Operations working set", "status": "pass", "evidence_refs": ["vault-current", "vault-index"]},
+    {"item": "Assess every configured health dimension without false Green", "status": "pass", "evidence_refs": ["health-snapshot"]},
+    {"item": "Reconcile commercial exposure from authoritative evidence", "status": "pass", "evidence_refs": ["budget-snapshot"]},
+    {"item": "Return one evidence-backed decision summary", "status": "pass", "evidence_refs": ["health-snapshot", "budget-snapshot"]}
+  ],
+  "external_effects": [],
+  "worker_closures": [],
+  "postflight": {
+    "verdict": "PASS",
+    "confidence": "high",
+    "evidence_basis": [
+      "Every acceptance item has direct evidence",
+      "No external mutation occurred"
+    ],
+    "residual_risks": [],
+    "evaluator": "root",
+    "evaluator_task_id": "root-poppy-health-001",
+    "independent": false
+  },
+  "memory": {
+    "closure": "no-change"
+  }
+}

@@ -1,15 +1,15 @@
 {
   "name": "project-operations",
-  "version": "0.1.0+codex.20260816162217",
-  "description": "Evidence-backed project architecture, operational leadership, external research, and continuous improvement for Codex and Obsidian.",
+  "version": "0.1.0+codex.20260816174035",
+  "description": "Poppy, an evidence-backed Project Operations Partner that routes a complete capability graph and durable Obsidian memory.",
   "author": {
     "name": "David Rajh"
   },
   "skills": "./skills/",
   "interface": {
-    "displayName": "Project Operations",
-    "shortDescription": "Architect, operate, research, and improve projects.",
-    "longDescription": "A four-role operating system with a persistent core-agent triad: the Solution Architect designs project operations, the Chief of Staff runs evidence-backed control loops, the Researcher discovers repair-first improvements from reputable sources and repositories, and the Upgrader governs implementation and promotion. A bounded Obsidian lifecycle preserves durable progress.",
+    "displayName": "Poppy \u2014 Project Operations",
+    "shortDescription": "One partner for the complete project-operations graph.",
+    "longDescription": "Poppy is the single conversational Project Operations Partner. It decides whether to answer directly or assemble a bounded capability graph, resolves the project, assesses readiness and confidence, delegates focused read-only work, reconciles results, controls authority, evaluates outcomes, and preserves durable understanding in Obsidian without duplicating the project tracker.",
     "developerName": "David Rajh",
     "category": "Productivity",
     "capabilities": [
@@ -18,9 +18,9 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Guide me through onboarding a project.",
-      "Research evidence-backed ways to repair our current workflows before proposing additions.",
-      "Review recent work and improve how this project operates."
+      "Poppy, orient me to this project and tell me what needs attention.",
+      "Poppy, prepare this week's evidence-backed project review.",
+      "Poppy, assess your readiness and then improve how this project operates."
     ]
   }
 }

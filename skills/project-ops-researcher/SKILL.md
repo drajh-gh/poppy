@@ -1,6 +1,6 @@
 ---
 name: project-ops-researcher
-description: Research reputable online sources and evidence-backed GitHub repositories for improvements relevant to Project Operations and active projects. Use for Codex, AI, agentic-work, graph-engineering, knowledge-system, workflow-tool, or template research; project and cross-project opportunity scans; repository due diligence; repair-first research; relevance scoring; and structured handoff of project fixes or plugin candidates to Upgrader.
+description: Run Poppy's external-discovery capability over reputable online sources and evidence-backed GitHub repositories. Use behind Poppy only when project memory has a defined evidence gap or the user requests external discovery, including graph engineering, agentic work, workflow research, repository due diligence, repair-first scoring, and structured improvement handoff; direct invocation remains available when explicitly named.
 ---
 
 # Project Operations Researcher

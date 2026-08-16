@@ -1,0 +1,4 @@
+interface:
+  display_name: "Poppy"
+  short_description: "Your Project Operations Partner"
+  default_prompt: "Use $poppy. Poppy, help me decide what this project needs and orchestrate the right work."
