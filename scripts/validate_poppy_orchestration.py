@@ -392,9 +392,15 @@ def _validate_authority(
     forbidden_normalized = {
         item.strip().casefold() for item in authority.get("forbidden_actions", []) if _is_string(item)
     }
-    overlap = sorted(allowed_normalized & forbidden_normalized)
-    if overlap:
+    approval_normalized = {
+        item.strip().casefold() for item in authority.get("approval_required", []) if _is_string(item)
+    }
+    if allowed_normalized & forbidden_normalized:
         errors.append("authority allowed_actions and forbidden_actions must not overlap")
+    if allowed_normalized & approval_normalized:
+        errors.append("authority allowed_actions and approval_required must not overlap")
+    if forbidden_normalized & approval_normalized:
+        errors.append("authority forbidden_actions and approval_required must not overlap")
     maximum_risk = authority.get("maximum_risk")
     if maximum_risk not in RISKS:
         errors.append("authority.maximum_risk must be R0, R1, R2, or R3")
@@ -414,6 +420,8 @@ def _validate_authority(
             errors.append("current-turn authority receipt_id must match trigger.turn_id")
         if source_digest != trigger.get("turn_digest"):
             errors.append("current-turn authority source_digest must match trigger.turn_digest")
+    if risk_floor == "R3" and source == "approved-manifest":
+        errors.append("R3 authority cannot come from an approved manifest; it requires separate exact approval")
     previews = authority.get("effect_previews")
     if not isinstance(previews, list):
         errors.append("authority.effect_previews must be a list")
@@ -429,8 +437,11 @@ def _validate_authority(
             if effect_id in preview_ids:
                 errors.append(f"authority.effect_previews[{index}].effect_id must be unique")
             preview_ids.add(effect_id)
-        if preview.get("action") not in authority.get("allowed_actions", []):
-            errors.append(f"authority.effect_previews[{index}].action is outside allowed_actions")
+        action_bucket = "approval_required" if status == "approval-required" else "allowed_actions"
+        if preview.get("action") not in authority.get(action_bucket, []):
+            errors.append(
+                f"authority.effect_previews[{index}].action is outside {action_bucket}"
+            )
     if interaction == "mutating":
         stopping = disposition in {"ask-user", "escalate-approval"}
         if status in {"read-only", "denied"} and not stopping:
@@ -441,6 +452,8 @@ def _validate_authority(
             errors.append("authorized mutating plans require bounded allowed_actions")
         if status == "approval-required" and not ({"human-approval", "needs-user-decision"} & set(selected)):
             errors.append("approval-required plans must select a root approval or user-decision node")
+        if status == "approval-required" and "authorized-execution" in selected:
+            errors.append("approval-required plans must stop before authorized execution and re-plan after approval")
         if not previews:
             errors.append("mutating plans require exact effect previews")
     elif previews:
@@ -721,6 +734,7 @@ def validate_closure(
     results = _list(packet.get("node_results"), "node_results", errors)
     result_nodes: set[str] = set()
     result_status_by_node: dict[str, str] = {}
+    result_evidence_by_node: dict[str, set[str]] = {}
     node_statuses: list[str] = []
     for index, item in enumerate(results):
         path = f"node_results[{index}]"
@@ -743,6 +757,8 @@ def validate_closure(
             _is_string(value) for value in result.get("evidence_refs", [])
         ):
             errors.append(f"{path}.evidence_refs must be a string list")
+        elif _is_string(node_id):
+            result_evidence_by_node[node_id] = set(result.get("evidence_refs", []))
         if status == "skipped" and not _is_string(result.get("skip_reason")):
             errors.append(f"{path}.skip_reason is required when skipped")
     missing_results = sorted(set(selected) - result_nodes)
@@ -765,6 +781,8 @@ def validate_closure(
             _is_string(value) for value in result.get("evidence_refs", [])
         ):
             errors.append(f"{path}.evidence_refs must be a string list")
+        elif status in {"pass", "limited"} and not result.get("evidence_refs"):
+            errors.append(f"{path}.evidence_refs must contain direct evidence for passing acceptance")
     if not acceptance:
         errors.append("acceptance_results must be non-empty")
     if plan is not None:
@@ -815,23 +833,25 @@ def validate_closure(
             if isinstance(item, dict)
         ]
         plan_authority = plan.get("authority", {}).get("status")
-        if plan_authority == "approval-required" and approval_decision == "not-required":
-            errors.append("approval-required closures must record the root approval decision")
-        if approval_decision in {"denied", "deferred"}:
+        if plan_authority == "approval-required":
+            if approval_decision == "not-required":
+                errors.append("approval-required closures must record the root approval decision")
             if recorded_effects:
-                errors.append("denied or deferred approval cannot produce external effects")
-        elif recorded_effects != planned_effects:
-            errors.append("external effects must exactly match the bound plan effect previews")
+                errors.append("approval-required plans cannot produce effects; create a new authorized plan")
+        else:
+            if approval_decision != "not-required":
+                errors.append("approval_decision must be not-required when the bound plan is already authorized")
+            if recorded_effects != planned_effects:
+                errors.append("external effects must exactly match the bound plan effect previews")
         if recorded_effects:
             if result_status_by_node.get("authorized-execution") != "pass":
                 errors.append("recorded effects require a passing authorized-execution node result")
-            if plan_authority == "approval-required" and approval_decision != "approved":
-                errors.append("approval-required effects require an approved root decision")
 
     worker_closures = _list(packet.get("worker_closures"), "worker_closures", errors)
     closure_workers: set[str] = set()
     worker_outcomes: dict[str, str] = {}
     worker_needed_parent_decision = False
+    parent_resolution_receipts: list[str] = []
     for index, item in enumerate(worker_closures):
         path = f"worker_closures[{index}]"
         card = _object(item, path, errors)
@@ -849,6 +869,8 @@ def validate_closure(
             worker_needed_parent_decision = True
             if not _is_string(card.get("parent_resolution_receipt")):
                 errors.append(f"{path}.parent_resolution_receipt is required after NEEDS_PARENT_DECISION")
+            else:
+                parent_resolution_receipts.append(card["parent_resolution_receipt"])
         if _is_string(worker_id) and _is_string(outcome):
             worker_outcomes[worker_id] = outcome
         if not _string_list(card.get("evidence_refs")):
@@ -873,6 +895,14 @@ def validate_closure(
             errors.append("worker_closures must exactly cover the bound plan workers")
     if worker_needed_parent_decision and not ({"needs-user-decision", "human-approval"} & set(selected)):
         errors.append("worker NEEDS_PARENT_DECISION requires a selected root decision node")
+    for receipt in parent_resolution_receipts:
+        bound = any(
+            result_status_by_node.get(node_id) == "pass"
+            and receipt in result_evidence_by_node.get(node_id, set())
+            for node_id in ("needs-user-decision", "human-approval")
+        )
+        if not bound:
+            errors.append("worker parent_resolution_receipt must bind to passing root-decision evidence")
 
     postflight = _object(packet.get("postflight"), "postflight", errors)
     verdict = postflight.get("verdict")
