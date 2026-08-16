@@ -156,6 +156,9 @@ def planned_files(
         "templates/decision.md": "decision.md",
         "templates/open-question.md": "open-question.md",
         "templates/promotion-candidate.md": "promotion-candidate.md",
+        "templates/research-brief.md": "research-brief.md",
+        "templates/repository-assessment.md": "repository-assessment.md",
+        "templates/research-handoff.md": "research-handoff.md",
     }
     for destination, template in template_map.items():
         files.append((TEMPLATE_ROOT / template, vault / destination, render(TEMPLATE_ROOT / template, values)))
@@ -209,6 +212,7 @@ def required_directories(profile: dict[str, Any], vault: Path) -> list[Path]:
         "raw",
         f"raw/{key}",
         f"raw/{key}/meetings",
+        f"raw/{key}/research",
         f"raw/{key}/pm-os/onboarding",
         f"raw/{key}/pm-os/runs",
         f"raw/{key}/pm-os/weekly",
@@ -228,6 +232,7 @@ def required_directories(profile: dict[str, Any], vault: Path) -> list[Path]:
         f"wiki/{key}/pm/records/health",
         f"wiki/{key}/pm/records/reports",
         f"wiki/{key}/pm/records/improvements",
+        f"wiki/{key}/pm/records/research",
     ]
     return [vault / item for item in relative]
 

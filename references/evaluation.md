@@ -29,12 +29,19 @@ Forward-test with bounded historical or synthetic evidence and zero external wri
 23. Functional QA checks acceptance and directly affected regressions, while Final Assurance consumes the exact-candidate QA verdict and checks evidence, authority, separation, rollback, and residual risk without duplicating QA or expanding write authority.
 24. An adapter-nominated project extension is present exactly once with `required` or `not-applicable`, a non-empty rationale, and evidence; omission, duplication, or an invalid classification fails without moving project vocabulary into the generic plugin.
 25. A scaffolded Obsidian graph uses a verified positive query over `wiki`, `dashboards`, and `Start Here`, while vault lint rejects an unescaped wikilink alias pipe that would split a Markdown table.
+26. Researcher reads actual task/vault evidence before external search, sequences workflow repairs before additions, and emits Gray or partial coverage rather than false completeness.
+27. Research source validation accepts official, primary, maintained evidence and rejects an uncorroborated social source as an adoption claim.
+28. Repository assessment remains inspect-only and records maintainer reputation, maintenance, license, security, quality, fit, constraints, and outcome without cloning or execution.
+29. Deterministic relevance totals, source/finding/need references, and Researcher-to-Upgrader candidate classifications validate; broken references and score drift fail.
+30. Researcher handoff always has `implementation_authorized: false`; Upgrader retains project/plugin classification, validation, promotion, and activation authority.
+31. New vaults include research records, templates, and a Research Base; existing human-owned or canonical files remain protected.
 
 ## Validation commands
 
 ```powershell
 python scripts/validate_project_profile.py <profile.json>
 python scripts/bootstrap_project.py --profile <profile.json> --vault <vault> --dry-run
+python scripts/validate_research_packet.py <research-packet.json>
 python scripts/test_project_operations.py
 ```
 

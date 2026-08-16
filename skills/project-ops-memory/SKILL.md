@@ -33,7 +33,7 @@ Read the smallest compiled working set. Follow receipts or live sources for curr
 Explicit read-only, review-only, or diagnosis-only scope suppresses all vault writes, including receipts and log entries. Return proposed memory updates instead; this lifecycle never expands task authority.
 
 1. Decide whether source-backed durable understanding changed.
-2. Promote confirmed decisions, commitments, milestones, risks, incidents, contradictions, and reusable findings into existing canonical pages or a distinct typed record.
+2. Promote confirmed decisions, commitments, milestones, risks, incidents, contradictions, and reusable findings into existing canonical pages or a distinct typed record. Store research briefs, repository assessments, and Researcher-to-Upgrader handoffs in the project research record surface.
 3. Update `current.md` only when present orientation changed; keep dated history in snapshots.
 4. Preserve stable ticket, PR, commit, CI, deployment, and verification references. Add an immutable receipt when mutable evidence lacks a stable durable reference or supports a compiled claim.
 5. Append one concise log entry and lint only changed files.

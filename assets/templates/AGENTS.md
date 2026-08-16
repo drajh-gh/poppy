@@ -9,6 +9,8 @@ This vault is the persistent, evidence-backed project memory and PM control reco
 - `inbox.md` and `daily/` are human-owned.
 - `raw/` is immutable sanitized evidence; add a receipt instead of rewriting history.
 - `wiki/` is compiled project knowledge and PM control records.
+- `wiki/{{project_key}}/pm/records/research/` stores research briefs, repository assessments, and Researcher-to-Upgrader handoffs.
+- `raw/{{project_key}}/research/` stores immutable minimized research receipts only when stable source links are insufficient.
 - `dashboards/` and `templates/` are derived infrastructure.
 - `log.md` is append-only; `project-ops.json` is the validated profile.
 
@@ -24,4 +26,5 @@ Explicit read-only, review-only, or diagnosis-only scope suppresses every vault 
 - Repository code proves implementation, not deployment.
 - Slack, email, meetings, and transcripts provide context but do not automatically approve scope.
 - Source access never authorizes external writes.
+- Repository research is inspect-only unless separately approved; do not clone, download, install, import, or execute third-party code.
 - Exclude credentials, access instructions, raw production rows, unnecessary personal data, and unminimized sensitive cases.

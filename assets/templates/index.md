@@ -29,6 +29,7 @@ sources: []
 ## Evidence
 
 - [[dashboards/{{project_name}} Sources.base|Source registry]]
+- [[dashboards/{{project_name}} Research.base|Research evidence and handoffs]]
 - [[dashboards/{{project_name}} Refresh.base|Refresh queue]]
 - [[log|Knowledge operations log]]
 

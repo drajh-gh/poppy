@@ -203,6 +203,24 @@ def _validate_cadence(cadence: Any, errors: list[str]) -> None:
                 errors.append("cadence.workflow_improvement.changed_only must be boolean")
             if improvement.get("max_specialists") not in {0, 1, 2}:
                 errors.append("cadence.workflow_improvement.max_specialists must be 0, 1, or 2")
+    research = cadence.get("workflow_research")
+    if research is not None:
+        if not isinstance(research, dict):
+            errors.append("cadence.workflow_research must be an object")
+        else:
+            if not isinstance(research.get("enabled"), bool):
+                errors.append("cadence.workflow_research.enabled must be boolean")
+            if research.get("frequency") not in {"weekly", "monthly"}:
+                errors.append("cadence.workflow_research.frequency must be weekly or monthly")
+            if not isinstance(research.get("time"), str) or not TIME_PATTERN.fullmatch(research["time"]):
+                errors.append("cadence.workflow_research.time must use 24-hour HH:MM")
+            if not isinstance(research.get("changed_only"), bool):
+                errors.append("cadence.workflow_research.changed_only must be boolean")
+            if research.get("max_specialists") not in {0, 1, 2}:
+                errors.append("cadence.workflow_research.max_specialists must be 0, 1, or 2")
+            if research.get("repository_access") != "inspect-only":
+                errors.append("cadence.workflow_research.repository_access must be inspect-only")
+            _require_string_list(research.get("themes", []), "cadence.workflow_research.themes", errors)
 
 
 def validate_profile(profile: dict[str, Any], allow_draft: bool = False) -> tuple[list[str], list[str]]:

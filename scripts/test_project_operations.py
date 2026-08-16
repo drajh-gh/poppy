@@ -17,6 +17,7 @@ from validate_delivery_manifest import (
     validate_manifest,
 )
 from validate_local_execution_preflight import validate_packet
+from validate_research_packet import validate_packet as validate_research_packet
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -83,6 +84,68 @@ def assert_memory_lifecycle_contract() -> None:
         raise AssertionError("memory skill does not load the lifecycle contract")
     if "at close" not in agents.casefold() or "if nothing durable changed, write nothing" not in agents.casefold():
         raise AssertionError("generated repository adapter lacks a bounded close contract")
+
+
+def assert_researcher_contract() -> None:
+    valid = load_fixture("valid-research-packet.json")
+    errors = validate_research_packet(valid)
+    if errors:
+        raise AssertionError(f"valid Researcher packet failed: {errors}")
+    run(str(SCRIPTS / "validate_research_packet.py"), str(FIXTURES / "valid-research-packet.json"))
+
+    adversaries: list[tuple[str, dict[str, object], str]] = []
+    packet = copy.deepcopy(valid)
+    packet["scope"]["repository_access"] = "clone"  # type: ignore[index]
+    adversaries.append(("repository execution boundary", packet, "must be inspect-only"))
+    packet = copy.deepcopy(valid)
+    packet["sources"].append(  # type: ignore[union-attr]
+        {
+            "id": "S3",
+            "kind": "social-evidence",
+            "title": "Uncorroborated social claim",
+            "url": "https://social.example/post/1",
+            "publisher": "Unknown promoter",
+            "retrieved": "2026-08-16",
+            "reputation_basis": "Popularity only",
+            "primary": False,
+            "claim_refs": ["F1"],
+            "social": True,
+            "corroborated_by": [],
+        }
+    )
+    adversaries.append(("social evidence", packet, "requires non-social corroboration"))
+    packet = copy.deepcopy(valid)
+    packet["findings"][0]["score"]["total"] = 91  # type: ignore[index]
+    adversaries.append(("score drift", packet, "must equal deterministic score"))
+    packet = copy.deepcopy(valid)
+    packet["handoff"]["implementation_authorized"] = True  # type: ignore[index]
+    adversaries.append(("implementation authority", packet, "must be false"))
+    packet = copy.deepcopy(valid)
+    packet["repositories"][0]["inspection_only"] = False  # type: ignore[index]
+    adversaries.append(("repository inspection", packet, "must be true"))
+    packet = copy.deepcopy(valid)
+    packet["recommendations"][0]["lane"] = "addition"  # type: ignore[index]
+    packet["recommendations"][0]["repair_gate"] = "deferred"  # type: ignore[index]
+    adversaries.append(("repair-first order", packet, "cannot precede disposition"))
+    for label, packet, expected in adversaries:
+        errors = validate_research_packet(packet)
+        if not any(expected in error for error in errors):
+            raise AssertionError(f"Researcher {label} adversary was accepted: {errors}")
+
+    skill = (ROOT / "skills" / "project-ops-researcher" / "SKILL.md").read_text(encoding="utf-8")
+    manager = (ROOT / "skills" / "project-ops-manager" / "SKILL.md").read_text(encoding="utf-8")
+    upgrader = (ROOT / "skills" / "project-ops-upgrader" / "SKILL.md").read_text(encoding="utf-8")
+    architecture = (ROOT / "references" / "architecture.md").read_text(encoding="utf-8")
+    for term in ("repair-existing", "inspect-only", "project-ops-upgrader", "validate_research_packet.py"):
+        if term not in skill:
+            raise AssertionError(f"Researcher skill is missing required contract term: {term}")
+    if "project-ops-researcher" not in manager:
+        raise AssertionError("Chief of Staff does not route external discovery to Researcher")
+    if "research-handoff.md" not in upgrader:
+        raise AssertionError("Upgrader does not load the Researcher handoff contract")
+    for term in ("Researcher", "core-agent triad", "Research loop"):
+        if term.casefold() not in architecture.casefold():
+            raise AssertionError(f"architecture is missing Researcher term: {term}")
 
 
 def load_fixture(name: str) -> dict[str, object]:
@@ -302,6 +365,7 @@ def main() -> int:
     assert_no_placeholders(ROOT)
     assert_skills()
     assert_memory_lifecycle_contract()
+    assert_researcher_contract()
 
     run(str(SCRIPTS / "validate_project_profile.py"), str(FIXTURES / "valid-project.json"))
     run(str(SCRIPTS / "validate_project_profile.py"), str(FIXTURES / "invalid-project.json"), expect=1)
@@ -360,8 +424,14 @@ def main() -> int:
             "dashboards/Test Project Health.base",
             "templates/meeting-note.md",
             "templates/promotion-candidate.md",
+            "templates/research-brief.md",
+            "templates/repository-assessment.md",
+            "templates/research-handoff.md",
             "wiki/test-project/pm/records/improvements",
             "dashboards/Test Project Improvements.base",
+            "wiki/test-project/pm/records/research",
+            "raw/test-project/research",
+            "dashboards/Test Project Research.base",
         ]
         for relative in required:
             if not (vault / relative).exists():
@@ -487,6 +557,9 @@ def main() -> int:
         improvement = generated_profile["cadence"]["workflow_improvement"]
         if improvement["max_specialists"] != 2 or not improvement["changed_only"]:
             raise AssertionError("workflow improvement cadence was not preserved")
+        research = generated_profile["cadence"]["workflow_research"]
+        if research["repository_access"] != "inspect-only" or research["enabled"]:
+            raise AssertionError("workflow research cadence was not preserved safely")
 
     print("PASS: Project Operations deterministic smoke tests")
     return 0

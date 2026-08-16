@@ -14,6 +14,8 @@ A task is substantive when it investigates or changes product behavior, project 
 4. Read the profile or source map only when authority, freshness, sensitivity, or external effects matter.
 5. Follow raw receipts or live authorities only for current, disputed, exact, or high-impact claims.
 
+Researcher may widen beyond the default routed-page budget when the authorized research scope requires full task-history or vault coverage. Record the reason and coverage; do not bulk-copy the corpus into outputs.
+
 ## Work
 
 - Treat the tracker as the task system and Obsidian as compiled memory.
@@ -27,6 +29,7 @@ Explicit read-only, review-only, or diagnosis-only scope suppresses all vault wr
 
 1. Decide whether source-backed durable understanding changed.
 2. If it changed, update an existing canonical page before creating a distinct record. Promote confirmed decisions, commitments, risks, milestones, incidents, contradictions, and reusable findings from task or meeting evidence.
+   Store substantive research briefs, repository assessments, and Upgrader handoffs under `wiki/<project>/pm/records/research/`; use `raw/<project>/research/` only for immutable minimized source receipts that lack a stable reference.
 3. Update `current.md` only when present orientation changed. Keep dated history in snapshots or canonical history pages.
 4. Preserve stable ticket, PR, commit, CI, deployment, and verification references. Create an immutable receipt when mutable evidence lacks a stable durable reference or is needed to support a compiled claim.
 5. Append one concise audit entry and lint only the changed surface.

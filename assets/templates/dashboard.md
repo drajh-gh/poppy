@@ -57,6 +57,10 @@ sensitivity: internal
 
 ![[{{project_name}} Orchestration.base#Runs]]
 
+## Research
+
+![[{{project_name}} Research.base#Research]]
+
 ## Refresh queue
 
 ![[{{project_name}} Refresh.base#Needs refresh]]

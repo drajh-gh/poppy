@@ -22,7 +22,7 @@ supersedes: []
 sources: []
 ```
 
-Use `type: analysis` plus one of the operational `record_kind` values: `milestone`, `commitment`, `raid-item`, `change-request`, `stakeholder`, `budget-snapshot`, `health-snapshot`, `meeting-note`, `portfolio-summary`, or `improvement-candidate`. Decisions remain `type: decision`. This keeps Project Operations records compatible with the Project OS knowledge lifecycle while letting Bases select operational records precisely.
+Use `type: analysis` plus one of the operational `record_kind` values: `milestone`, `commitment`, `raid-item`, `change-request`, `stakeholder`, `budget-snapshot`, `health-snapshot`, `meeting-note`, `portfolio-summary`, `improvement-candidate`, `research-brief`, `repository-assessment`, or `research-handoff`. Decisions remain `type: decision`. This keeps Project Operations records compatible with the Project OS knowledge lifecycle while letting Bases select operational records precisely.
 
 Use `status: current|draft|needs-review|superseded` for milestone, commitment, RAID, change, stakeholder, budget, and health records. Do not place values such as `blocked`, `overdue`, `approved`, or `at-risk` in `status`; those belong in `pm_state` or `health`. Decisions and open questions retain their Project OS lifecycle values.
 
@@ -53,3 +53,7 @@ Add `period`, `currency`, `approved_budget`, `actual_cost`, `actual_hours`, `com
 ## Health snapshot
 
 Add each configured health dimension, `overall_health`, `meaningful_changes`, `decisions_required`, `next_actions`, and `freshness_gaps`. Store a dated snapshot; `current.md` compiles only the present orientation.
+
+## Research records
+
+For a research brief, add `research_run_id`, `scope_level`, `priority_lane`, coverage, need IDs, finding IDs, and source references. For a repository assessment, add canonical URL, maintainer evidence, maintenance date, license, security/quality signals, inspection mode, and outcome. For an Upgrader handoff, add project-fix and global-candidate IDs and keep `implementation_authorized: false`.

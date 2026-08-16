@@ -71,6 +71,7 @@
     "weekly_review": {"enabled": true, "day": "friday", "time": "14:00"},
     "monthly_portfolio": {"enabled": true},
     "workflow_improvement": {"enabled": true, "frequency": "weekly", "time": "17:30", "changed_only": true, "max_specialists": 2},
+    "workflow_research": {"enabled": false, "frequency": "weekly", "time": "16:30", "changed_only": true, "max_specialists": 2, "repository_access": "inspect-only", "themes": ["agentic workflow", "graph engineering"]},
     "meeting_followup": "event-driven",
     "quiet_hours": ["18:00", "08:00"]
   },

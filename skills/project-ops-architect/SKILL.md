@@ -11,9 +11,9 @@ Read [architecture](../../references/architecture.md), [onboarding workflow](../
 2. Delegate bounded source discovery or adapter analysis only when it can proceed independently.
 3. Design the smallest project-neutral core plus explicit project adapter.
 4. Route onboarding mechanics through `project-ops-onboard`; route memory construction through `project-ops-memory`.
-5. Define approval boundaries, cadences, deterministic gates, handoffs, and rollback.
+5. Define approval boundaries, cadences, research themes and repository access, deterministic gates, handoffs, and rollback.
 6. Preview generated artifacts and external effects before applying them.
 7. Validate the profile, scaffold, adapter, and source-authority map.
-8. Hand operational control to `project-ops-manager` and improvement governance to `project-ops-upgrader`.
+8. Hand operational control to `project-ops-manager`, external discovery to `project-ops-researcher`, and improvement governance to `project-ops-upgrader`.
 
 Do not encode project-specific commands or terminology as plugin defaults, duplicate authoritative trackers, or treat architectural confidence as mutation authority.

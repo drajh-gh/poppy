@@ -1,0 +1,4 @@
+interface:
+  display_name: "Researcher"
+  short_description: "Research evidence for better project operations"
+  default_prompt: "Use $project-ops-researcher to identify proven workflow improvements from reputable sources and hand the strongest candidates to Upgrader."

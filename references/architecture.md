@@ -2,20 +2,22 @@
 
 ## Operating model
 
-Use three peer orchestrators over one evidence-backed project record:
+Use four peer orchestrator roles over one evidence-backed project record:
 
 - **Solution Architect** designs or reconfigures the operating system, source authority, delivery adapter, gates, and project structure.
 - **Chief of Staff** runs the project-management control loop and coordinates approved delivery through existing specialist skills.
+- **Researcher** studies current work, reputable external sources, and evidence-backed repositories; determines project and global applicability; and hands repair-first recommendations to Upgrader.
 - **Upgrader** studies actual work, friction, failures, corrections, and successful patterns; applies safe local improvements and governs promotion into the reusable plugin.
 
-Use one persistent Chief of Staff task per project and one portfolio task consuming sanitized project summaries. Keep operational control, delivery execution, and improvement governance distinct while sharing evidence.
+The persistent core-agent triad is Chief of Staff, Researcher, and Upgrader. Solution Architect remains the design and reconfiguration role. Use one persistent Chief of Staff task per project, bounded Researcher and Upgrader runs, and one portfolio task consuming sanitized project summaries. Keep operational control, external discovery, delivery execution, and improvement governance distinct while sharing evidence.
 
 ```text
 External sources -> bounded evidence receipts -> compiled project memory
                                             -> operating design  -> Solution Architect
                                             -> PM control records -> Chief of Staff
                                             -> delivery context  -> Delivery workflow
-                                            -> work evidence     -> Upgrader
+                                            -> observed needs    -> Researcher
+Researcher evidence + work evidence         -> Upgrader
 ```
 
 ## Authority boundaries
@@ -71,12 +73,23 @@ project-ops.json       validated machine-readable project profile
 7. Prepare a one-stop handoff.
 8. Require separate approval for merge, deployment, production, or sensitive communication.
 
+### Research loop
+
+1. Bound projects, task window, vaults, themes, decision, and coverage.
+2. Build a need ledger from actual work before searching externally.
+3. Research repairs to existing workflows before net-new capabilities.
+4. Prefer official, primary, reproducible, and maintained evidence; treat social material as a lead unless corroborated.
+5. Inspect repository pages and metadata without cloning, downloading, installing, or executing third-party code.
+6. Reconcile claims, contradictions, source quality, repository risk, and target-specific applicability.
+7. Score and sequence findings with deterministic repair-first relevance.
+8. Validate a normalized handoff and route project fixes or plugin candidates to Upgrader without implementation authority.
+
 ### Upgrade loop
 
-1. Bound the review period and enumerate relevant completed or materially attempted work.
+1. Bound the review period and enumerate relevant completed or materially attempted work plus validated Researcher handoffs.
 2. Use one efficiency analyst and, when useful, one workflow-quality analyst as read-only subagents.
 3. Reconcile outcomes, retries, delays, user corrections, tool failures, safeguards, and successful patterns.
-4. Classify each supported improvement as no action, project fix, plugin candidate, or plugin upgrade.
+4. Reassess each Researcher proposal and work-derived improvement as no action, project fix, plugin candidate, or plugin upgrade.
 5. Apply only authorized, reversible project-level improvements; validate them and record evidence.
 6. Add reusable candidates to the promotion registry; require cross-project evidence or a project-neutral deterministic proof before promotion.
 7. Prepare plugin changes and an independent assessment. Plugin activation, marketplace updates, and broad behavioral changes remain approval-gated unless the current manifest explicitly grants them.
@@ -84,4 +97,4 @@ project-ops.json       validated machine-readable project profile
 
 ## Portfolio isolation
 
-Publish only normalized project health, milestone, capacity, commercial variance, risk, decision, and freshness fields. Never publish raw client evidence, credentials, personal data, production rows, or contract text into the portfolio vault.
+Publish only normalized project health, milestone, capacity, commercial variance, risk, decision, freshness, and sanitized project-neutral research fields. Never publish raw client evidence, task content, credentials, personal data, production rows, or contract text into the portfolio vault.

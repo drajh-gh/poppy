@@ -1,6 +1,6 @@
 ---
 name: project-ops-automate
-description: Configure, inspect, deconflict, update, or retire Codex automations for Project Operations cadences. Use when a user wants recurring project health checks, weekly planning, monthly governance, meeting follow-ups, portfolio refreshes, reminders, monitoring, or changes to an existing Project Operations schedule.
+description: Configure, inspect, deconflict, update, or retire Codex automations for Project Operations cadences. Use when a user wants recurring project health checks, weekly planning, monthly governance, external research, workflow improvement, meeting follow-ups, portfolio refreshes, reminders, monitoring, or changes to an existing Project Operations schedule.
 ---
 
 # Project Operations automation
@@ -12,7 +12,7 @@ Read [automation and cadence](../../references/automation-and-cadence.md), [proj
 3. Recommend the smallest useful cadence and notification policy. Prefer a heartbeat attached to the current task unless the user explicitly asks for standalone project work.
 4. Show the proposed name, purpose, schedule in local human-readable time, target, expected outputs, no-change behavior, and external side effects.
 5. Ask for explicit confirmation before creating, changing, enabling, disabling, or deleting an automation.
-6. Rehearse the proposed prompt manually against the project contract before activation. Durable scheduled prompts must explicitly invoke `project-ops-manager` and `project-ops-memory`.
+6. Rehearse the proposed prompt manually against the project contract before activation. Operational prompts explicitly invoke `project-ops-manager` and `project-ops-memory`. Research prompts explicitly invoke `project-ops-researcher` and `project-ops-memory`, keep repositories `inspect-only`, and hand actionable findings to `project-ops-upgrader` without applying them.
 7. Use the automation tool, preserving all unspecified fields when updating.
 8. Record the automation identifier and purpose in the project profile or onboarding receipt only after successful creation or update.
 

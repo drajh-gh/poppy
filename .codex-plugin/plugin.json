@@ -1,15 +1,15 @@
 {
   "name": "project-operations",
-  "version": "0.1.0+codex.20260814150806",
-  "description": "Evidence-backed project architecture, operational leadership, and continuous improvement for Codex and Obsidian.",
+  "version": "0.1.0+codex.20260816073259",
+  "description": "Evidence-backed project architecture, operational leadership, external research, and continuous improvement for Codex and Obsidian.",
   "author": {
     "name": "David Rajh"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Project Operations",
-    "shortDescription": "Architect, operate, and continuously improve projects.",
-    "longDescription": "A three-part operating system: the Solution Architect designs project operations, the Chief of Staff runs evidence-backed control loops, and the Upgrader continuously improves workflows. A bounded Obsidian lifecycle orients substantive work and preserves durable progress at close.",
+    "shortDescription": "Architect, operate, research, and improve projects.",
+    "longDescription": "A four-role operating system with a persistent core-agent triad: the Solution Architect designs project operations, the Chief of Staff runs evidence-backed control loops, the Researcher discovers repair-first improvements from reputable sources and repositories, and the Upgrader governs implementation and promotion. A bounded Obsidian lifecycle preserves durable progress.",
     "developerName": "David Rajh",
     "category": "Productivity",
     "capabilities": [
@@ -19,8 +19,7 @@
     ],
     "defaultPrompt": [
       "Guide me through onboarding a project.",
-      "Orient from project memory and close this task without losing durable progress.",
-      "Prepare this week's project health review.",
+      "Research evidence-backed ways to repair our current workflows before proposing additions.",
       "Review recent work and improve how this project operates."
     ]
   }

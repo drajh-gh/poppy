@@ -28,7 +28,7 @@ Modes: `new-project`, `adopt-existing-vault`, `clone-project-archetype`, and `re
 7. Protect human-owned vault surfaces and confirm portfolio publication policy.
 8. Confirm stakeholders, decision rights, and approvers.
 9. Select approval preset and exact external-write boundaries.
-10. Confirm cadence, quiet hours, destinations, and changed-only notifications.
+10. Confirm cadence, quiet hours, destinations, changed-only notifications, research themes, and inspect-only repository policy. Leave research automation disabled unless explicitly activated after rehearsal.
 11. Recommend archetype-specific RAG tolerances and allow adjustment.
 12. Discover every active repository's agent-instruction source and preview a compact repository memory adapter; never edit generated instruction outputs directly.
 13. Preview source map, authority map, artifact plan, repository-adoption plan, gaps, and exact external effects.

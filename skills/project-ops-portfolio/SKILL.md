@@ -5,7 +5,7 @@ description: Prepare a cross-project portfolio review from sanitized Project Ope
 
 # Project Operations portfolio
 
-Read [architecture](../../references/architecture.md), [health and cadence](../../references/health-and-cadence.md), and each project's published sanitized portfolio summary. Do not read raw client evidence unless the user explicitly authorizes a project-specific investigation.
+Read [architecture](../../references/architecture.md), [health and cadence](../../references/health-and-cadence.md), and each project's published sanitized portfolio summary. Read sanitized project-neutral research records only when comparing Researcher findings. Do not read raw client evidence unless the user explicitly authorizes a project-specific investigation.
 
 1. Verify summary freshness and schema compatibility.
 2. Compare outcomes, next milestones, capacity, forecast variance, top risks, decisions, and evidence gaps.
@@ -14,5 +14,7 @@ Read [architecture](../../references/architecture.md), [health and cadence](../.
 5. Identify cross-project capacity or timing conflicts without leaking client detail.
 6. Draft the portfolio review and decisions required.
 7. Update the portfolio record only with normalized data.
+
+Route cross-project external research to `project-ops-researcher`; route resulting promotion decisions to `project-ops-upgrader`. Never merge client-specific need evidence into the global research registry.
 
 Never copy contracts, transcripts, raw messages, production evidence, personal data, credentials, or detailed client financial cases across vault boundaries.

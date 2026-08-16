@@ -122,6 +122,8 @@ def defaults(name: str, key: str, client: str) -> dict[str, Any]:
             "daily_brief": {"enabled": True, "time": "08:30", "changed_only": True},
             "weekly_review": {"enabled": True, "day": "friday", "time": "14:00"},
             "monthly_portfolio": {"enabled": True},
+            "workflow_improvement": {"enabled": False, "frequency": "weekly", "time": "17:30", "changed_only": True, "max_specialists": 2},
+            "workflow_research": {"enabled": False, "frequency": "weekly", "time": "16:30", "changed_only": True, "max_specialists": 2, "repository_access": "inspect-only", "themes": []},
             "meeting_followup": "event-driven",
             "quiet_hours": ["18:00", "08:00"],
         },

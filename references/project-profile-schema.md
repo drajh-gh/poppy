@@ -81,6 +81,7 @@ Store the validated profile as `project-ops.json` at the vault root. The onboard
     "weekly_review": {"enabled": true, "day": "friday", "time": "14:00"},
     "monthly_portfolio": {"enabled": true},
     "workflow_improvement": {"enabled": false, "frequency": "weekly", "time": "17:30", "changed_only": true, "max_specialists": 2},
+    "workflow_research": {"enabled": false, "frequency": "weekly", "time": "16:30", "changed_only": true, "max_specialists": 2, "repository_access": "inspect-only", "themes": []},
     "meeting_followup": "event-driven",
     "quiet_hours": ["18:00", "08:00"]
   },
@@ -107,6 +108,7 @@ Store the validated profile as `project-ops.json` at the vault root. The onboard
 - `vault.adoption_mode`: `new`, `existing`, `clone`, `reconfigure`
 - sensitivity: `internal`, `confidential`, `restricted`
 - `cadence.workflow_improvement.frequency`: `weekdays` or `weekly`
+- `cadence.workflow_research.frequency`: `weekly` or `monthly`; repository access must be `inspect-only`
 
 ## Validation invariants
 
@@ -116,3 +118,4 @@ Store the validated profile as `project-ops.json` at the vault root. The onboard
 - `tracker` and `github` references never authorize external writes.
 - A budget health result is Gray when no approved baseline exists.
 - Existing vault adoption never overwrites `AGENTS.md`, `raw/`, `inbox.md`, `daily/`, canonical pages, or `log.md`.
+- Research cadence is optional and disabled by default; scheduling never authorizes repository download/execution or project/plugin mutation.
