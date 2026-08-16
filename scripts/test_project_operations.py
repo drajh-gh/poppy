@@ -537,6 +537,10 @@ def assert_poppy_orchestration() -> None:
     graph_errors = validate_poppy_graph(graph)
     if graph_errors:
         raise AssertionError(f"Poppy capability graph failed: {graph_errors}")
+    boolean_schema_graph = copy.deepcopy(graph)
+    boolean_schema_graph["schema_version"] = True
+    if not any("schema_version must be 1" in error for error in validate_poppy_graph(boolean_schema_graph)):
+        raise AssertionError("Poppy capability graph accepted boolean schema_version")
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(ROOT / "references" / "poppy-capability-graph.json"))
 
     simple = load_fixture("valid-poppy-simple-plan.json")
@@ -626,8 +630,23 @@ def assert_poppy_orchestration() -> None:
     forged_turn_authority["authority"]["allowed_actions"] = ["Delete the project controls"]  # type: ignore[index]
     forged_turn_authority["authority"]["effect_previews"][0]["action"] = "Delete the project controls"  # type: ignore[index]
     errors = validate_poppy_plan(forged_turn_authority, graph)
-    if not any("explicit authorization language" in error for error in errors):
+    if not any("standalone exact authorization grant" in error for error in errors):
         raise AssertionError(f"Poppy self-promoted a non-authorizing turn into write authority: {errors}")
+    for non_authorizing_text in (
+        "Poppy, you may not Set review_mode to evidence-first",
+        "Poppy, the phrase 'you may Set review_mode to evidence-first' is only an example; do not act",
+        "Poppy, if I later say go ahead, Set review_mode to evidence-first",
+        "Poppy, explain why 'please set Set review_mode to evidence-first' is unsafe; do not execute",
+    ):
+        non_authorizing_packet = copy.deepcopy(mutating)
+        non_authorizing_packet["trigger"]["mention"] = non_authorizing_text  # type: ignore[index]
+        non_authorizing_packet["trigger"]["turn_digest"] = hashlib.sha256(  # type: ignore[index]
+            non_authorizing_text.encode("utf-8")
+        ).hexdigest()
+        non_authorizing_packet["authority"]["source_digest"] = non_authorizing_packet["trigger"]["turn_digest"]  # type: ignore[index]
+        errors = validate_poppy_plan(non_authorizing_packet, graph)
+        if not any("standalone exact authorization grant" in error for error in errors):
+            raise AssertionError(f"Poppy treated non-authorizing language as write authority: {errors}")
 
     mutation_closure = {
         "schema_version": 1,
@@ -972,7 +991,7 @@ def assert_poppy_orchestration() -> None:
             "root_task_id": worker_plan["root_task_id"],
             "parent_task_id": worker_plan["root_task_id"],
             "outcome": "NEEDS_PARENT_DECISION",
-            "evidence_refs": ["worker-decision-packet"],
+            "evidence_refs": ["worker-decision-packet", "health-snapshot"],
             "repository_state": {"status": "not-applicable"},
             "residual_risk": "Human decision remains unresolved",
             "next_action": "Poppy must resolve or relay the decision",
@@ -1017,7 +1036,7 @@ def assert_poppy_orchestration() -> None:
             "parent_task_id": resolved_worker_plan["root_task_id"],
             "outcome": "NEEDS_PARENT_DECISION",
             "parent_resolution_receipt": "parent-resolution-001",
-            "evidence_refs": ["worker-decision-packet"],
+            "evidence_refs": ["worker-decision-packet", "health-snapshot"],
             "repository_state": {"status": "not-applicable"},
             "residual_risk": "Decision resolved by Poppy",
             "next_action": "Use the recorded parent disposition",
@@ -1025,6 +1044,13 @@ def assert_poppy_orchestration() -> None:
     ]
     if errors := validate_poppy_closure(resolved_worker, graph, resolved_worker_plan):
         raise AssertionError(f"valid resolved-worker decision closure failed: {errors}")
+    unbound_worker_evidence = copy.deepcopy(resolved_worker)
+    for result in unbound_worker_evidence["node_results"]:  # type: ignore[index]
+        if result["node"] == "health-reporting":
+            result["evidence_refs"] = ["different-evidence"]
+    errors = validate_poppy_closure(unbound_worker_evidence, graph, resolved_worker_plan)
+    if not any("passing delegated node health-reporting must cite" in error for error in errors):
+        raise AssertionError(f"Poppy accepted unbound ordinary-worker evidence: {errors}")
     failed_worker = copy.deepcopy(resolved_worker)
     failed_worker["worker_closures"][0]["outcome"] = "failed"  # type: ignore[index]
     failed_worker["worker_closures"][0].pop("parent_resolution_receipt")  # type: ignore[index]
@@ -1108,6 +1134,7 @@ def assert_poppy_orchestration() -> None:
             "root_task_id": r2_plan["root_task_id"],
             "parent_task_id": r2_plan["root_task_id"],
             "outcome": "complete",
+            "verdict": "PASS",
             "evidence_refs": ["independent-postflight-verdict"],
             "repository_state": {"status": "not-applicable"},
             "residual_risk": "No material residual risk",
@@ -1117,6 +1144,9 @@ def assert_poppy_orchestration() -> None:
     valid_r2_closure["postflight"]["evidence_basis"].append(  # type: ignore[index]
         "independent-postflight-verdict"
     )
+    for result in valid_r2_closure["node_results"]:  # type: ignore[index]
+        if result["node"] == "postflight-evaluate":
+            result["evidence_refs"].append("independent-postflight-verdict")
     if errors := validate_poppy_closure(valid_r2_closure, graph, r2_plan):
         raise AssertionError(f"valid R2 independent-evaluator closure failed: {errors}")
     unbound_evaluator_evidence = copy.deepcopy(valid_r2_closure)
@@ -1126,6 +1156,11 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(unbound_evaluator_evidence, graph, r2_plan)
     if not any("must cite the independent evaluator evidence" in error for error in errors):
         raise AssertionError(f"Poppy accepted unbound independent-evaluator evidence: {errors}")
+    blocking_evaluator = copy.deepcopy(valid_r2_closure)
+    blocking_evaluator["worker_closures"][0]["verdict"] = "BLOCK_REMEDIATE"  # type: ignore[index]
+    errors = validate_poppy_closure(blocking_evaluator, graph, r2_plan)
+    if not any("evaluator verdict must match" in error for error in errors):
+        raise AssertionError(f"Poppy PASS overrode a blocking evaluator verdict: {errors}")
     failed_evaluator = copy.deepcopy(valid_r2_closure)
     failed_evaluator["worker_closures"][0]["outcome"] = "failed"  # type: ignore[index]
     errors = validate_poppy_closure(failed_evaluator, graph, r2_plan)
@@ -1215,6 +1250,25 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_plan(delivery_without_review, graph)
     if not any("requires Functional QA and Final Assurance" in error for error in errors):
         raise AssertionError(f"Poppy delivery bypassed mandatory assessment stages: {errors}")
+    parallel_delivery_bypass = copy.deepcopy(delivery_plan)
+    parallel_delivery_bypass["selected_edges"].append(  # type: ignore[union-attr]
+        {"from": "delivery", "to": "join"}
+    )
+    errors = validate_poppy_plan(parallel_delivery_bypass, graph)
+    if not any("cannot select the stopped-before-review" in error for error in errors):
+        raise AssertionError(f"Poppy delivery retained a parallel assessment bypass: {errors}")
+    simultaneous_assessors = copy.deepcopy(delivery_plan)
+    simultaneous_assessors["delegation"]["max_active_workers"] = 2  # type: ignore[index]
+    for worker in simultaneous_assessors["delegation"]["workers"]:  # type: ignore[index]
+        worker["status"] = "active"
+    errors = validate_poppy_plan(simultaneous_assessors, graph)
+    if not any("cannot be active simultaneously" in error for error in errors):
+        raise AssertionError(f"Poppy ran Functional QA and Final Assurance concurrently: {errors}")
+    root_assessor = copy.deepcopy(delivery_plan)
+    root_assessor["delegation"]["workers"][0]["id"] = root_assessor["root_task_id"]  # type: ignore[index]
+    errors = validate_poppy_plan(root_assessor, graph)
+    if not any("id must differ from the root task ID" in error for error in errors):
+        raise AssertionError(f"Poppy reused the root identity for a fresh assessor: {errors}")
     wrong_assurance_input = copy.deepcopy(delivery_plan)
     wrong_assurance_input["delegation"]["workers"][1]["minimized_inputs"] = [  # type: ignore[index]
         "unrelated-marketing-note"
@@ -1227,6 +1281,62 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_plan(wrong_assurance_output, graph)
     if not any("output_contract must match one declared node output" in error for error in errors):
         raise AssertionError(f"Poppy Final Assurance accepted an untyped worker output: {errors}")
+
+    delivery_closure = copy.deepcopy(mutation_closure)
+    delivery_closure["plan_run_id"] = delivery_plan["run_id"]
+    delivery_closure["plan_digest"] = poppy_digest(delivery_plan)
+    delivery_closure["selected_nodes"] = copy.deepcopy(delivery_plan["selected_nodes"])
+    delivery_closure["selected_edges"] = copy.deepcopy(delivery_plan["selected_edges"])
+    delivery_closure["node_results"] = [
+        {
+            "node": node,
+            "status": "pass",
+            "summary": f"{node} completed",
+            "evidence_refs": (
+                ["functional-qa-evidence"] if node == "functional-qa"
+                else ["final-assurance-evidence"] if node == "final-assurance"
+                else []
+            ),
+        }
+        for node in delivery_plan["selected_nodes"]
+    ]
+    delivery_closure["external_effects"][0]["handler"] = "project-ops-delivery"  # type: ignore[index]
+    delivery_closure["worker_closures"] = [
+        {
+            "worker_id": f"worker-{node}-001",
+            "root_task_id": delivery_plan["root_task_id"],
+            "parent_task_id": delivery_plan["root_task_id"],
+            "outcome": "complete",
+            "verdict": "PASS_HANDOFF",
+            "evidence_refs": [
+                "functional-qa-evidence" if node == "functional-qa" else "final-assurance-evidence"
+            ],
+            "repository_state": {"status": "not-applicable"},
+            "residual_risk": "No material stage-specific residual risk",
+            "next_action": "Return the stage verdict to Poppy",
+        }
+        for node in ("functional-qa", "final-assurance")
+    ]
+    if errors := validate_poppy_closure(delivery_closure, graph, delivery_plan):
+        raise AssertionError(f"valid delivery closure with passing assessment stages failed: {errors}")
+    failed_delivery_gate = copy.deepcopy(delivery_closure)
+    for result in failed_delivery_gate["node_results"]:  # type: ignore[index]
+        if result["node"] == "functional-qa":
+            result["status"] = "failed"
+    failed_delivery_gate["worker_closures"][0]["verdict"] = "BLOCK_REMEDIATE"  # type: ignore[index]
+    failed_delivery_gate["postflight"]["verdict"] = "ESCALATE"  # type: ignore[index]
+    errors = validate_poppy_closure(failed_delivery_gate, graph, delivery_plan)
+    if not any("delivery effects require passing" in error for error in errors):
+        raise AssertionError(f"Poppy applied a delivery effect after failed Functional QA: {errors}")
+    failed_both_delivery_gates = copy.deepcopy(failed_delivery_gate)
+    for result in failed_both_delivery_gates["node_results"]:  # type: ignore[index]
+        if result["node"] == "final-assurance":
+            result["status"] = "failed"
+    failed_both_delivery_gates["worker_closures"][1]["verdict"] = "BLOCK_REMEDIATE"  # type: ignore[index]
+    failed_both_delivery_gates["postflight"]["verdict"] = "BLOCK_REMEDIATE"  # type: ignore[index]
+    errors = validate_poppy_closure(failed_both_delivery_gates, graph, delivery_plan)
+    if not any("delivery effects require passing" in error for error in errors):
+        raise AssertionError(f"Poppy applied a delivery effect after both delivery gates failed: {errors}")
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-simple-plan.json"))
     run(str(SCRIPTS / "validate_poppy_orchestration.py"), str(FIXTURES / "valid-poppy-plan.json"))
     run(
@@ -1246,10 +1356,19 @@ def assert_poppy_orchestration() -> None:
     packet = copy.deepcopy(plan)
     packet["preflight"]["risk"] = "R1"  # type: ignore[index]
     plan_cases.append(("authority below risk floor", packet, "below the preflight risk floor"))
+    packet = copy.deepcopy(plan)
+    packet["schema_version"] = True
+    plan_cases.append(("boolean plan schema version", packet, "schema_version must be 1"))
     for invalid_project in ("not-required", "unknown", "sample-project,other-project"):
         packet = copy.deepcopy(plan)
         packet["project_id"] = invalid_project
         plan_cases.append((f"unresolved substantive project {invalid_project}", packet, "exact resolved project_id"))
+    for invalid_unresolved_stop in ("UNRESOLVED", " unresolved "):
+        packet = copy.deepcopy(ask_user)
+        packet["project_id"] = invalid_unresolved_stop
+        plan_cases.append(
+            (f"non-canonical unresolved stop {invalid_unresolved_stop!r}", packet, "exact resolved project_id")
+        )
     packet = copy.deepcopy(plan)
     packet["acceptance"] = []
     plan_cases.append(("empty acceptance", packet, "acceptance must be a non-empty string list"))
@@ -1327,6 +1446,14 @@ def assert_poppy_orchestration() -> None:
     packet = copy.deepcopy(worker_plan)
     packet["delegation"]["workers"][0]["remaining_task_allowance"] = 3  # type: ignore[index]
     plan_cases.append(("recursive task allowance", packet, "must be 0 because recursive delegation is forbidden"))
+    for invalid_depth in (True, 1.0):
+        packet = copy.deepcopy(worker_plan)
+        packet["delegation"]["workers"][0]["depth"] = invalid_depth  # type: ignore[index]
+        plan_cases.append((f"non-integer worker depth {invalid_depth!r}", packet, "depth must be 1"))
+    for invalid_allowance in (False, 0.0):
+        packet = copy.deepcopy(worker_plan)
+        packet["delegation"]["workers"][0]["remaining_task_allowance"] = invalid_allowance  # type: ignore[index]
+        plan_cases.append((f"non-integer worker allowance {invalid_allowance!r}", packet, "must be 0 because"))
     for label, packet, expected in plan_cases:
         errors = validate_poppy_plan(packet, graph)
         if not any(expected in error for error in errors):
@@ -1337,6 +1464,11 @@ def assert_poppy_orchestration() -> None:
     errors = validate_poppy_closure(packet, graph, plan)
     if not any("plan_digest does not match" in error for error in errors):
         raise AssertionError(f"Poppy closure accepted the wrong plan digest: {errors}")
+    packet = copy.deepcopy(closure)
+    packet["schema_version"] = True
+    errors = validate_poppy_closure(packet, graph, plan)
+    if not any("schema_version must be 1" in error for error in errors):
+        raise AssertionError(f"Poppy closure accepted boolean schema_version: {errors}")
     packet = copy.deepcopy(closure)
     packet["node_results"][0]["status"] = "limited"  # type: ignore[index]
     errors = validate_poppy_closure(packet, graph, plan)

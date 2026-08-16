@@ -80,7 +80,8 @@ Treat the following as release-gate cases for the single-partner graph:
 14. R2/R3 postflight is performed by a fresh evaluator task whose identity differs from the root. The root cannot self-declare independence.
 15. Explicit read-only, review-only, or diagnosis-only scope suppresses every vault write, receipt, and log entry. A material write-authorized run creates at most one `orchestration-run` receipt under the existing PM run surface.
 16. A truthful ambiguous-project safe stop records `project_id: unresolved`; an executing substantive path accepts only one normalized exact project key and rejects cross-project identifiers.
-17. A trusted current turn grants write authority only when it contains explicit authorization language and every exact allowed action; a health or assessment request cannot be self-promoted into mutation authority.
+17. A trusted current turn grants write authority only as one standalone exact-action authorization; quoted examples, future conditions, explanations, negations, and health or assessment requests cannot be self-promoted into mutation authority.
 18. Unicode-equivalent allowed, forbidden, and approval-required actions remain contradictory after normalization and fail closed.
 19. Every worker budget can actually accommodate its declared depth and active state; recursive workers retain zero remaining task allowance.
-20. Delivery always traverses distinct fresh Functional QA and Final Assurance workers. Their minimized inputs and output contracts exactly match the typed selected graph edges, and passing assessment/evaluator nodes cite completed worker evidence.
+20. Every passing delegated node cites its assigned worker evidence and every evaluator binds a structured verdict. Delivery traverses identity-distinct, sequential Functional QA and Final Assurance workers; their minimized inputs and output contracts match the typed graph, and no execution or effect crosses a failed gate.
+21. Schema versions, worker depths, and remaining allowances reject booleans and floats even when Python equality would treat them as integer-equivalent.
