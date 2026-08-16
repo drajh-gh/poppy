@@ -559,6 +559,30 @@ def assert_poppy_orchestration() -> None:
         raise AssertionError(f"valid substantive Poppy plan failed: {errors}")
     if errors := validate_poppy_closure(closure, graph, plan):
         raise AssertionError(f"valid Poppy closure failed: {errors}")
+    for field, invalid_value in (
+        ("trigger", []),
+        ("preflight", []),
+        ("authority", []),
+        ("delegation", []),
+        ("interaction_class", []),
+        ("scope_mode", []),
+    ):
+        malformed_plan = copy.deepcopy(plan)
+        malformed_plan[field] = invalid_value
+        if not validate_poppy_plan(malformed_plan, graph):
+            raise AssertionError(f"Poppy accepted malformed plan field {field}")
+    for field, invalid_value in (
+        ("trigger", []),
+        ("interaction_class", []),
+        ("scope_mode", []),
+        ("risk", []),
+        ("postflight", []),
+        ("memory", []),
+    ):
+        malformed_closure = copy.deepcopy(closure)
+        malformed_closure[field] = invalid_value
+        if not validate_poppy_closure(malformed_closure, graph, plan):
+            raise AssertionError(f"Poppy accepted malformed closure field {field}")
     errors = validate_poppy_closure(closure, graph)
     if not any("requires the exact bound plan" in error for error in errors):
         raise AssertionError(f"Poppy accepted an unbound closure: {errors}")

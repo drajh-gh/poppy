@@ -85,3 +85,4 @@ Treat the following as release-gate cases for the single-partner graph:
 19. Every worker budget can actually accommodate its declared depth and active state; recursive workers retain zero remaining task allowance.
 20. Every passing delegated node cites its assigned worker evidence and every evaluator binds a structured verdict. Delivery traverses identity-distinct, sequential Functional QA and Final Assurance workers; their minimized inputs and output contracts match the typed graph, and no execution or effect crosses a failed gate.
 21. Schema versions, worker depths, and remaining allowances reject booleans and floats even when Python equality would treat them as integer-equivalent.
+22. Malformed nested packet field types fail closed as validation errors and never escape as validator exceptions.

@@ -152,7 +152,10 @@ def _graph_index(graph: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], set[
     return nodes, edges
 
 
-def validate_graph(graph: dict[str, Any], root: Path = ROOT) -> list[str]:
+STRUCTURE_EXCEPTIONS = (AttributeError, IndexError, KeyError, TypeError, ValueError)
+
+
+def _validate_graph_impl(graph: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     if not _is_integer(graph.get("schema_version")) or graph.get("schema_version") != 1:
         errors.append("schema_version must be 1")
@@ -302,6 +305,15 @@ def validate_graph(graph: dict[str, Any], root: Path = ROOT) -> list[str]:
     if not _string_list(invariants) or len(invariants) < 8:
         errors.append("invariants must contain at least eight non-empty contracts")
     return errors
+
+
+def validate_graph(graph: dict[str, Any], root: Path = ROOT) -> list[str]:
+    if not isinstance(graph, dict):
+        return ["capability graph must be an object"]
+    try:
+        return _validate_graph_impl(graph, root)
+    except STRUCTURE_EXCEPTIONS:
+        return ["capability graph contains invalid nested field types"]
 
 
 def _validate_trigger(packet: dict[str, Any], errors: list[str]) -> None:
@@ -625,7 +637,7 @@ def _validate_delegation(
         errors.append("delegation active workers exceed max_active_workers")
 
 
-def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
+def _validate_plan_impl(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     if not _is_integer(packet.get("schema_version")) or packet.get("schema_version") != 1:
         errors.append("schema_version must be 1")
@@ -827,7 +839,16 @@ def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
     return errors
 
 
-def validate_closure(
+def validate_plan(packet: dict[str, Any], graph: dict[str, Any]) -> list[str]:
+    if not isinstance(packet, dict):
+        return ["plan packet must be an object"]
+    try:
+        return _validate_plan_impl(packet, graph)
+    except STRUCTURE_EXCEPTIONS:
+        return ["plan packet contains invalid nested field types"]
+
+
+def _validate_closure_impl(
     packet: dict[str, Any], graph: dict[str, Any], plan: dict[str, Any] | None = None
 ) -> list[str]:
     errors: list[str] = []
@@ -1229,9 +1250,22 @@ def validate_closure(
     return errors
 
 
+def validate_closure(
+    packet: dict[str, Any], graph: dict[str, Any], plan: dict[str, Any] | None = None
+) -> list[str]:
+    if not isinstance(packet, dict):
+        return ["closure packet must be an object"]
+    try:
+        return _validate_closure_impl(packet, graph, plan)
+    except STRUCTURE_EXCEPTIONS:
+        return ["closure packet contains invalid nested field types"]
+
+
 def validate_packet(
     packet: dict[str, Any], graph: dict[str, Any] | None = None, plan: dict[str, Any] | None = None
 ) -> list[str]:
+    if not isinstance(packet, dict):
+        return ["packet must be an object"]
     packet_type = packet.get("packet_type")
     if packet_type not in PACKET_TYPES:
         return ["packet_type must be capability-graph, plan, or closure"]
