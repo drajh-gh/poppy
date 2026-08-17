@@ -1,0 +1,36 @@
+{
+  "bind": "127.0.0.1",
+  "port": 7317,
+  "runtime": {
+    "ledger": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\events.jsonl",
+    "database": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\poppy-ops.sqlite3"
+  },
+  "vaults": [
+    {"key": "sloski", "name": "Sloski", "path": "C:\\Vaults\\Sloski"},
+    {"key": "everaway", "name": "EverAway", "path": "C:\\Vaults\\EverAway"}
+  ],
+  "capability_graph": "config/poppy-capability-graph.json",
+  "codex": {
+    "interface": "official-app-server-stdio-jsonrpc",
+    "executable": "C:\\Users\\david\\.codex\\.sandbox-bin\\codex.exe",
+    "launch_enabled": true,
+    "launch_args": [
+      "app-server",
+      "--stdio",
+      "--disable",
+      "apps",
+      "--disable",
+      "plugins",
+      "-c",
+      "mcp_servers.povio_boards={url=\"https://mcp.boards.app.povio.dev/mcp\",enabled=false}",
+      "-c",
+      "mcp_servers.povio_dashboard_mcp={url=\"https://app.povio.com/mcp\",enabled=false}"
+    ],
+    "external_mcp_policy": "explicitly-disabled-for-dashboard-owned-threads",
+    "allowed_local_mcp_servers": ["node_repl"],
+    "disabled_remote_mcp_servers": ["povio_boards", "povio_dashboard_mcp"],
+    "compatibility": "supported",
+    "verified_version": "codex-cli 0.147.0-alpha.6.6",
+    "decision_receipt": "POC-DEC-002"
+  }
+}
