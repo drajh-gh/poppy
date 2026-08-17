@@ -104,6 +104,9 @@ def normalize_cost(value: Any) -> dict[str, Any]:
     except (TypeError, ValueError):
         amount = None
         basis = "unavailable"
+    if basis == "unavailable" or amount is None:
+        amount = None
+        basis = "unavailable"
     return {"amount": amount, "currency": str(source.get("currency") or "USD"), "basis": basis}
 
 

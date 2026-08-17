@@ -108,11 +108,22 @@ async function run() {
     if (!detailText.includes(text)) throw new Error(`Run detail lineage missing: ${text}`);
   }
 
+  view.state.runs = [{ run_id: "run-1", project: "portfolio", status: "completed", updated_at: "2026-08-17T00:00:00Z", duration_ms: 10, tokens: {}, cost: { amount: null, basis: "unavailable" } }];
+  const runs = view.renderRuns();
+  if (!findAll(runs, (node) => node.textContent === "unavailable").length) throw new Error("Unavailable run cost is not rendered as a Gray unavailable state");
+
   const finding = { id: "finding-1", kind: "execution-failure", severity: "high", message: "Gate failed", action: "Inspect it", event_ids: ["event-1"], references: [{ type: "event", id: "event-1", run_id: "run-1", label: "Gate verified" }] };
   view.state.findings = [finding];
-  view.focusedFinding = finding.id;
-  const issues = view.renderIssues();
-  if (findAll(issues, (node) => node.className === "poppy-finding-ref").length !== 1) throw new Error("Issue drill-through did not render its structured reference");
+  view.focusedFinding = null;
+  let issues = view.renderIssues();
+  const inspect = findAll(issues, (node) => node.textContent === "Inspect references")[0];
+  if (!inspect?.listeners?.click) throw new Error("Issue finding has no drill-through control");
+  inspect.listeners.click();
+  issues = view.renderIssues();
+  const findingRef = findAll(issues, (node) => node.className === "poppy-finding-ref")[0];
+  if (!findingRef) throw new Error("Issue drill-through did not render its structured reference");
+  findingRef.listeners.click();
+  if (view.page !== "runs" || view.selectedRun !== "run-1") throw new Error("Event finding reference did not focus its linked run");
 
   view.state.graph = graph;
   view.state.events = [];

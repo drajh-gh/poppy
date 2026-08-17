@@ -23,7 +23,11 @@ class EventNormalizationTests(unittest.TestCase):
     def test_cost_basis_is_bounded(self) -> None:
         event = normalize_event({"kind": "turn.completed", "cost": {"amount": "1.25", "basis": "invoice"}})
         self.assertEqual(event["cost"]["basis"], "unavailable")
-        self.assertEqual(event["cost"]["amount"], 1.25)
+        self.assertIsNone(event["cost"]["amount"])
+
+    def test_missing_amount_cannot_claim_exact_cost(self) -> None:
+        event = normalize_event({"kind": "turn.completed", "cost": {"amount": None, "basis": "exact"}})
+        self.assertEqual(event["cost"], {"amount": None, "currency": "USD", "basis": "unavailable"})
 
     def test_contradiction_is_preserved(self) -> None:
         event = normalize_event({"kind": "evidence.read", "evidence": [{"source": "budget", "contradiction": True, "state": "completed"}]})
