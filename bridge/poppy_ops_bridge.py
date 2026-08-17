@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import queue
 import re
@@ -44,7 +45,7 @@ def utc_now() -> str:
 
 
 def json_dumps(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
 def stable_id(prefix: str, value: Any) -> str:
@@ -98,16 +99,27 @@ def normalize_cost(value: Any) -> dict[str, Any]:
     basis = str(source.get("basis") or "unavailable")
     if basis not in VALID_COST_BASIS:
         basis = "unavailable"
+    raw_currency = source.get("currency")
+    currency = raw_currency.strip().upper() if isinstance(raw_currency, str) else None
+    if not currency or not re.fullmatch(r"[A-Z]{3}", currency):
+        currency = None
     raw_amount = source.get("amount")
-    try:
-        amount = None if raw_amount is None else round(float(raw_amount), 8)
-    except (TypeError, ValueError):
+    if isinstance(raw_amount, bool) or not isinstance(raw_amount, (int, float)):
         amount = None
         basis = "unavailable"
-    if basis == "unavailable" or amount is None:
+    else:
+        try:
+            amount = round(float(raw_amount), 8)
+        except (TypeError, ValueError, OverflowError):
+            amount = None
+            basis = "unavailable"
+    if amount is not None and (not math.isfinite(amount) or amount < 0):
         amount = None
         basis = "unavailable"
-    return {"amount": amount, "currency": str(source.get("currency") or "USD"), "basis": basis}
+    if basis == "unavailable" or amount is None or currency is None:
+        amount = None
+        basis = "unavailable"
+    return {"amount": amount, "currency": currency, "basis": basis}
 
 
 def normalize_evidence(value: Any) -> list[dict[str, Any]]:
@@ -265,7 +277,7 @@ class EventStore:
                 event["event_id"], event["timestamp"], event["run_id"], event["project"], event["kind"],
                 event["status"], event["capability"], event["skill"], event["worker"], event["tool"],
                 event["approval"], event["duration_ms"], tokens["input"], tokens["cached"], tokens["reasoning"],
-                tokens["output"], cost["amount"], cost["currency"], cost["basis"], event["parent_id"],
+                tokens["output"], cost["amount"], cost["currency"] or "", cost["basis"], event["parent_id"],
                 event["message"], json_dumps(event["evidence"]), json_dumps(event["metadata"]), json_dumps(event),
             ),
         )
@@ -317,10 +329,12 @@ class EventStore:
                SUM(input_tokens) AS input_tokens, SUM(cached_tokens) AS cached_tokens,
                SUM(reasoning_tokens) AS reasoning_tokens, SUM(output_tokens) AS output_tokens,
                SUM(cost_amount) AS known_cost_amount,
-               SUM(CASE WHEN cost_amount IS NULL OR cost_basis = 'unavailable' THEN 1 ELSE 0 END) AS unavailable_cost_count,
+               SUM(CASE WHEN cost_amount IS NULL OR cost_basis = 'unavailable' OR cost_currency IS NULL OR cost_currency = '' THEN 1 ELSE 0 END) AS unavailable_cost_count,
                SUM(CASE WHEN cost_basis = 'exact' THEN 1 ELSE 0 END) AS exact_cost_count,
                SUM(CASE WHEN cost_basis = 'estimated' THEN 1 ELSE 0 END) AS estimated_cost_count,
                SUM(CASE WHEN cost_basis = 'shadow-price' THEN 1 ELSE 0 END) AS shadow_cost_count,
+               COUNT(DISTINCT CASE WHEN cost_amount IS NOT NULL AND cost_basis != 'unavailable' THEN cost_currency END) AS available_currency_count,
+               MIN(CASE WHEN cost_amount IS NOT NULL AND cost_basis != 'unavailable' THEN cost_currency END) AS available_currency,
                MAX(CASE status WHEN 'failed' THEN 7 WHEN 'blocked' THEN 6 WHEN 'current' THEN 5
                    WHEN 'waiting' THEN 4 WHEN 'gray' THEN 3 WHEN 'pending' THEN 2 ELSE 1 END) AS state_rank
         FROM events GROUP BY run_id, project ORDER BY updated_at DESC LIMIT ?
@@ -337,17 +351,19 @@ class EventStore:
                 exact_count = item.pop("exact_cost_count")
                 estimated_count = item.pop("estimated_cost_count")
                 shadow_count = item.pop("shadow_cost_count")
-                if unavailable_count or known_amount is None:
-                    amount, basis = None, "unavailable"
+                currency_count = item.pop("available_currency_count")
+                available_currency = item.pop("available_currency")
+                if unavailable_count or known_amount is None or currency_count != 1:
+                    amount, basis, currency = None, "unavailable", None
                 elif shadow_count:
-                    amount, basis = round(known_amount, 8), "shadow-price"
+                    amount, basis, currency = round(known_amount, 8), "shadow-price", available_currency
                 elif estimated_count:
-                    amount, basis = round(known_amount, 8), "estimated"
+                    amount, basis, currency = round(known_amount, 8), "estimated", available_currency
                 elif exact_count:
-                    amount, basis = round(known_amount, 8), "exact"
+                    amount, basis, currency = round(known_amount, 8), "exact", available_currency
                 else:
-                    amount, basis = None, "unavailable"
-                item["cost"] = {"amount": amount, "currency": "USD", "basis": basis}
+                    amount, basis, currency = None, "unavailable", None
+                item["cost"] = {"amount": amount, "currency": currency, "basis": basis}
                 result.append(item)
             return result
 
@@ -892,7 +908,11 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def _json(self, value: Any, status: int = 200) -> None:
-        payload = json.dumps(value, ensure_ascii=False).encode("utf-8")
+        try:
+            payload = json.dumps(value, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        except (TypeError, ValueError):
+            status = HTTPStatus.INTERNAL_SERVER_ERROR
+            payload = b'{"error":"response contains a non-JSON value","state":"gray"}'
         self._headers(status)
         self.wfile.write(payload)
 
@@ -903,7 +923,9 @@ class Handler(BaseHTTPRequestHandler):
             raise ValueError("Invalid Content-Length") from error
         if length <= 0 or length > limit:
             raise ValueError("JSON body is required and must be bounded")
-        value = json.loads(self.rfile.read(length).decode("utf-8"))
+        def reject_constant(constant: str):
+            raise ValueError(f"Non-finite JSON constant is not allowed: {constant}")
+        value = json.loads(self.rfile.read(length).decode("utf-8"), parse_constant=reject_constant)
         if not isinstance(value, dict):
             raise ValueError("JSON body must be an object")
         return value

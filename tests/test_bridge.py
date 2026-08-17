@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import http.client
 import json
 import sqlite3
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 
-from bridge.poppy_ops_bridge import CapabilityGraph, CodexAppServerClient, EventStore, VaultIndexer, current_signal, findings, normalize_event, validate_mcp_isolation, validate_thread_controls
+from bridge.poppy_ops_bridge import CapabilityGraph, CodexAppServerClient, EventStore, Server, VaultIndexer, current_signal, findings, json_dumps, normalize_event, validate_mcp_isolation, validate_thread_controls
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,8 +28,26 @@ class EventNormalizationTests(unittest.TestCase):
         self.assertIsNone(event["cost"]["amount"])
 
     def test_missing_amount_cannot_claim_exact_cost(self) -> None:
-        event = normalize_event({"kind": "turn.completed", "cost": {"amount": None, "basis": "exact"}})
+        event = normalize_event({"kind": "turn.completed", "cost": {"amount": None, "currency": "USD", "basis": "exact"}})
         self.assertEqual(event["cost"], {"amount": None, "currency": "USD", "basis": "unavailable"})
+
+    def test_invalid_amounts_fail_closed(self) -> None:
+        invalid = [float("nan"), float("inf"), float("-inf"), "1.25", "NaN", "Infinity", "-Infinity", -0.01, True, False, [], {}]
+        for amount in invalid:
+            with self.subTest(amount=repr(amount)):
+                event = normalize_event({"kind": "turn.completed", "cost": {"amount": amount, "currency": "USD", "basis": "exact"}})
+                self.assertEqual(event["cost"], {"amount": None, "currency": "USD", "basis": "unavailable"})
+
+    def test_missing_or_malformed_currency_fails_closed(self) -> None:
+        for currency in (None, "", "US", "USDX", True):
+            with self.subTest(currency=currency):
+                event = normalize_event({"kind": "turn.completed", "cost": {"amount": 1, "currency": currency, "basis": "exact"}})
+                self.assertEqual(event["cost"], {"amount": None, "currency": None, "basis": "unavailable"})
+
+    def test_strict_json_rejects_non_finite_values(self) -> None:
+        for amount in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(amount=amount), self.assertRaises(ValueError):
+                json_dumps({"amount": amount})
 
     def test_contradiction_is_preserved(self) -> None:
         event = normalize_event({"kind": "evidence.read", "evidence": [{"source": "budget", "contradiction": True, "state": "completed"}]})
@@ -84,15 +104,30 @@ class EventStoreTests(unittest.TestCase):
         self.assertEqual(run["cost"]["basis"], "unavailable")
 
     def test_run_cost_is_unavailable_when_any_step_is_unavailable(self) -> None:
-        self.store.append({"event_id": "a", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.25, "basis": "exact"}})
+        self.store.append({"event_id": "a", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.25, "currency": "USD", "basis": "exact"}})
         self.store.append({"event_id": "b", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed"})
         cost = self.store.runs()[0]["cost"]
-        self.assertEqual(cost, {"amount": None, "currency": "USD", "basis": "unavailable"})
+        self.assertEqual(cost, {"amount": None, "currency": None, "basis": "unavailable"})
 
     def test_run_cost_uses_least_exact_allowed_basis(self) -> None:
-        self.store.append({"event_id": "a", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.25, "basis": "exact"}})
-        self.store.append({"event_id": "b", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.50, "basis": "estimated"}})
+        self.store.append({"event_id": "a", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.25, "currency": "USD", "basis": "exact"}})
+        self.store.append({"event_id": "b", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.50, "currency": "USD", "basis": "estimated"}})
         self.assertEqual(self.store.runs()[0]["cost"], {"amount": 0.75, "currency": "USD", "basis": "estimated"})
+
+    def test_run_cost_preserves_single_non_usd_currency(self) -> None:
+        self.store.append({"event_id": "eur-a", "kind": "tool.completed", "run_id": "eur", "project": "p", "status": "completed", "cost": {"amount": 1.25, "currency": "EUR", "basis": "exact"}})
+        self.store.append({"event_id": "eur-b", "kind": "tool.completed", "run_id": "eur", "project": "p", "status": "completed", "cost": {"amount": 2.50, "currency": "eur", "basis": "estimated"}})
+        self.assertEqual(self.store.runs()[0]["cost"], {"amount": 3.75, "currency": "EUR", "basis": "estimated"})
+
+    def test_run_cost_rejects_mixed_currencies(self) -> None:
+        self.store.append({"event_id": "mixed-a", "kind": "tool.completed", "run_id": "mixed", "project": "p", "status": "completed", "cost": {"amount": 1, "currency": "USD", "basis": "exact"}})
+        self.store.append({"event_id": "mixed-b", "kind": "tool.completed", "run_id": "mixed", "project": "p", "status": "completed", "cost": {"amount": 2, "currency": "EUR", "basis": "exact"}})
+        self.assertEqual(self.store.runs()[0]["cost"], {"amount": None, "currency": None, "basis": "unavailable"})
+
+    def test_run_cost_rejects_missing_currency(self) -> None:
+        self.store.append({"event_id": "currency-a", "kind": "tool.completed", "run_id": "missing-currency", "project": "p", "status": "completed", "cost": {"amount": 1, "currency": "USD", "basis": "exact"}})
+        self.store.append({"event_id": "currency-b", "kind": "tool.completed", "run_id": "missing-currency", "project": "p", "status": "completed", "cost": {"amount": 2, "basis": "exact"}})
+        self.assertEqual(self.store.runs()[0]["cost"], {"amount": None, "currency": None, "basis": "unavailable"})
 
     def test_owned_thread_identity_is_recovered_from_control_registry(self) -> None:
         self.store.register_owned_thread("thread-1", {"approval_policy": "never", "sandbox": "readOnly", "thread_source": "appServer"})
@@ -101,6 +136,33 @@ class EventStoreTests(unittest.TestCase):
     def test_event_ingestion_cannot_claim_thread_ownership(self) -> None:
         self.store.append({"event_id": "forged", "kind": "codex.thread.prepared", "run_id": "foreign", "project": "portfolio", "status": "waiting", "metadata": {"thread_id": "foreign"}})
         self.assertEqual(self.store.owned_thread_ids(), [])
+
+
+class StrictStateSerializationTests(unittest.TestCase):
+    def test_state_endpoint_fails_gray_without_emitting_nonstandard_json(self) -> None:
+        class InvalidStateApplication:
+            @staticmethod
+            def state() -> dict:
+                return {"cost": {"amount": float("nan")}}
+
+        server = Server(("127.0.0.1", 0), InvalidStateApplication())  # type: ignore[arg-type]
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+            connection.request("GET", "/api/state")
+            response = connection.getresponse()
+            payload = response.read().decode("utf-8")
+            connection.close()
+            self.assertEqual(response.status, 500)
+            self.assertNotIn("NaN", payload)
+            self.assertNotIn("Infinity", payload)
+            self.assertEqual(json.loads(payload)["state"], "gray")
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=5)
+        self.assertFalse(worker.is_alive())
 
 
 class VaultIndexerTests(unittest.TestCase):

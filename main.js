@@ -63,8 +63,27 @@ function formatTokens(tokens = {}) {
 }
 
 function formatCost(cost = {}) {
-  if (cost.amount === null || cost.amount === undefined || cost.basis === "unavailable") return "unavailable";
-  return `$${Number(cost.amount).toFixed(Number(cost.amount) < 0.01 ? 4 : 2)} · ${cost.basis || "unknown"}`;
+  const basis = typeof cost.basis === "string" ? cost.basis : "unavailable";
+  const currency = typeof cost.currency === "string" ? cost.currency.trim().toUpperCase() : "";
+  const amount = typeof cost.amount === "boolean" ? NaN : Number(cost.amount);
+  if (!["exact", "estimated", "shadow-price"].includes(basis)
+      || !/^[A-Z]{3}$/.test(currency)
+      || cost.amount === null
+      || cost.amount === undefined
+      || !Number.isFinite(amount)
+      || amount < 0) return "unavailable";
+  try {
+    const digits = amount < 0.01 ? 4 : 2;
+    const formatted = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(amount);
+    return `${formatted} · ${basis}`;
+  } catch (_error) {
+    return "unavailable";
+  }
 }
 
 function formatTime(value) {
@@ -821,3 +840,4 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
 module.exports.VIEW_TYPE = VIEW_TYPE;
 module.exports.PoppyOpsView = PoppyOpsView;
 module.exports.computeTopology = computeTopology;
+module.exports.formatCost = formatCost;

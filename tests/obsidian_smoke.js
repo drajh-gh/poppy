@@ -111,6 +111,19 @@ async function run() {
   view.state.runs = [{ run_id: "run-1", project: "portfolio", status: "completed", updated_at: "2026-08-17T00:00:00Z", duration_ms: 10, tokens: {}, cost: { amount: null, basis: "unavailable" } }];
   const runs = view.renderRuns();
   if (!findAll(runs, (node) => node.textContent === "unavailable").length) throw new Error("Unavailable run cost is not rendered as a Gray unavailable state");
+  const eurCost = PluginClass.formatCost({ amount: 12.5, currency: "EUR", basis: "exact" });
+  if (!eurCost.includes("EUR") && !eurCost.includes("€")) throw new Error("Single-currency non-USD cost does not preserve its currency in the UI");
+  if (eurCost.includes("$")) throw new Error("Non-USD cost was relabelled as USD in the UI");
+  for (const cost of [
+    { amount: NaN, currency: "USD", basis: "exact" },
+    { amount: Infinity, currency: "USD", basis: "exact" },
+    { amount: -1, currency: "USD", basis: "exact" },
+    { amount: true, currency: "USD", basis: "exact" },
+    { amount: 1, basis: "exact" },
+    { amount: 1, currency: "USD", basis: "unavailable" },
+  ]) {
+    if (PluginClass.formatCost(cost) !== "unavailable") throw new Error(`Malformed cost did not render Gray: ${JSON.stringify(cost)}`);
+  }
 
   const finding = { id: "finding-1", kind: "execution-failure", severity: "high", message: "Gate failed", action: "Inspect it", event_ids: ["event-1"], references: [{ type: "event", id: "event-1", run_id: "run-1", label: "Gate verified" }] };
   view.state.findings = [finding];
@@ -134,7 +147,7 @@ async function run() {
     if (!source.includes(token)) throw new Error(`Trace or finding lineage surface missing: ${token}`);
   }
 
-  process.stdout.write(JSON.stringify({ status: "pass", registeredType, command: command.id, ribbon: ribbon.icon, activated, topology: { nodes: graph.nodes.length, edges: topology.edges.length, levels: topology.levels }, accessibility: { labels: labels.length, liveRegion: receipt.id } }) + "\n");
+  process.stdout.write(JSON.stringify({ status: "pass", registeredType, command: command.id, ribbon: ribbon.icon, activated, topology: { nodes: graph.nodes.length, edges: topology.edges.length, levels: topology.levels }, accessibility: { labels: labels.length, liveRegion: receipt.id }, cost: { unavailable: "gray", nonUsd: eurCost } }) + "\n");
 }
 
 run().catch((error) => { console.error(error.stack || error); process.exit(1); });

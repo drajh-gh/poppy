@@ -90,8 +90,11 @@ def bridge_smoke() -> dict:
             if any(run.get("cost", {}).get("basis") not in {"exact", "estimated", "shadow-price", "unavailable"} for run in state.get("runs", [])):
                 raise RuntimeError("Run projection emitted an unsupported cost basis")
             unavailable_runs = [run for run in state.get("runs", []) if run.get("cost", {}).get("basis") == "unavailable"]
-            if any(run.get("cost", {}).get("amount") is not None for run in unavailable_runs):
-                raise RuntimeError("Unavailable run cost was rendered as a numeric subtotal")
+            if any(run.get("cost", {}).get("amount") is not None or run.get("cost", {}).get("currency") is not None for run in unavailable_runs):
+                raise RuntimeError("Unavailable run cost retained a numeric subtotal or currency label")
+            available_runs = [run for run in state.get("runs", []) if run.get("cost", {}).get("basis") != "unavailable"]
+            if any(not isinstance(run.get("cost", {}).get("currency"), str) or len(run["cost"]["currency"]) != 3 for run in available_runs):
+                raise RuntimeError("Available run cost lacks an explicit three-letter currency")
             if any(not finding.get("action") or not finding.get("references") for finding in state.get("findings", [])):
                 raise RuntimeError("A deterministic finding lacks actionable lineage")
             connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
