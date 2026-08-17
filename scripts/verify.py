@@ -5,6 +5,7 @@ import hashlib
 import http.client
 import json
 import os
+import argparse
 import shutil
 import socket
 import subprocess
@@ -131,7 +132,10 @@ def fixture_install() -> dict:
     return {"name": "fixture installation read-back", "status": "pass", "source": str(source), "installations": results}
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Verify and optionally freeze Poppy Ops Cockpit evidence.")
+    parser.add_argument("--check", action="store_true", help="Run every gate without rewriting the frozen evidence file.")
+    args = parser.parse_args(argv)
     checks = []
     checks.append(run([sys.executable, str(PLUGIN_ROOT / "scripts" / "validate_delivery_manifest.py"), str(MANIFEST), "--required-extension", "obsidian-runtime-smoke", "--required-extension", "codex-stream-compatibility"], "delivery manifest validation"))
     checks.append(run([sys.executable, str(PLUGIN_ROOT / "scripts" / "validate_local_execution_preflight.py"), "--json", str(PREFLIGHT)], "local execution preflight validation"))
@@ -158,8 +162,9 @@ def main() -> int:
         "real_vault_installation": "pending-post-assurance",
         "external_writes": [],
     }
-    EVIDENCE.write_text(json.dumps(evidence, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(json.dumps({"status": "pass", "evidence": str(EVIDENCE), "checks": [item["name"] for item in checks]}, indent=2))
+    if not args.check:
+        EVIDENCE.write_text(json.dumps(evidence, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(json.dumps({"status": "pass", "evidence": str(EVIDENCE) if not args.check else "unchanged (--check)", "checks": [item["name"] for item in checks]}, indent=2))
     return 0
 
 

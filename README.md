@@ -41,6 +41,8 @@ The verifier runs unit tests, event replay, an HTTP integration smoke, JavaScrip
 
 Do not copy them into a real vault before Functional QA and Final Assurance pass against the frozen candidate.
 
+Use `python scripts/verify.py --check` during review to rerun every gate without changing the frozen evidence file.
+
 ## Supported Codex boundary
 
 The bridge uses `codex app-server --stdio` through `C:\Users\david\.codex\.sandbox-bin\codex.exe`. Compatibility was proven with an initialization response and a real ephemeral `thread/started` event. The earlier WindowsApps executable failed with `Access is denied` and is not used.
