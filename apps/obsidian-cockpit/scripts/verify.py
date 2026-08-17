@@ -80,6 +80,17 @@ def request_json(port: int, method: str, route: str, *, project: str | None = No
     return status, value
 
 
+def request_sse_ready(port: int, project: str) -> str:
+    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+    connection.request("GET", f"/events?project={project}", headers={"X-Poppy-Ops-Client": "obsidian-plugin"})
+    response = connection.getresponse()
+    line = response.readline().decode("utf-8").strip()
+    connection.close()
+    if response.status != 200 or line != "event: ready":
+        raise RuntimeError(f"SSE did not connect for {project}: status={response.status}, line={line!r}")
+    return line
+
+
 def write_fixture_vault(root: Path, key: str, name: str, *, contradiction: bool = False) -> list[Path]:
     vault = root / key
     current = vault / "wiki" / key / "current.md"
@@ -124,13 +135,44 @@ def bridge_smoke() -> dict:
             "--ledger", str(temp / "events.jsonl"), "--database", str(temp / "events.sqlite3"),
             "--source", "fixtures/events.jsonl",
         ], "synthetic event replay")
-        process = subprocess.Popen(
-            [sys.executable, "bridge/poppy_ops_bridge.py", "serve", "--config", str(config_path), "--ledger", str(temp / "events.jsonl"), "--database", str(temp / "events.sqlite3")],
-            cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8",
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0,
-        )
-        try:
+        processes: list[tuple[str, subprocess.Popen]] = []
+
+        def start_pair(cycle: int) -> list[tuple[str, subprocess.Popen]]:
+            pair = []
+            for project in ("atlas-demo", "beacon-demo"):
+                token = f"verify-{cycle}-{project}"
+                process = subprocess.Popen(
+                    [
+                        sys.executable, "bridge/poppy_ops_bridge.py", "serve", "--config", str(config_path),
+                        "--ledger", str(temp / "events.jsonl"), "--database", str(temp / "events.sqlite3"),
+                        "--instance-token", token,
+                    ],
+                    cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0,
+                )
+                pair.append((token, process))
+                processes.append((token, process))
+            return pair
+
+        def converge(pair: list[tuple[str, subprocess.Popen]]) -> tuple[subprocess.Popen, dict]:
             health = wait_health(port)
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline and sum(process.poll() is None for _token, process in pair) != 1:
+                time.sleep(0.05)
+            alive = [(token, process) for token, process in pair if process.poll() is None]
+            if len(alive) != 1:
+                raise RuntimeError(f"Dual-vault startup left {len(alive)} bridge processes instead of one")
+            token, owner = alive[0]
+            if health.get("instance_token") != token or health.get("pid") != owner.pid:
+                raise RuntimeError(f"Health ownership mismatch: health={health}, owner={token}/{owner.pid}")
+            losers = [process for _token, process in pair if process is not owner]
+            if any(process.poll() != 73 for process in losers):
+                raise RuntimeError(f"Losing bridge child did not exit with the ownership code: {[process.poll() for process in losers]}")
+            return owner, health
+
+        pair = start_pair(1)
+        try:
+            owner, health = converge(pair)
             rejected_scopes = {}
             for label, project in (("missing", None), ("empty", ""), ("unknown", "unknown-demo")):
                 rejected_status, rejected = request_json(port, "GET", "/api/state", project=project)
@@ -149,22 +191,62 @@ def bridge_smoke() -> dict:
                 if len(scoped.get("graph", {}).get("nodes", [])) != 37 or len(scoped.get("graph", {}).get("edges", [])) != 81:
                     raise RuntimeError("Canonical capability graph topology changed")
                 scopes[project] = {"runs": len(scoped.get("runs", [])), "events": len(scoped.get("events", []))}
+            poll_sse_checks = 0
+            for _interval in range(2):
+                for project in ("atlas-demo", "beacon-demo"):
+                    scoped_status, scoped = request_json(port, "GET", "/api/state", project=project)
+                    if scoped_status != 200 or scoped.get("scope", {}).get("project") != project:
+                        raise RuntimeError(f"Repeated poll lost project scope for {project}")
+                    request_sse_ready(port, project)
+                    poll_sse_checks += 1
+                time.sleep(0.2)
             refresh_status, refresh = request_json(port, "POST", "/api/refresh", project="atlas-demo", body={"scope": "configured-vaults", "mode": "read-only-index"})
             if refresh_status != 200 or [vault.get("key") for vault in refresh.get("vaults", [])] != ["atlas-demo"] or refresh.get("event", {}).get("project") != "atlas-demo":
                 raise RuntimeError(f"Scoped read-only refresh failed: status={refresh_status}, response={refresh}")
             after = {str(path): digest(path) for path in protected}
             if before != after:
                 raise RuntimeError("Synthetic vault fixtures changed during read-only bridge smoke")
-            return {"name": "synthetic localhost integration", "status": "pass", "health": health, "rejected_scopes": rejected_scopes, "project_scopes": scopes, "replay": replay["stdout"], "protected_hashes_unchanged": len(before)}
+            owner.terminate()
+            owner.wait(timeout=5)
+            reloaded_owner, reloaded_health = converge(start_pair(2))
+            for project in ("atlas-demo", "beacon-demo"):
+                scoped_status, scoped = request_json(port, "GET", "/api/state", project=project)
+                if scoped_status != 200 or scoped.get("scope", {}).get("project") != project:
+                    raise RuntimeError(f"Reloaded bridge lost project scope for {project}")
+                request_sse_ready(port, project)
+                poll_sse_checks += 1
+            reloaded_owner.terminate()
+            reloaded_owner.wait(timeout=5)
+            if any(process.poll() is None for _token, process in processes):
+                raise RuntimeError("Owned bridge process survived dual-vault lifecycle smoke")
+            return {
+                "name": "synthetic localhost integration",
+                "status": "pass",
+                "health": health,
+                "reload_health": reloaded_health,
+                "rejected_scopes": rejected_scopes,
+                "project_scopes": scopes,
+                "poll_sse_checks": poll_sse_checks,
+                "reload_cycles": 2,
+                "owned_process_ledger": [
+                    {"token": token, "pid": process.pid, "exit_code": process.returncode}
+                    for token, process in processes
+                ],
+                "owned_process_survivors": 0,
+                "replay": replay["stdout"],
+                "protected_hashes_unchanged": len(before),
+            }
         finally:
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=5)
-            if process.poll() is None:
-                raise RuntimeError("Owned bridge process survived verification")
+            for _token, process in processes:
+                if process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait(timeout=5)
+            if any(process.poll() is None for _token, process in processes):
+                raise RuntimeError("Owned bridge process survived verification cleanup")
 
 
 def package_readback() -> dict:
@@ -195,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
         run([sys.executable, "scripts/build.py"], "cockpit package build"),
         run(["node", "--check", "main.js"], "plugin syntax"),
         run(["node", "tests/obsidian_smoke.js"], "Obsidian runtime smoke"),
+        run(["node", "tests/bridge_lifecycle_smoke.js"], "dual-vault bridge lifecycle regression"),
         bridge_smoke(),
         package_readback(),
     ]

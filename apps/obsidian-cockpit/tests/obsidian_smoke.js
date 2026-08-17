@@ -21,6 +21,8 @@ const originalReadFileSync = fs.readFileSync.bind(fs);
 fs.readFileSync = function (file, ...args) {
   if (String(file).endsWith(path.join("config", "bridge.json"))) {
     return JSON.stringify({
+      bind: "127.0.0.1",
+      port: 7318,
       runtime: { ledger: "runtime/events.jsonl", database: "runtime/poppy-ops.sqlite3" },
       vaults: [{ key: "atlas-demo", name: "Atlas Demo", path: syntheticVaultPath }],
     });
@@ -92,7 +94,14 @@ Module._load = function (request, parent, isMain) {
     spawn: (commandName, args, options) => {
       const child = new EventEmitter();
       child.killed = false;
-      child.kill = () => { child.killed = true; child.emit("exit", 0); return true; };
+      child.exitCode = null;
+      child.signalCode = null;
+      child.kill = (signal = "SIGTERM") => {
+        child.killed = true;
+        child.signalCode = signal;
+        child.emit("exit", null, signal);
+        return true;
+      };
       spawnedBridge = { commandName, args, options, child };
       return child;
     },
@@ -108,7 +117,11 @@ Module._load = function (request, parent, isMain) {
         healthChecks += 1;
         return healthChecks === 1
           ? { status: 503, json: { state: "gray" } }
-          : { status: 200, json: { state: "completed", service: "poppy-ops-bridge" } };
+          : { status: 200, json: {
+            state: "completed",
+            service: "poppy-ops-bridge",
+            instance_token: spawnedBridge.args[spawnedBridge.args.indexOf("--instance-token") + 1],
+          } };
       }
       return { status: 200, json: apiResponseJson };
     },
@@ -124,9 +137,11 @@ async function run() {
   await plugin.onload();
   await plugin.ensureBridge();
   if (plugin.project.key !== "atlas-demo" || plugin.project.name !== "Atlas Demo") throw new Error("Plugin did not resolve the active vault to its project scope");
+  if (plugin.bridgeApi !== "http://127.0.0.1:7318") throw new Error(`Plugin ignored its configured bridge endpoint: ${plugin.bridgeApi}`);
   if (!spawnedBridge) throw new Error("Plugin did not start its packaged bridge when health was unavailable");
   if (spawnedBridge.commandName !== (process.platform === "win32" ? "python" : "python3")) throw new Error("Plugin selected an unexpected Python command");
   if (!spawnedBridge.args[0].endsWith(path.join("dist", "poppy-ops-cockpit", "bridge", "poppy_ops_bridge.py")) || spawnedBridge.args[1] !== "serve") throw new Error("Plugin did not launch the packaged bridge entrypoint");
+  if (!spawnedBridge.args.includes("--instance-token")) throw new Error("Plugin did not bind its child to a verifiable startup ownership token");
   if (!spawnedBridge.args.includes("--ledger") || !spawnedBridge.args.includes("--database") || !spawnedBridge.args.some((value) => String(value).endsWith(path.join("runtime", "events.jsonl")))) throw new Error("Plugin did not bind the bridge to the shared runtime store");
   if (!spawnedBridge.options.windowsHide || spawnedBridge.options.shell !== false || spawnedBridge.options.stdio !== "ignore") throw new Error("Packaged bridge launch is not hidden and shell-free");
   if (plugin.bridgeStatus.state !== "completed") throw new Error("Plugin did not verify bridge health after launch");

@@ -23,6 +23,12 @@ The build packages the safe template as `config/bridge.json`. A separately autho
 
 An installed cockpit never falls back to portfolio data. If the active vault does not exactly match one configured project, the plugin opens no operational HTTP or SSE stream and shows an explicit Gray configuration state. The bridge independently rejects missing, empty, and unknown scope on every operational endpoint.
 
+## Shared bridge ownership
+
+Multiple configured vaults share one localhost bridge. The Obsidian client derives the loopback endpoint from the packaged `bridge.json`, so health, API, SSE, and spawned service all use the same configured port. Each startup child carries an opaque instance token, while the Python service claims ownership by binding that port before opening the shared runtime. A losing child exits immediately; the plugin verifies the winning token and terminates any losing or timed-out child before returning. Only the vault instance that owns the active child may stop it on unload. Another active vault can then claim a fresh singleton after its next health or SSE retry.
+
+The deterministic lifecycle regression starts two vault contenders concurrently, exercises repeated project-scoped polling and SSE reconnects, performs a simultaneous reload cycle, tests an unavailable-service timeout, and requires zero owned process survivors.
+
 ## Verify and package
 
 From the product root:
@@ -37,7 +43,7 @@ Or run the cockpit gate directly:
 python scripts/verify.py --check
 ```
 
-The cockpit verifier runs Python unit tests, deterministic synthetic event replay, localhost HTTP integration, JavaScript syntax, Obsidian activation smoke, package build, project-isolation checks, temporary fixture installation, hash read-back, and canonical graph parity. It creates only temporary synthetic vaults.
+The cockpit verifier runs Python unit tests, deterministic synthetic event replay, singleton dual-vault localhost lifecycle coverage, JavaScript syntax, Obsidian activation smoke, package build, project-isolation checks, temporary fixture installation, hash read-back, and canonical graph parity. It creates only temporary synthetic vaults.
 
 The generated six-file package is under ignored `dist/poppy-ops-cockpit/`:
 

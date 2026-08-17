@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import http.client
 import json
+import os
 import sqlite3
 import tempfile
 import threading
@@ -175,6 +176,40 @@ class StrictStateSerializationTests(unittest.TestCase):
             server.server_close()
             worker.join(timeout=5)
         self.assertFalse(worker.is_alive())
+
+
+class BridgeOwnershipTests(unittest.TestCase):
+    class HealthApplication:
+        @staticmethod
+        def project_keys() -> set[str]:
+            return set()
+
+    def test_health_identifies_the_exact_listener_owner(self) -> None:
+        server = Server(("127.0.0.1", 0), self.HealthApplication(), "owner-token")  # type: ignore[arg-type]
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+            connection.request("GET", "/health")
+            response = connection.getresponse()
+            payload = json.loads(response.read())
+            connection.close()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(payload["instance_token"], "owner-token")
+            self.assertEqual(payload["pid"], os.getpid())
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=5)
+        self.assertFalse(worker.is_alive())
+
+    def test_second_live_listener_cannot_claim_the_same_port(self) -> None:
+        owner = Server(("127.0.0.1", 0), self.HealthApplication(), "owner-token")  # type: ignore[arg-type]
+        try:
+            with self.assertRaises(OSError):
+                Server(("127.0.0.1", owner.server_port), self.HealthApplication(), "loser-token")  # type: ignore[arg-type]
+        finally:
+            owner.server_close()
 
 
 class HttpProjectScopeTests(unittest.TestCase):

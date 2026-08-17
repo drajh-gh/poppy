@@ -15,8 +15,10 @@ import math
 import os
 import queue
 import re
+import secrets
 import shutil
 import sqlite3
+import socket
 import subprocess
 import sys
 import threading
@@ -1016,7 +1018,13 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/health":
-            self._json({"state": "completed", "service": "poppy-ops-bridge", "time": utc_now()})
+            self._json({
+                "state": "completed",
+                "service": "poppy-ops-bridge",
+                "time": utc_now(),
+                "pid": os.getpid(),
+                "instance_token": self.server.instance_token,  # type: ignore[attr-defined]
+            })
         elif parsed.path == "/api/state":
             try:
                 self._json(self.app.state(self._project_scope(parsed)))
@@ -1091,20 +1099,45 @@ class Handler(BaseHTTPRequestHandler):
 
 class Server(ThreadingHTTPServer):
     daemon_threads = True
+    allow_reuse_address = os.name != "nt"
 
-    def __init__(self, address, app: Application):
+    def __init__(self, address, app: Application | None, instance_token: str | None = None):
         super().__init__(address, Handler)
         self.app = app
+        self.instance_token = instance_token or secrets.token_hex(16)
+
+    def server_bind(self) -> None:
+        # Windows' SO_REUSEADDR permits multiple live listeners on one port. Its
+        # exclusive option makes the bind the cross-vault singleton boundary;
+        # POSIX keeps normal restart-friendly SO_REUSEADDR behavior.
+        if os.name == "nt" and hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
 
-def serve(config_path: Path, ledger: Path, database: Path) -> int:
-    app = Application.create(config_path, ledger, database)
-    bind = str(app.config.get("bind") or "127.0.0.1")
+def serve(config_path: Path, ledger: Path, database: Path, instance_token: str | None = None) -> int:
+    config = read_json(config_path)
+    bind = str(config.get("bind") or "127.0.0.1")
     if bind not in {"127.0.0.1", "localhost"}:
         raise SystemExit("Refusing non-loopback bind")
-    port = int(app.config.get("port") or 7317)
-    server = Server((bind, port), app)
-    watcher = VaultWatcher(app)
+    port = int(config.get("port") or 7317)
+    token = str(instance_token or secrets.token_hex(16))
+    if not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", token):
+        raise SystemExit("Invalid bridge instance token")
+    # Bind before opening the shared SQLite/read-model runtime. Competing vaults then
+    # lose at the one atomic OS ownership boundary and exit before doing any work.
+    try:
+        server = Server((bind, port), None, token)
+    except OSError as error:
+        print(f"Poppy Ops Bridge ownership unavailable on {bind}:{port}: {error}", file=sys.stderr, flush=True)
+        return 73
+    try:
+        app = Application.create(config_path, ledger, database)
+        server.app = app
+        watcher = VaultWatcher(app)
+    except BaseException:
+        server.server_close()
+        raise
     watcher.start()
     print(f"Poppy Ops Bridge listening on http://{bind}:{port}", flush=True)
     try:
@@ -1129,9 +1162,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--database", type=Path, default=DATABASE)
     parser.add_argument("--source", type=Path)
     parser.add_argument("--project", help="Configured project key required by state and refresh commands")
+    parser.add_argument("--instance-token", help="Opaque startup ownership token exposed only by localhost health")
     args = parser.parse_args(argv)
     if args.command == "serve":
-        return serve(args.config, args.ledger, args.database)
+        return serve(args.config, args.ledger, args.database, args.instance_token)
     app = Application.create(args.config, args.ledger, args.database)
     if args.command == "refresh":
         if not args.project or args.project not in app.project_keys():

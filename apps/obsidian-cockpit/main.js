@@ -4,8 +4,11 @@ const path = require("path");
 const { spawn } = require("child_process");
 
 const VIEW_TYPE = "poppy-ops-cockpit";
-const API = "http://127.0.0.1:7317";
+const DEFAULT_API = "http://127.0.0.1:7317";
 const BRIDGE_FILES = ["bridge/poppy_ops_bridge.py", "config/bridge.json", "config/poppy-capability-graph.json"];
+const BRIDGE_STARTUP_ATTEMPTS = 32;
+const BRIDGE_STARTUP_DELAY_MS = 250;
+const BRIDGE_STOP_GRACE_MS = 1500;
 const NAV = [
   ["overview", "Overview", "portfolio"],
   ["execution", "Live run", "route"],
@@ -49,6 +52,27 @@ function clear(node) {
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function childIsRunning(child) {
+  return Boolean(child) && child.exitCode === null && child.signalCode === null;
+}
+
+function waitForChildExit(child, timeoutMs) {
+  if (!childIsRunning(child)) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (exited) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      child.removeListener?.("exit", onExit);
+      resolve(exited);
+    };
+    const onExit = () => finish(true);
+    const timer = setTimeout(() => finish(!childIsRunning(child)), timeoutMs);
+    child.once("exit", onExit);
+  });
 }
 
 function stateBadge(state, label) {
@@ -272,7 +296,7 @@ class PoppyOpsView extends ItemView {
     const project = String(this.plugin.project?.key || "").trim();
     if (!project) throw new Error(this.plugin.project?.reason || "This vault is not configured for Poppy operations.");
     const response = await requestUrl({
-      url: `${API}${path}`,
+      url: `${this.plugin.bridgeApi || DEFAULT_API}${path}`,
       method: options.method || "GET",
       headers: { "X-Poppy-Ops-Client": "obsidian-plugin", "X-Poppy-Ops-Project": project, "Content-Type": "application/json" },
       body: options.body ? JSON.stringify(options.body) : undefined,
@@ -320,7 +344,7 @@ class PoppyOpsView extends ItemView {
     if (typeof EventSource === "undefined") return;
     try {
       const project = encodeURIComponent(this.plugin.project.key);
-      this.eventSource = new EventSource(`${API}/events?project=${project}`);
+      this.eventSource = new EventSource(`${this.plugin.bridgeApi || DEFAULT_API}/events?project=${project}`);
       this.eventSource.addEventListener("poppy", () => this.fetchState(true));
       this.eventSource.onerror = () => {
         this.updateConnection();
@@ -869,7 +893,12 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
   async onload() {
     this.bridgeProcess = null;
     this.bridgeStartup = null;
+    this.bridgeStopping = false;
+    this.bridgeStartupAttempts = BRIDGE_STARTUP_ATTEMPTS;
+    this.bridgeStartupDelayMs = BRIDGE_STARTUP_DELAY_MS;
+    this.bridgeStopGraceMs = BRIDGE_STOP_GRACE_MS;
     this.bridgeStatus = { state: "pending", detail: "startup scheduled" };
+    this.bridgeApi = this.resolveBridgeApi();
     this.project = this.resolveProjectScope();
     this.registerView(VIEW_TYPE, (leaf) => new PoppyOpsView(leaf, this));
     this.addRibbonIcon("activity", "Open Poppy Ops Cockpit", () => this.activateView());
@@ -879,8 +908,9 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
   }
 
   async onunload() {
+    this.bridgeStopping = true;
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
-    this.stopOwnedBridge();
+    await this.stopOwnedBridge();
   }
 
   pluginRoot() {
@@ -888,6 +918,20 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
     const basePath = typeof adapter?.getBasePath === "function" ? adapter.getBasePath() : null;
     const pluginDir = this.manifest?.dir;
     return basePath && pluginDir ? (path.isAbsolute(pluginDir) ? pluginDir : path.resolve(basePath, pluginDir)) : null;
+  }
+
+  resolveBridgeApi() {
+    const root = this.pluginRoot();
+    if (!root) return DEFAULT_API;
+    try {
+      const config = JSON.parse(fs.readFileSync(path.join(root, "config", "bridge.json"), "utf8"));
+      const bind = String(config.bind || "127.0.0.1").toLowerCase();
+      const port = Number(config.port || 7317);
+      if (!["127.0.0.1", "localhost"].includes(bind) || !Number.isInteger(port) || port < 1 || port > 65535) return DEFAULT_API;
+      return `http://127.0.0.1:${port}`;
+    } catch (_) {
+      return DEFAULT_API;
+    }
   }
 
   resolveProjectScope() {
@@ -905,16 +949,21 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
     }
   }
 
-  async bridgeIsHealthy() {
+  async bridgeHealth() {
     try {
-      const response = await requestUrl({ url: `${API}/health`, method: "GET", throw: false });
-      return response.status === 200 && response.json?.service === "poppy-ops-bridge" && response.json?.state === "completed";
+      const response = await requestUrl({ url: `${this.bridgeApi || DEFAULT_API}/health`, method: "GET", throw: false });
+      return response.status === 200 && response.json?.service === "poppy-ops-bridge" && response.json?.state === "completed"
+        ? response.json
+        : null;
     } catch (_) {
-      return false;
+      return null;
     }
   }
 
+  async bridgeIsHealthy() { return Boolean(await this.bridgeHealth()); }
+
   ensureBridge() {
+    if (this.bridgeStopping) return Promise.resolve({ state: "gray", detail: "plugin is unloading" });
     if (!this.bridgeStartup) {
       this.bridgeStartup = this.startBridge().finally(() => { this.bridgeStartup = null; });
     }
@@ -922,7 +971,15 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
   }
 
   async startBridge() {
-    if (await this.bridgeIsHealthy()) {
+    if (this.bridgeStatus?.state === "gray" && childIsRunning(this.bridgeProcess)) {
+      const stopped = await this.terminateBridgeChild(this.bridgeProcess);
+      if (!stopped) {
+        this.bridgeStatus = { state: "gray", detail: "previous bridge startup child is still stopping" };
+        return this.bridgeStatus;
+      }
+    }
+    const existing = await this.bridgeHealth();
+    if (existing) {
       this.bridgeStatus = { state: "completed", detail: "existing localhost bridge" };
       return this.bridgeStatus;
     }
@@ -953,9 +1010,12 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
       return this.bridgeStatus;
     }
     const python = process.env.POPPY_OPS_PYTHON || (process.platform === "win32" ? "python" : "python3");
+    const instanceToken = `${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     let startupError = null;
+    let childExited = false;
+    let child = null;
     try {
-      const child = spawn(python, [script, "serve", ...runtimeArgs], {
+      child = spawn(python, [script, "serve", ...runtimeArgs, "--instance-token", instanceToken], {
         cwd: root,
         windowsHide: true,
         stdio: "ignore",
@@ -963,27 +1023,52 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
       });
       this.bridgeProcess = child;
       child.once("error", (error) => { startupError = error; if (this.bridgeProcess === child) this.bridgeProcess = null; });
-      child.once("exit", () => { if (this.bridgeProcess === child) this.bridgeProcess = null; });
+      child.once("exit", () => { childExited = true; if (this.bridgeProcess === child) this.bridgeProcess = null; });
     } catch (error) {
       startupError = error;
     }
-    for (let attempt = 0; attempt < 32 && !startupError; attempt += 1) {
-      await delay(250);
-      if (await this.bridgeIsHealthy()) {
-        this.bridgeStatus = { state: "completed", detail: "packaged localhost bridge started" };
+    for (let attempt = 0; attempt < this.bridgeStartupAttempts && !startupError && !this.bridgeStopping; attempt += 1) {
+      await delay(this.bridgeStartupDelayMs);
+      const health = await this.bridgeHealth();
+      if (health) {
+        if (health.instance_token === instanceToken && !childExited) {
+          this.bridgeStatus = { state: "completed", detail: "packaged localhost bridge started" };
+          return this.bridgeStatus;
+        }
+        const stopped = await this.terminateBridgeChild(child);
+        if (!stopped) {
+          this.bridgeStatus = { state: "gray", detail: "losing bridge startup child did not exit" };
+          return this.bridgeStatus;
+        }
+        this.bridgeStatus = { state: "completed", detail: "shared localhost bridge won startup" };
         return this.bridgeStatus;
       }
     }
-    this.bridgeStatus = { state: "gray", detail: startupError instanceof Error ? startupError.message : "bridge health check timed out" };
+    const stopped = await this.terminateBridgeChild(child);
+    const detail = startupError instanceof Error ? startupError.message : this.bridgeStopping ? "plugin unloaded during bridge startup" : "bridge health check timed out";
+    this.bridgeStatus = { state: "gray", detail: stopped ? detail : `${detail}; startup child did not exit` };
     return this.bridgeStatus;
   }
 
-  stopOwnedBridge() {
-    const child = this.bridgeProcess;
-    this.bridgeProcess = null;
-    if (child && !child.killed) {
-      try { child.kill(); } catch (_) { /* Process may already have exited. */ }
+  async terminateBridgeChild(child) {
+    if (!child || !childIsRunning(child)) {
+      if (this.bridgeProcess === child) this.bridgeProcess = null;
+      return true;
     }
+    try { child.kill("SIGTERM"); } catch (_) { /* Process may already have exited. */ }
+    let exited = await waitForChildExit(child, this.bridgeStopGraceMs);
+    if (!exited && childIsRunning(child)) {
+      try { child.kill("SIGKILL"); } catch (_) { /* Process may already have exited. */ }
+      exited = await waitForChildExit(child, this.bridgeStopGraceMs);
+    }
+    const stopped = exited || !childIsRunning(child);
+    if (stopped && this.bridgeProcess === child) this.bridgeProcess = null;
+    return stopped;
+  }
+
+  async stopOwnedBridge() {
+    const child = this.bridgeProcess;
+    return this.terminateBridgeChild(child);
   }
 
   async activateView() {
