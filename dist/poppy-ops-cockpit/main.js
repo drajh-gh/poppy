@@ -532,7 +532,7 @@ class PoppyOpsView extends ItemView {
 
   renderRuns() {
     const root = h("section", "poppy-page");
-    append(root, sectionTitle("Run history", "Time, tokens, cost basis", "Dollar figures distinguish exact, estimated, shadow price, and unavailable bases."));
+    append(root, sectionTitle("Run history", "Time, tokens, cost basis", "Cost figures distinguish exact, estimated, shadow price, and unavailable bases."));
     const runs = this.state?.runs || [];
     if (!runs.length) return append(root, emptyState("No runs recorded", "Replay a ledger or connect a supported event source.")), root;
     const table = h("div", "poppy-run-table");

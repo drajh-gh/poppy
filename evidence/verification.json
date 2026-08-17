@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "pass",
-  "generated_at": "2026-08-17T08:15:40.237943Z",
+  "generated_at": "2026-08-17T08:39:21.974824Z",
   "candidate": "working-tree-pre-freeze",
   "checks": [
     {
@@ -46,7 +46,7 @@
       ],
       "exit_code": 0,
       "stdout": "",
-      "stderr": "test_control_validation_requires_read_only_never_appserver (test_bridge.CodexThreadOwnershipTests.test_control_validation_requires_read_only_never_appserver) ... ok\ntest_create_registers_ownership_only_after_control_validation (test_bridge.CodexThreadOwnershipTests.test_create_registers_ownership_only_after_control_validation) ... ok\ntest_resume_accepts_only_confirmed_owned_controls (test_bridge.CodexThreadOwnershipTests.test_resume_accepts_only_confirmed_owned_controls) ... ok\ntest_resume_fails_gray_when_returned_controls_mismatch (test_bridge.CodexThreadOwnershipTests.test_resume_fails_gray_when_returned_controls_mismatch) ... ok\ntest_resume_rejects_unowned_thread_before_request (test_bridge.CodexThreadOwnershipTests.test_resume_rejects_unowned_thread_before_request) ... ok\ntest_contradiction_is_preserved (test_bridge.EventNormalizationTests.test_contradiction_is_preserved) ... ok\ntest_cost_basis_is_bounded (test_bridge.EventNormalizationTests.test_cost_basis_is_bounded) ... ok\ntest_invalid_amounts_fail_closed (test_bridge.EventNormalizationTests.test_invalid_amounts_fail_closed) ... ok\ntest_missing_amount_cannot_claim_exact_cost (test_bridge.EventNormalizationTests.test_missing_amount_cannot_claim_exact_cost) ... ok\ntest_missing_evidence_and_cost_degrade_explicitly (test_bridge.EventNormalizationTests.test_missing_evidence_and_cost_degrade_explicitly) ... ok\ntest_missing_or_malformed_currency_fails_closed (test_bridge.EventNormalizationTests.test_missing_or_malformed_currency_fails_closed) ... ok\ntest_strict_json_rejects_non_finite_values (test_bridge.EventNormalizationTests.test_strict_json_rejects_non_finite_values) ... ok\ntest_append_is_idempotent_and_ledger_is_append_only (test_bridge.EventStoreTests.test_append_is_idempotent_and_ledger_is_append_only) ... ok\ntest_event_ingestion_cannot_claim_thread_ownership (test_bridge.EventStoreTests.test_event_ingestion_cannot_claim_thread_ownership) ... ok\ntest_owned_thread_identity_is_recovered_from_control_registry (test_bridge.EventStoreTests.test_owned_thread_identity_is_recovered_from_control_registry) ... ok\ntest_replay_is_deterministic_and_skips_malformed (test_bridge.EventStoreTests.test_replay_is_deterministic_and_skips_malformed) ... ok\ntest_run_cost_is_unavailable_when_any_step_is_unavailable (test_bridge.EventStoreTests.test_run_cost_is_unavailable_when_any_step_is_unavailable) ... ok\ntest_run_cost_preserves_single_non_usd_currency (test_bridge.EventStoreTests.test_run_cost_preserves_single_non_usd_currency) ... ok\ntest_run_cost_rejects_missing_currency (test_bridge.EventStoreTests.test_run_cost_rejects_missing_currency) ... ok\ntest_run_cost_rejects_mixed_currencies (test_bridge.EventStoreTests.test_run_cost_rejects_mixed_currencies) ... ok\ntest_run_cost_uses_least_exact_allowed_basis (test_bridge.EventStoreTests.test_run_cost_uses_least_exact_allowed_basis) ... ok\ntest_run_projection_aggregates_tokens_and_status (test_bridge.EventStoreTests.test_run_projection_aggregates_tokens_and_status) ... ok\ntest_every_finding_rule_has_actionable_event_or_source_lineage (test_bridge.GraphAndFindingTests.test_every_finding_rule_has_actionable_event_or_source_lineage) ... ok\ntest_findings_are_deterministic_and_link_events (test_bridge.GraphAndFindingTests.test_findings_are_deterministic_and_link_events) ... ok\ntest_mcp_isolation_rejects_unclassified_server (test_bridge.GraphAndFindingTests.test_mcp_isolation_rejects_unclassified_server) ... ok\ntest_pinned_graph_is_available (test_bridge.GraphAndFindingTests.test_pinned_graph_is_available) ... ok\ntest_state_endpoint_fails_gray_without_emitting_nonstandard_json (test_bridge.StrictStateSerializationTests.test_state_endpoint_fails_gray_without_emitting_nonstandard_json) ... [2026-08-17T08:15:37.941312Z] 127.0.0.1 \"GET /api/state HTTP/1.1\" 500 -\nok\ntest_current_signal_preserves_traffic_light_and_review (test_bridge.VaultIndexerTests.test_current_signal_preserves_traffic_light_and_review) ... ok\ntest_missing_vault_is_gray (test_bridge.VaultIndexerTests.test_missing_vault_is_gray) ... ok\ntest_profile_is_read_without_canonical_write (test_bridge.VaultIndexerTests.test_profile_is_read_without_canonical_write) ... ok\n\n----------------------------------------------------------------------\nRan 30 tests in 1.291s\n\nOK"
+      "stderr": "test_control_validation_requires_read_only_never_appserver (test_bridge.CodexThreadOwnershipTests.test_control_validation_requires_read_only_never_appserver) ... ok\ntest_create_registers_ownership_only_after_control_validation (test_bridge.CodexThreadOwnershipTests.test_create_registers_ownership_only_after_control_validation) ... ok\ntest_resume_accepts_only_confirmed_owned_controls (test_bridge.CodexThreadOwnershipTests.test_resume_accepts_only_confirmed_owned_controls) ... ok\ntest_resume_fails_gray_when_returned_controls_mismatch (test_bridge.CodexThreadOwnershipTests.test_resume_fails_gray_when_returned_controls_mismatch) ... ok\ntest_resume_rejects_unowned_thread_before_request (test_bridge.CodexThreadOwnershipTests.test_resume_rejects_unowned_thread_before_request) ... ok\ntest_contradiction_is_preserved (test_bridge.EventNormalizationTests.test_contradiction_is_preserved) ... ok\ntest_cost_basis_is_bounded (test_bridge.EventNormalizationTests.test_cost_basis_is_bounded) ... ok\ntest_invalid_amounts_fail_closed (test_bridge.EventNormalizationTests.test_invalid_amounts_fail_closed) ... ok\ntest_missing_amount_cannot_claim_exact_cost (test_bridge.EventNormalizationTests.test_missing_amount_cannot_claim_exact_cost) ... ok\ntest_missing_evidence_and_cost_degrade_explicitly (test_bridge.EventNormalizationTests.test_missing_evidence_and_cost_degrade_explicitly) ... ok\ntest_missing_or_malformed_currency_fails_closed (test_bridge.EventNormalizationTests.test_missing_or_malformed_currency_fails_closed) ... ok\ntest_strict_json_rejects_non_finite_values (test_bridge.EventNormalizationTests.test_strict_json_rejects_non_finite_values) ... ok\ntest_append_is_idempotent_and_ledger_is_append_only (test_bridge.EventStoreTests.test_append_is_idempotent_and_ledger_is_append_only) ... ok\ntest_event_ingestion_cannot_claim_thread_ownership (test_bridge.EventStoreTests.test_event_ingestion_cannot_claim_thread_ownership) ... ok\ntest_owned_thread_identity_is_recovered_from_control_registry (test_bridge.EventStoreTests.test_owned_thread_identity_is_recovered_from_control_registry) ... ok\ntest_replay_is_deterministic_and_skips_malformed (test_bridge.EventStoreTests.test_replay_is_deterministic_and_skips_malformed) ... ok\ntest_run_cost_is_unavailable_when_any_step_is_unavailable (test_bridge.EventStoreTests.test_run_cost_is_unavailable_when_any_step_is_unavailable) ... ok\ntest_run_cost_preserves_single_non_usd_currency (test_bridge.EventStoreTests.test_run_cost_preserves_single_non_usd_currency) ... ok\ntest_run_cost_rejects_missing_currency (test_bridge.EventStoreTests.test_run_cost_rejects_missing_currency) ... ok\ntest_run_cost_rejects_mixed_currencies (test_bridge.EventStoreTests.test_run_cost_rejects_mixed_currencies) ... ok\ntest_run_cost_uses_least_exact_allowed_basis (test_bridge.EventStoreTests.test_run_cost_uses_least_exact_allowed_basis) ... ok\ntest_run_projection_aggregates_tokens_and_status (test_bridge.EventStoreTests.test_run_projection_aggregates_tokens_and_status) ... ok\ntest_every_finding_rule_has_actionable_event_or_source_lineage (test_bridge.GraphAndFindingTests.test_every_finding_rule_has_actionable_event_or_source_lineage) ... ok\ntest_findings_are_deterministic_and_link_events (test_bridge.GraphAndFindingTests.test_findings_are_deterministic_and_link_events) ... ok\ntest_mcp_isolation_rejects_unclassified_server (test_bridge.GraphAndFindingTests.test_mcp_isolation_rejects_unclassified_server) ... ok\ntest_pinned_graph_is_available (test_bridge.GraphAndFindingTests.test_pinned_graph_is_available) ... ok\ntest_state_endpoint_fails_gray_without_emitting_nonstandard_json (test_bridge.StrictStateSerializationTests.test_state_endpoint_fails_gray_without_emitting_nonstandard_json) ... [2026-08-17T08:39:20.088384Z] 127.0.0.1 \"GET /api/state HTTP/1.1\" 500 -\nok\ntest_current_signal_preserves_traffic_light_and_review (test_bridge.VaultIndexerTests.test_current_signal_preserves_traffic_light_and_review) ... ok\ntest_missing_vault_is_gray (test_bridge.VaultIndexerTests.test_missing_vault_is_gray) ... ok\ntest_profile_is_read_without_canonical_write (test_bridge.VaultIndexerTests.test_profile_is_read_without_canonical_write) ... ok\n\n----------------------------------------------------------------------\nRan 30 tests in 0.946s\n\nOK"
     },
     {
       "name": "package build",
@@ -55,7 +55,7 @@
         "scripts/build.py"
       ],
       "exit_code": 0,
-      "stdout": "{\n  \"status\": \"pass\",\n  \"artifact\": \"C:\\\\Users\\\\david\\\\Documents\\\\Codex\\\\2026-08-17\\\\ho\\\\outputs\\\\poppy-ops-cockpit\\\\dist\\\\poppy-ops-cockpit\",\n  \"files\": {\n    \"manifest.json\": \"484a34a8c4f5aa8c1d55aaffe633089867a333778291fd9f91e9abc7ad263076\",\n    \"main.js\": \"117cbfa4b4756e224ee86ed1cd208762aaa29cbfee1415aad993f0c9d829d505\",\n    \"styles.css\": \"a3e0ad7a6cbef9cf671b8c110ade775b286952dc1f405f9a4c10195ce4df1c45\"\n  }\n}",
+      "stdout": "{\n  \"status\": \"pass\",\n  \"artifact\": \"C:\\\\Users\\\\david\\\\Documents\\\\Codex\\\\2026-08-17\\\\ho\\\\outputs\\\\poppy-ops-cockpit\\\\dist\\\\poppy-ops-cockpit\",\n  \"files\": {\n    \"manifest.json\": \"484a34a8c4f5aa8c1d55aaffe633089867a333778291fd9f91e9abc7ad263076\",\n    \"main.js\": \"cf67045d59560e43318708a71dbe6c463dc0c033da61a101a0e020b5197865c6\",\n    \"styles.css\": \"a3e0ad7a6cbef9cf671b8c110ade775b286952dc1f405f9a4c10195ce4df1c45\"\n  }\n}",
       "stderr": ""
     },
     {
@@ -82,11 +82,11 @@
     {
       "name": "localhost bridge smoke",
       "status": "pass",
-      "port": 64139,
+      "port": 54949,
       "health": {
         "state": "completed",
         "service": "poppy-ops-bridge",
-        "time": "2026-08-17T08:15:39.948296Z"
+        "time": "2026-08-17T08:39:21.822650Z"
       },
       "vaults": [
         {
@@ -105,8 +105,8 @@
       "runs": 3,
       "unavailable_cost_runs": 1,
       "findings_with_lineage": 5,
-      "refresh_event": "evt-35265e2cb14c5db68bc6",
-      "owned_process_pid": 62388,
+      "refresh_event": "evt-4631e15f5cc0b529b0ee",
+      "owned_process_pid": 44320,
       "canonical_vault_hashes_unchanged": 35
     },
     {
@@ -118,7 +118,7 @@
           "path": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\fixture-install\\Sloski\\.obsidian\\plugins\\poppy-ops-cockpit",
           "files": {
             "manifest.json": "484a34a8c4f5aa8c1d55aaffe633089867a333778291fd9f91e9abc7ad263076",
-            "main.js": "117cbfa4b4756e224ee86ed1cd208762aaa29cbfee1415aad993f0c9d829d505",
+            "main.js": "cf67045d59560e43318708a71dbe6c463dc0c033da61a101a0e020b5197865c6",
             "styles.css": "a3e0ad7a6cbef9cf671b8c110ade775b286952dc1f405f9a4c10195ce4df1c45"
           }
         },
@@ -126,7 +126,7 @@
           "path": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\fixture-install\\EverAway\\.obsidian\\plugins\\poppy-ops-cockpit",
           "files": {
             "manifest.json": "484a34a8c4f5aa8c1d55aaffe633089867a333778291fd9f91e9abc7ad263076",
-            "main.js": "117cbfa4b4756e224ee86ed1cd208762aaa29cbfee1415aad993f0c9d829d505",
+            "main.js": "cf67045d59560e43318708a71dbe6c463dc0c033da61a101a0e020b5197865c6",
             "styles.css": "a3e0ad7a6cbef9cf671b8c110ade775b286952dc1f405f9a4c10195ce4df1c45"
           }
         }
