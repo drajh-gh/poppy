@@ -19,4 +19,4 @@ This repository is the canonical source for the project-agnostic Poppy product.
 
 ## Verification
 
-Run `python scripts/verify_product.py`. Before handing off a committed candidate, run `python scripts/verify_product.py --require-clean` and prove both nominated source commits remain ancestors of `HEAD`.
+Run `python scripts/verify_product.py`. Before handing off a committed candidate, run `python scripts/verify_product.py --require-clean` and prove the two nominated source commits plus the preserved remote seed remain ancestors of `HEAD`.

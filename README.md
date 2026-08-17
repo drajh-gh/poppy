@@ -27,7 +27,7 @@ The cockpit's checked-in `config/bridge.example.json` is intentionally inert: it
 python scripts/verify_product.py
 ```
 
-The single verifier runs the complete Project Operations deterministic suite, owned-process tests, Python compilation, cockpit unit/build/syntax/Obsidian/integration/package tests, client-boundary audit, canonical graph parity, and dual-history ancestry proof. It uses disposable synthetic vaults and never depends on a real vault.
+The single verifier runs the complete Project Operations deterministic suite, owned-process tests, Python compilation, cockpit unit/build/syntax/Obsidian/integration/package tests, client-boundary audit, canonical graph parity, and three-history ancestry proof. It uses disposable synthetic vaults and never depends on a real vault.
 
 For a committed release candidate:
 

@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CORE_SOURCE = "85797ef39dfa641a87716d1c04d2613b67da7c22"
 COCKPIT_SOURCE = "b7373b7ad3760243621bac2198f2b4c6ec4b9729"
+REMOTE_SEED = "305efbd300a1c59ef0e84553b84638d0def22568"
 
 
 def run(command: list[str], name: str) -> dict:
@@ -65,9 +66,9 @@ def boundary_audit() -> dict:
 
 
 def ancestry_proof() -> dict:
-    for revision in (CORE_SOURCE, COCKPIT_SOURCE):
+    for revision in (CORE_SOURCE, COCKPIT_SOURCE, REMOTE_SEED):
         run(["git", "merge-base", "--is-ancestor", revision, "HEAD"], f"ancestry {revision}")
-    return {"name": "dual-history ancestry", "status": "pass", "head": run(["git", "rev-parse", "HEAD"], "candidate revision")["stdout"], "ancestors": [CORE_SOURCE, COCKPIT_SOURCE]}
+    return {"name": "three-history ancestry", "status": "pass", "head": run(["git", "rev-parse", "HEAD"], "candidate revision")["stdout"], "ancestors": [CORE_SOURCE, COCKPIT_SOURCE, REMOTE_SEED]}
 
 
 def artifact_hashes() -> dict:

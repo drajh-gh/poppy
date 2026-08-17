@@ -4,7 +4,7 @@ A Poppy candidate is eligible for handoff only when:
 
 1. the complete product verifier passes;
 2. the tree is clean and the candidate revision is frozen;
-3. both preserved source revisions remain ancestors of the candidate;
+3. both preserved source revisions and the remote seed remain ancestors of the candidate;
 4. the tracked-data boundary audit finds no client data, live configuration, credentials, runtime state, or generated installation;
 5. fresh Functional QA passes against the exact candidate; and
 6. fresh Final Assurance passes after QA against that same candidate.

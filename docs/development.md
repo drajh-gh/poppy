@@ -27,3 +27,11 @@ It creates synthetic Atlas Demo and Beacon Demo vaults in a temporary directory,
 ## Local configuration
 
 `apps/obsidian-cockpit/config/bridge.local.json` is ignored. Begin with `bridge.example.json`, then add local project paths. Do not commit the resulting file. Build output and runtime state are ignored as well.
+
+To create a reviewed local installation candidate without changing the inert default package, use the ignored local configuration and an output below the ignored product runtime:
+
+```powershell
+python apps/obsidian-cockpit/scripts/build.py --config apps/obsidian-cockpit/config/bridge.local.json --output runtime/installation-candidate/poppy-ops-cockpit
+```
+
+The builder refuses custom output outside `runtime/` and always emits the exact six-file inventory.
