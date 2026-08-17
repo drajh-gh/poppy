@@ -1,6 +1,10 @@
 {
   "bind": "127.0.0.1",
   "port": 7317,
+  "runtime": {
+    "ledger": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\events.jsonl",
+    "database": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\poppy-ops.sqlite3"
+  },
   "vaults": [
     {"key": "sloski", "name": "Sloski", "path": "C:\\Vaults\\Sloski"},
     {"key": "everaway", "name": "EverAway", "path": "C:\\Vaults\\EverAway"}

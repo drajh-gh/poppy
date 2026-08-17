@@ -885,10 +885,23 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
       return this.bridgeStatus;
     }
     const script = path.join(root, "bridge", "poppy_ops_bridge.py");
+    let runtimeArgs;
+    try {
+      const config = JSON.parse(fs.readFileSync(path.join(root, "config", "bridge.json"), "utf8"));
+      const ledger = config.runtime?.ledger;
+      const database = config.runtime?.database;
+      if (typeof ledger !== "string" || typeof database !== "string" || !path.isAbsolute(ledger) || !path.isAbsolute(database)) {
+        throw new Error("shared runtime ledger and database must be absolute paths");
+      }
+      runtimeArgs = ["--ledger", ledger, "--database", database];
+    } catch (error) {
+      this.bridgeStatus = { state: "gray", detail: error instanceof Error ? error.message : "invalid bridge runtime configuration" };
+      return this.bridgeStatus;
+    }
     const python = process.env.POPPY_OPS_PYTHON || (process.platform === "win32" ? "python" : "python3");
     let startupError = null;
     try {
-      const child = spawn(python, [script, "serve"], {
+      const child = spawn(python, [script, "serve", ...runtimeArgs], {
         cwd: root,
         windowsHide: true,
         stdio: "ignore",

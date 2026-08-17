@@ -103,6 +103,7 @@ async function run() {
   if (!spawnedBridge) throw new Error("Plugin did not start its packaged bridge when health was unavailable");
   if (spawnedBridge.commandName !== (process.platform === "win32" ? "python" : "python3")) throw new Error("Plugin selected an unexpected Python command");
   if (!spawnedBridge.args[0].endsWith(path.join("dist", "poppy-ops-cockpit", "bridge", "poppy_ops_bridge.py")) || spawnedBridge.args[1] !== "serve") throw new Error("Plugin did not launch the packaged bridge entrypoint");
+  if (!spawnedBridge.args.includes("--ledger") || !spawnedBridge.args.includes("--database") || !spawnedBridge.args.some((value) => String(value).endsWith(path.join("runtime", "events.jsonl")))) throw new Error("Plugin did not bind the bridge to the shared runtime store");
   if (!spawnedBridge.options.windowsHide || spawnedBridge.options.shell !== false || spawnedBridge.options.stdio !== "ignore") throw new Error("Packaged bridge launch is not hidden and shell-free");
   if (plugin.bridgeStatus.state !== "completed") throw new Error("Plugin did not verify bridge health after launch");
   if (registeredType !== "poppy-ops-cockpit") throw new Error(`Unexpected view type: ${registeredType}`);
