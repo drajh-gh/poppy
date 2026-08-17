@@ -18,6 +18,4 @@ Read [onboarding-workflow](../../references/onboarding-workflow.md), [project pr
 9. Lint the generated surface and report unresolved gaps.
 10. Offer cadence automation as a separate preview-and-confirm step. Inspect and deconflict existing automations before calling `$project-ops-automate`.
 
-Never request credentials, infer that the newest Drive document is approved, overwrite an existing vault file, or create a duplicate ticket backlog. Existing-vault adoption preserves `AGENTS.md`, `raw/`, `inbox.md`, `daily/`, `log.md`, and canonical pages by default.
-
-When the target is Sloski, read [Sloski adoption adapter](../../references/sloski-adapter.md) and preserve every coexistence boundary it defines.
+Never request credentials, infer that the newest Drive document is approved, overwrite an existing vault file, or create a duplicate ticket backlog. Existing-vault adoption preserves `AGENTS.md`, `raw/`, `inbox.md`, `daily/`, `log.md`, and canonical pages by default. Read the project's own adapter and preserve every coexistence boundary it defines; use the [project adapter contract](../../references/project-adapter-contract.md) when no adapter has been established yet.

@@ -1,6 +1,6 @@
 # Reusable delivery orchestration
 
-This protocol generalizes the proven Sloski Delivery OS. Project adapters retain repository-specific ticket, test, worktree, CI, deployment, and tracker rules.
+This protocol defines Poppy's project-neutral delivery control plane. Project adapters retain repository-specific ticket, test, worktree, CI, deployment, and tracker rules.
 
 ## Dispatch manifest
 
@@ -66,7 +66,7 @@ A candidate revision change invalidates both stage verdicts. Missing, failed, st
 
 Freeze manifest version, effective execution policy, validated extension gates, base/head, diff, acceptance matrix, deterministic tests/CI, specialist reports, proposed action, rollback/observability, external effects, prior remediation findings, and stage verdicts. Each assessor returns only `PASS_HANDOFF`, `BLOCK_REMEDIATE`, or `ESCALATE_APPROVAL` for its named stage. A stage verdict qualifies evidence; it does not itself authorize a write or any R2/R3 action.
 
-The generic plugin defines this protocol but is not an executable delivery adapter by itself. A project must nominate and validate its tracker, repository, base branch, worktree allocator, deterministic gates, receipt schema, and approval boundaries. Preserve Sloski's repo-local adapter until its own pilot gate authorizes extraction.
+The generic plugin defines this protocol but is not an executable delivery adapter by itself. A project must nominate and validate its tracker, repository, base branch, worktree allocator, deterministic gates, receipt schema, and approval boundaries. Preserve every project-local adapter until that project explicitly authorizes a reviewed migration.
 
 ## Closure
 

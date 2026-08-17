@@ -6,6 +6,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -515,7 +516,7 @@ def assert_local_execution_safety() -> None:
 
     reference_path = ROOT / "references" / "local-execution-safety.md"
     reference = reference_path.read_text(encoding="utf-8")
-    for forbidden in ("Sloski", "PNPM", "Docker", "MinIO", "sloski-drop"):
+    for forbidden in ("client repository", "PNPM", "Docker", "MinIO"):
         if forbidden.casefold() in reference.casefold():
             raise AssertionError(f"generic local-execution contract contains project-specific term: {forbidden}")
     for skill_name in ("project-ops-delivery", "project-ops-upgrader"):
@@ -525,11 +526,12 @@ def assert_local_execution_safety() -> None:
         if "read" not in skill.casefold() or "apply" not in skill.casefold():
             raise AssertionError(f"{skill_name} does not explicitly read and apply the safety contract")
 
-    adapter = (ROOT / "references" / "sloski-adapter.md").read_text(encoding="utf-8")
-    if r"C:\Dev\sloski-drop" not in adapter:
-        raise AssertionError("Sloski adapter does not preserve the current canonical repository")
-    if r"C:\Users\david\OneDrive\Documents\GitHub\sloski-drop" in adapter:
-        raise AssertionError("Sloski adapter still treats the retired checkout as canonical")
+    adapter = (ROOT / "references" / "project-adapter-contract.md").read_text(encoding="utf-8")
+    for required in ("project key", "canonical repository", "authority boundaries", "rollback"):
+        if required not in adapter.casefold():
+            raise AssertionError(f"project adapter contract is missing: {required}")
+    if re.search(r"[A-Za-z]:[\\/]", adapter):
+        raise AssertionError("project adapter contract contains a machine-specific path")
 
 
 def assert_poppy_orchestration() -> None:

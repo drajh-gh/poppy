@@ -3,4 +3,11 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+apps/obsidian-cockpit/config/bridge.local.json
+apps/obsidian-cockpit/dist/
+apps/obsidian-cockpit/runtime/
+*.sqlite
+*.sqlite3
+*.db
+*.jsonl.local
 

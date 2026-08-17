@@ -33,6 +33,6 @@ These are recommendations, not mandatory schedules. Frequency should follow proj
 - Changed-only monitoring should be quiet when there is no material change.
 - Use the Codex automation API for all lifecycle changes. Never hand-edit automation files.
 
-## Sloski coexistence
+## Existing cadence coexistence
 
-Sloski already has a Monday 07:30 weekly Project OS refresh. Treat it as an existing control surface. During adoption, either retain it and attach the PM roll-up to its output, or replace it only after the user confirms a complete migration. Do not create another Monday weekly refresh by default.
+Treat every discovered project automation as an existing control surface. During adoption, retain it and attach the PM roll-up to its output, or replace it only after the user confirms a complete migration. Do not create a second cadence with the same purpose by default.

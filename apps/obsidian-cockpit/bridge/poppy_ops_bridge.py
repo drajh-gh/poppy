@@ -32,7 +32,10 @@ from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "config" / "bridge.json"
+LOCAL_CONFIG = ROOT / "config" / "bridge.local.json"
+EXAMPLE_CONFIG = ROOT / "config" / "bridge.example.json"
+PACKAGED_CONFIG = ROOT / "config" / "bridge.json"
+DEFAULT_CONFIG = LOCAL_CONFIG if LOCAL_CONFIG.is_file() else PACKAGED_CONFIG if PACKAGED_CONFIG.is_file() else EXAMPLE_CONFIG
 RUNTIME = ROOT / "runtime"
 LEDGER = RUNTIME / "events.jsonl"
 DATABASE = RUNTIME / "poppy-ops.sqlite3"
@@ -874,7 +877,10 @@ class Application:
         config = read_json(config_path)
         store = EventStore(ledger, database)
         subscribers: set[queue.Queue] = set()
-        placeholder = cls(config, store, VaultIndexer(config, store), CapabilityGraph(config.get("capability_graph", "")), None, subscribers, [])  # type: ignore[arg-type]
+        graph_path = Path(config.get("capability_graph", ""))
+        if not graph_path.is_absolute():
+            graph_path = config_path.parent.parent / graph_path
+        placeholder = cls(config, store, VaultIndexer(config, store), CapabilityGraph(graph_path), None, subscribers, [])  # type: ignore[arg-type]
         placeholder.codex = CodexAppServerClient(config.get("codex", {}), placeholder.record_event, store.register_owned_thread)
         placeholder.codex.thread_ids = store.owned_thread_ids()
         placeholder.codex.thread_projects = store.owned_thread_projects()

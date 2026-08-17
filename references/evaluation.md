@@ -4,7 +4,7 @@ Forward-test with bounded historical or synthetic evidence and zero external wri
 
 ## Required cases
 
-1. Existing Sloski vault is extended without rewriting raw history, human notes, or canonical pages.
+1. An existing synthetic project vault is extended without rewriting raw history, human notes, or canonical pages.
 2. Slack/email request is deduplicated and linked before proposing a ticket.
 3. Linear/Boards mismatch is detected instead of silently creating work in the wrong project.
 4. No-transcript Slovenian meeting produces localized pre-brief, structured capture, debrief, and confirmation draft; unconfirmed dates remain provisional.

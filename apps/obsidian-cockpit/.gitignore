@@ -1,4 +1,6 @@
 __pycache__/
 *.pyc
 runtime/
+dist/
+config/bridge.local.json
 .DS_Store

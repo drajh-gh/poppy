@@ -12,6 +12,17 @@ let revealed = false;
 let spawnedBridge = null;
 let healthChecks = 0;
 let lastApiRequest = null;
+const syntheticVaultPath = path.resolve("C:\\Synthetic", "AtlasDemo");
+const originalReadFileSync = fs.readFileSync.bind(fs);
+fs.readFileSync = function (file, ...args) {
+  if (String(file).endsWith(path.join("config", "bridge.json"))) {
+    return JSON.stringify({
+      runtime: { ledger: "runtime/events.jsonl", database: "runtime/poppy-ops.sqlite3" },
+      vaults: [{ key: "atlas-demo", name: "Atlas Demo", path: syntheticVaultPath }],
+    });
+  }
+  return originalReadFileSync(file, ...args);
+};
 
 class FakeElement {
   constructor(tag) {
@@ -49,7 +60,7 @@ class Plugin {
   constructor() {
     const root = path.resolve(__dirname, "..");
     this.app = {
-      vault: { adapter: { getBasePath: () => "C:\\Vaults\\Sloski" }, getName: () => "Sloski" },
+      vault: { adapter: { getBasePath: () => syntheticVaultPath }, getName: () => "Atlas Demo" },
       workspace: {
         getLeavesOfType: () => [],
         getLeaf: () => ({ setViewState: async (state) => { activated = state; } }),
@@ -102,7 +113,7 @@ async function run() {
   const plugin = new PluginClass();
   await plugin.onload();
   await plugin.ensureBridge();
-  if (plugin.project.key !== "sloski" || plugin.project.name !== "Sloski") throw new Error("Plugin did not resolve the active vault to its project scope");
+  if (plugin.project.key !== "atlas-demo" || plugin.project.name !== "Atlas Demo") throw new Error("Plugin did not resolve the active vault to its project scope");
   if (!spawnedBridge) throw new Error("Plugin did not start its packaged bridge when health was unavailable");
   if (spawnedBridge.commandName !== (process.platform === "win32" ? "python" : "python3")) throw new Error("Plugin selected an unexpected Python command");
   if (!spawnedBridge.args[0].endsWith(path.join("dist", "poppy-ops-cockpit", "bridge", "poppy_ops_bridge.py")) || spawnedBridge.args[1] !== "serve") throw new Error("Plugin did not launch the packaged bridge entrypoint");
@@ -117,7 +128,7 @@ async function run() {
   if (!activated || activated.type !== "poppy-ops-cockpit" || activated.active !== true) throw new Error("Pane view state was not activated");
   if (!revealed) throw new Error("Pane was not revealed");
 
-  const graph = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "config", "poppy-capability-graph.json"), "utf8"));
+  const graph = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "..", "..", "references", "poppy-capability-graph.json"), "utf8"));
   const topology = PluginClass.computeTopology(graph.nodes, graph.edges);
   if (graph.nodes.length !== 37 || graph.edges.length !== 81 || topology.edges.length !== 81) throw new Error("The full 37-node/81-edge topology was not preserved");
   const outgoing = new Map();
@@ -130,7 +141,7 @@ async function run() {
 
   const view = new PluginClass.PoppyOpsView({}, plugin);
   await view.api("/api/state");
-  if (lastApiRequest.headers["X-Poppy-Ops-Project"] !== "sloski") throw new Error("Plugin API request did not carry its project scope");
+  if (lastApiRequest.headers["X-Poppy-Ops-Project"] !== "atlas-demo") throw new Error("Plugin API request did not carry its project scope");
   view.state = { codex: { connection_state: "disconnected", interface_state: "supported" } };
   const dock = view.renderDock();
   const labels = findAll(dock, (node) => node.tagName === "LABEL");

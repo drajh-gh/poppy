@@ -26,9 +26,9 @@ Prioritize planned allocation, actual hours, burn, remaining capacity, throughpu
 
 Prioritize outcomes, benefits, dependencies, capacity, governance, adoption, and stakeholder alignment.
 
-## Known starting recommendations
+## Synthetic examples
 
-- Sloski: `support-maintenance` with `fixed-scope-delivery` overlay.
-- EverAway: `product-launch` with `retainer-capacity` overlay.
-- Orodjarna: `discovery-validation` with `fixed-scope-delivery` overlay.
+- Atlas Demo: `support-maintenance` with `fixed-scope-delivery` overlay.
+- Beacon Demo: `product-launch` with `retainer-capacity` overlay.
+- Cedar Demo: `discovery-validation` with `fixed-scope-delivery` overlay.
 

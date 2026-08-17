@@ -12,6 +12,7 @@ from bridge.poppy_ops_bridge import CapabilityGraph, CodexAppServerClient, Event
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PRODUCT_ROOT = ROOT.parents[1]
 
 
 class EventNormalizationTests(unittest.TestCase):
@@ -104,10 +105,10 @@ class EventStoreTests(unittest.TestCase):
         self.assertEqual(run["cost"]["basis"], "unavailable")
 
     def test_events_and_runs_are_project_scoped(self) -> None:
-        self.store.append({"event_id": "sloski-event", "kind": "run.started", "run_id": "sloski-run", "project": "sloski", "status": "current"})
-        self.store.append({"event_id": "everaway-event", "kind": "run.started", "run_id": "everaway-run", "project": "everaway", "status": "current"})
-        self.assertEqual([event["event_id"] for event in self.store.events(project="sloski")], ["sloski-event"])
-        self.assertEqual([run["run_id"] for run in self.store.runs(project="everaway")], ["everaway-run"])
+        self.store.append({"event_id": "atlas-event", "kind": "run.started", "run_id": "atlas-run", "project": "atlas-demo", "status": "current"})
+        self.store.append({"event_id": "beacon-event", "kind": "run.started", "run_id": "beacon-run", "project": "beacon-demo", "status": "current"})
+        self.assertEqual([event["event_id"] for event in self.store.events(project="atlas-demo")], ["atlas-event"])
+        self.assertEqual([run["run_id"] for run in self.store.runs(project="beacon-demo")], ["beacon-run"])
 
     def test_run_cost_is_unavailable_when_any_step_is_unavailable(self) -> None:
         self.store.append({"event_id": "a", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.25, "currency": "USD", "basis": "exact"}})
@@ -136,9 +137,9 @@ class EventStoreTests(unittest.TestCase):
         self.assertEqual(self.store.runs()[0]["cost"], {"amount": None, "currency": None, "basis": "unavailable"})
 
     def test_owned_thread_identity_is_recovered_from_control_registry(self) -> None:
-        self.store.register_owned_thread("thread-1", {"approval_policy": "never", "sandbox": "readOnly", "thread_source": "appServer", "project": "sloski"})
+        self.store.register_owned_thread("thread-1", {"approval_policy": "never", "sandbox": "readOnly", "thread_source": "appServer", "project": "atlas-demo"})
         self.assertEqual(self.store.owned_thread_ids(), ["thread-1"])
-        self.assertEqual(self.store.owned_thread_projects(), {"thread-1": "sloski"})
+        self.assertEqual(self.store.owned_thread_projects(), {"thread-1": "atlas-demo"})
 
     def test_event_ingestion_cannot_claim_thread_ownership(self) -> None:
         self.store.append({"event_id": "forged", "kind": "codex.thread.prepared", "run_id": "foreign", "project": "portfolio", "status": "waiting", "metadata": {"thread_id": "foreign"}})
@@ -223,7 +224,7 @@ class VaultIndexerTests(unittest.TestCase):
 
 class GraphAndFindingTests(unittest.TestCase):
     def test_pinned_graph_is_available(self) -> None:
-        graph = CapabilityGraph(ROOT / "config" / "poppy-capability-graph.json").read()
+        graph = CapabilityGraph(PRODUCT_ROOT / "references" / "poppy-capability-graph.json").read()
         self.assertEqual(graph["state"], "completed")
         self.assertGreater(len(graph["nodes"]), 25)
         self.assertEqual(len(graph["digest"]), 64)
@@ -248,7 +249,7 @@ class GraphAndFindingTests(unittest.TestCase):
             normalize_event({"event_id": "slow-3", "kind": "capability.completed", "run_id": "r3", "project": "p", "status": "completed", "capability": "delivery", "duration_ms": 100}),
             normalize_event({"event_id": "failed", "kind": "verification.failed", "run_id": "r3", "project": "p", "status": "failed"}),
         ]
-        vaults = [{"key": "p", "name": "Project", "path": "C:/Vaults/Project", "state": "gray", "reason": "stale", "contradictions": ["A conflicts with B"]}]
+        vaults = [{"key": "p", "name": "Project", "path": "fixture://project", "state": "gray", "reason": "stale", "contradictions": ["A conflicts with B"]}]
         result = findings(events, vaults)
         self.assertEqual({item["kind"] for item in result}, {"duration-regression", "execution-failure", "stale-or-missing-vault", "preserved-contradiction"})
         for item in result:
@@ -308,21 +309,21 @@ class CodexThreadOwnershipTests(unittest.TestCase):
         client.thread_ids = ["owned"]
         client.ensure_started = lambda *_args: {"connection_state": "connected"}  # type: ignore[method-assign]
         client.request = lambda *_args, **_kwargs: self.response("owned")  # type: ignore[method-assign]
-        result = client.resume_thread("owned", "draft", "everaway")
+        result = client.resume_thread("owned", "draft", "beacon-demo")
         self.assertEqual(result["thread_id"], "owned")
         self.assertFalse(result["draft_submitted"])
         self.assertEqual(events[0]["approval"], "turn-not-authorized")
-        self.assertEqual(events[0]["project"], "everaway")
+        self.assertEqual(events[0]["project"], "beacon-demo")
 
     def test_create_registers_ownership_only_after_control_validation(self) -> None:
         owned = []
         client = CodexAppServerClient({"compatibility": "supported"}, lambda _event: None, lambda thread_id, controls: owned.append((thread_id, controls)))
         client.ensure_started = lambda *_args: {"connection_state": "connected"}  # type: ignore[method-assign]
         client.request = lambda *_args, **_kwargs: self.response("new")  # type: ignore[method-assign]
-        client.create_thread("draft", "sloski")
+        client.create_thread("draft", "atlas-demo")
         self.assertEqual(owned[0][0], "new")
         self.assertEqual(owned[0][1]["sandbox"], "readOnly")
-        self.assertEqual(owned[0][1]["project"], "sloski")
+        self.assertEqual(owned[0][1]["project"], "atlas-demo")
 
         rejected = []
         client = CodexAppServerClient({"compatibility": "supported"}, lambda _event: None, lambda thread_id, controls: rejected.append((thread_id, controls)))

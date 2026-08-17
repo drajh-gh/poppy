@@ -29,7 +29,7 @@
 
 - Classification: plugin upgrade
 - Status: activation authorized by Upgrader Run 01 for the exact package that passes independent Functional QA and Final Assurance; inactive until those gates pass and that assessed package is installed
-- Evidence: Researcher Run 01 found cross-project reporting, authority, source-identity, and release-evidence gaps plus direct EverAway duplicate retrieval. A schema-v1 project-neutral packet and adversarial fixtures now cover R1, R4, R5, R6, R7, and the R9 Gray safeguard.
+- Evidence: Researcher Run 01 found cross-project reporting, authority, source-identity, release-evidence, and duplicate-retrieval gaps. A schema-v1 project-neutral packet and adversarial fixtures now cover R1, R4, R5, R6, R7, and the R9 Gray safeguard.
 - Proposed contract: canonical source preflight; one logical retrieval with physical retries and success-only checkpoints; expiring human authority; outcome-first executive body with evidence appendix; and a source-revision-to-runtime release tuple with explicit Gray gaps.
 - Validation: the deterministic suite rejects duplicate logical reads, failure checkpoint advancement, retired locators, unsupported incremental control without Gray, expired active authority, false Green, source-revision mismatch, false verified releases, word-cap overflow, appendix evidence loss, and client leakage. New profiles receive safe defaults; schema-v1 profiles without `controls` remain valid.
 - Rollback: remove active skill references and default profile controls in an additive release while retaining stable source IDs, checkpoints, failures, authority receipts, detailed health records, and release evidence.
@@ -41,14 +41,6 @@
 - Status: activated and verified
 - Evidence: commit `d80ad176963b388ba78552f6221f12655b7c5fcf`, installed version `0.1.0+codex.20260816080042`, live skill-catalog discovery, strict schema-v2 packet validation, and negative fixtures.
 - Decision: R8 requires no further source change in this run. A second bounded catalog/validator verification passed before the Upgrader mutation surface was opened.
-
-## SloSki GRAD canonical-stage preflight
-
-- Classification: project fix
-- Status: implemented in isolated branch; not pushed, merged, deployed, or executed against production
-- Evidence: the GRAD candidate used invented `STAGE=prod` while canonical configuration and deployment use `ss-prd`. Branch `codex/grad-stage-preflight-upgrader` at commit `f7d1d8f81` changes the boundary to `ss-prd` and adds pure tests for alias rejection, incomplete configuration, canonical config paths, database identity, and local/test safeguards.
-- Validation: ten focused unit tests pass; repository format and check gates pass with warnings only. No database, GRAD endpoint, deployment, or production connection was used.
-- Rollback: revert the isolated commit; retain the failed preflight and Upgrader receipt.
 
 ## Artifact attestations
 

@@ -920,11 +920,13 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
     let runtimeArgs;
     try {
       const config = JSON.parse(fs.readFileSync(path.join(root, "config", "bridge.json"), "utf8"));
-      const ledger = config.runtime?.ledger;
-      const database = config.runtime?.database;
-      if (typeof ledger !== "string" || typeof database !== "string" || !path.isAbsolute(ledger) || !path.isAbsolute(database)) {
-        throw new Error("shared runtime ledger and database must be absolute paths");
+      const ledgerValue = config.runtime?.ledger;
+      const databaseValue = config.runtime?.database;
+      if (typeof ledgerValue !== "string" || typeof databaseValue !== "string" || !ledgerValue.trim() || !databaseValue.trim()) {
+        throw new Error("shared runtime ledger and database must be configured");
       }
+      const ledger = path.isAbsolute(ledgerValue) ? ledgerValue : path.resolve(root, ledgerValue);
+      const database = path.isAbsolute(databaseValue) ? databaseValue : path.resolve(root, databaseValue);
       runtimeArgs = ["--ledger", ledger, "--database", database];
     } catch (error) {
       this.bridgeStatus = { state: "gray", detail: error instanceof Error ? error.message : "invalid bridge runtime configuration" };

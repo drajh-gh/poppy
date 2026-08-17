@@ -8,14 +8,15 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PRODUCT_ROOT = ROOT.parents[1]
 DIST = ROOT / "dist" / "poppy-ops-cockpit"
-FILES = (
-    "manifest.json",
-    "main.js",
-    "styles.css",
-    "bridge/poppy_ops_bridge.py",
-    "config/bridge.json",
-    "config/poppy-capability-graph.json",
+INPUTS = (
+    (ROOT / "manifest.json", "manifest.json"),
+    (ROOT / "main.js", "main.js"),
+    (ROOT / "styles.css", "styles.css"),
+    (ROOT / "bridge" / "poppy_ops_bridge.py", "bridge/poppy_ops_bridge.py"),
+    (ROOT / "config" / "bridge.example.json", "config/bridge.json"),
+    (PRODUCT_ROOT / "references" / "poppy-capability-graph.json", "config/poppy-capability-graph.json"),
 )
 
 
@@ -26,8 +27,7 @@ def digest(path: Path) -> str:
 def build() -> dict:
     DIST.mkdir(parents=True, exist_ok=True)
     hashes = {}
-    for name in FILES:
-        source = ROOT / name
+    for source, name in INPUTS:
         if not source.is_file():
             raise SystemExit(f"Missing build input: {source}")
         target = DIST / name
@@ -37,7 +37,8 @@ def build() -> dict:
             raise SystemExit(f"Build copy mismatch: {name}")
         hashes[name] = digest(target)
     actual = sorted(path.relative_to(DIST).as_posix() for path in DIST.rglob("*") if path.is_file())
-    if actual != sorted(FILES):
+    expected = sorted(name for _source, name in INPUTS)
+    if actual != expected:
         raise SystemExit(f"Unexpected package inventory: {actual}")
     result = {"status": "pass", "artifact": str(DIST), "files": hashes}
     print(json.dumps(result, indent=2))
