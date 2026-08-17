@@ -48,4 +48,3 @@ async function run() {
 }
 
 run().catch((error) => { console.error(error.stack || error); process.exit(1); });
-

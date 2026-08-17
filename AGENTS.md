@@ -24,4 +24,3 @@ This repository contains a private, localhost-only Obsidian operations cockpit.
 ## Deterministic gates
 
 Run `python scripts/verify.py`. It performs unit tests, deterministic replay, plugin runtime smoke, package build, fixture installation, and hash read-back. A release candidate is not eligible for review while the required live Codex stream gate is Gray.
-

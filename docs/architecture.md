@@ -33,4 +33,3 @@ Subject: one operator maintaining Poppy across confidential project vaults. Job:
 - Motion: one brief rail pulse for new events, removed under reduced-motion preferences.
 
 Initial critique removed gradients, oversized KPI cards, and a decorative grid. State and lineage now carry the visual character. This is specific to Poppy's graph and evidence vocabulary rather than a reusable SaaS dashboard theme.
-

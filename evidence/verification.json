@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "pass",
-  "generated_at": "2026-08-17T07:29:18.446619Z",
+  "generated_at": "2026-08-17T07:29:58.248862Z",
   "candidate": "working-tree-pre-freeze",
   "checks": [
     {
@@ -46,7 +46,7 @@
       ],
       "exit_code": 0,
       "stdout": "",
-      "stderr": "test_contradiction_is_preserved (test_bridge.EventNormalizationTests.test_contradiction_is_preserved) ... ok\ntest_cost_basis_is_bounded (test_bridge.EventNormalizationTests.test_cost_basis_is_bounded) ... ok\ntest_missing_evidence_and_cost_degrade_explicitly (test_bridge.EventNormalizationTests.test_missing_evidence_and_cost_degrade_explicitly) ... ok\ntest_append_is_idempotent_and_ledger_is_append_only (test_bridge.EventStoreTests.test_append_is_idempotent_and_ledger_is_append_only) ... ok\ntest_replay_is_deterministic_and_skips_malformed (test_bridge.EventStoreTests.test_replay_is_deterministic_and_skips_malformed) ... ok\ntest_run_projection_aggregates_tokens_and_status (test_bridge.EventStoreTests.test_run_projection_aggregates_tokens_and_status) ... ok\ntest_findings_are_deterministic_and_link_events (test_bridge.GraphAndFindingTests.test_findings_are_deterministic_and_link_events) ... ok\ntest_pinned_graph_is_available (test_bridge.GraphAndFindingTests.test_pinned_graph_is_available) ... ok\ntest_current_signal_preserves_traffic_light_and_review (test_bridge.VaultIndexerTests.test_current_signal_preserves_traffic_light_and_review) ... ok\ntest_missing_vault_is_gray (test_bridge.VaultIndexerTests.test_missing_vault_is_gray) ... ok\ntest_profile_is_read_without_canonical_write (test_bridge.VaultIndexerTests.test_profile_is_read_without_canonical_write) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.177s\n\nOK"
+      "stderr": "test_contradiction_is_preserved (test_bridge.EventNormalizationTests.test_contradiction_is_preserved) ... ok\ntest_cost_basis_is_bounded (test_bridge.EventNormalizationTests.test_cost_basis_is_bounded) ... ok\ntest_missing_evidence_and_cost_degrade_explicitly (test_bridge.EventNormalizationTests.test_missing_evidence_and_cost_degrade_explicitly) ... ok\ntest_append_is_idempotent_and_ledger_is_append_only (test_bridge.EventStoreTests.test_append_is_idempotent_and_ledger_is_append_only) ... ok\ntest_replay_is_deterministic_and_skips_malformed (test_bridge.EventStoreTests.test_replay_is_deterministic_and_skips_malformed) ... ok\ntest_run_projection_aggregates_tokens_and_status (test_bridge.EventStoreTests.test_run_projection_aggregates_tokens_and_status) ... ok\ntest_findings_are_deterministic_and_link_events (test_bridge.GraphAndFindingTests.test_findings_are_deterministic_and_link_events) ... ok\ntest_pinned_graph_is_available (test_bridge.GraphAndFindingTests.test_pinned_graph_is_available) ... ok\ntest_current_signal_preserves_traffic_light_and_review (test_bridge.VaultIndexerTests.test_current_signal_preserves_traffic_light_and_review) ... ok\ntest_missing_vault_is_gray (test_bridge.VaultIndexerTests.test_missing_vault_is_gray) ... ok\ntest_profile_is_read_without_canonical_write (test_bridge.VaultIndexerTests.test_profile_is_read_without_canonical_write) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.333s\n\nOK"
     },
     {
       "name": "package build",
@@ -55,7 +55,7 @@
         "scripts/build.py"
       ],
       "exit_code": 0,
-      "stdout": "{\n  \"status\": \"pass\",\n  \"artifact\": \"C:\\\\Users\\\\david\\\\Documents\\\\Codex\\\\2026-08-17\\\\ho\\\\outputs\\\\poppy-ops-cockpit\\\\dist\\\\poppy-ops-cockpit\",\n  \"files\": {\n    \"manifest.json\": \"cf95e54c7bdf746728fb19f2bc415cf931237e9e0b4978dc3bea7bb373bce00e\",\n    \"main.js\": \"24cc5a7293dc5b71e777c10cad9b5c1b0d752d1f4ea78360b35a5b96b8a3d545\",\n    \"styles.css\": \"b9f0b98013b43bc2a7e18e7e9c1be1fd3a94198fa435960f2076c6c6e5b199a4\"\n  }\n}",
+      "stdout": "{\n  \"status\": \"pass\",\n  \"artifact\": \"C:\\\\Users\\\\david\\\\Documents\\\\Codex\\\\2026-08-17\\\\ho\\\\outputs\\\\poppy-ops-cockpit\\\\dist\\\\poppy-ops-cockpit\",\n  \"files\": {\n    \"manifest.json\": \"484a34a8c4f5aa8c1d55aaffe633089867a333778291fd9f91e9abc7ad263076\",\n    \"main.js\": \"24cc5a7293dc5b71e777c10cad9b5c1b0d752d1f4ea78360b35a5b96b8a3d545\",\n    \"styles.css\": \"b9f0b98013b43bc2a7e18e7e9c1be1fd3a94198fa435960f2076c6c6e5b199a4\"\n  }\n}",
       "stderr": ""
     },
     {
@@ -82,11 +82,11 @@
     {
       "name": "localhost bridge smoke",
       "status": "pass",
-      "port": 60805,
+      "port": 61338,
       "health": {
         "state": "completed",
         "service": "poppy-ops-bridge",
-        "time": "2026-08-17T07:29:18.303020Z"
+        "time": "2026-08-17T07:29:57.970904Z"
       },
       "vaults": [
         {
@@ -102,8 +102,8 @@
       ],
       "graph_nodes": 37,
       "runs": 3,
-      "refresh_event": "evt-1656bad1b0b344366b2e",
-      "owned_process_pid": 12424,
+      "refresh_event": "evt-437e3e18e994e7f2121a",
+      "owned_process_pid": 42228,
       "canonical_vault_hashes_unchanged": 35
     },
     {
@@ -114,7 +114,7 @@
         {
           "path": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\fixture-install\\Sloski\\.obsidian\\plugins\\poppy-ops-cockpit",
           "files": {
-            "manifest.json": "cf95e54c7bdf746728fb19f2bc415cf931237e9e0b4978dc3bea7bb373bce00e",
+            "manifest.json": "484a34a8c4f5aa8c1d55aaffe633089867a333778291fd9f91e9abc7ad263076",
             "main.js": "24cc5a7293dc5b71e777c10cad9b5c1b0d752d1f4ea78360b35a5b96b8a3d545",
             "styles.css": "b9f0b98013b43bc2a7e18e7e9c1be1fd3a94198fa435960f2076c6c6e5b199a4"
           }
@@ -122,7 +122,7 @@
         {
           "path": "C:\\Users\\david\\Documents\\Codex\\2026-08-17\\ho\\outputs\\poppy-ops-cockpit\\runtime\\fixture-install\\EverAway\\.obsidian\\plugins\\poppy-ops-cockpit",
           "files": {
-            "manifest.json": "cf95e54c7bdf746728fb19f2bc415cf931237e9e0b4978dc3bea7bb373bce00e",
+            "manifest.json": "484a34a8c4f5aa8c1d55aaffe633089867a333778291fd9f91e9abc7ad263076",
             "main.js": "24cc5a7293dc5b71e777c10cad9b5c1b0d752d1f4ea78360b35a5b96b8a3d545",
             "styles.css": "b9f0b98013b43bc2a7e18e7e9c1be1fd3a94198fa435960f2076c6c6e5b199a4"
           }

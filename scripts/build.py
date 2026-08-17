@@ -35,4 +35,3 @@ def build() -> dict:
 
 if __name__ == "__main__":
     build()
-

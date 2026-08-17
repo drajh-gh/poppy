@@ -29,4 +29,3 @@ Every event is normalized to the following envelope:
 Allowed states are `completed`, `current`, `waiting`, `blocked`, `pending`, `failed`, and `gray`. Cost basis is one of `exact`, `estimated`, `shadow-price`, or `unavailable`. Evidence entries preserve `source`, `locator`, `freshness`, `authority`, `contradiction`, and `state`.
 
 Kinds are open for compatibility, while the cockpit recognizes capability, skill, worker, tool, approval, verification, evidence, vault, run, plan, and Codex lifecycle prefixes. Unknown kinds are retained rather than discarded.
-
