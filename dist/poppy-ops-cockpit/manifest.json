@@ -1,7 +1,7 @@
 {
   "id": "poppy-ops-cockpit",
   "name": "Poppy Ops Cockpit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "minAppVersion": "1.8.0",
   "description": "Private cross-vault operations observability for Poppy.",
   "author": "David Rajh",

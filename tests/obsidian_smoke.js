@@ -11,6 +11,7 @@ let activated = null;
 let revealed = false;
 let spawnedBridge = null;
 let healthChecks = 0;
+let lastApiRequest = null;
 
 class FakeElement {
   constructor(tag) {
@@ -48,7 +49,7 @@ class Plugin {
   constructor() {
     const root = path.resolve(__dirname, "..");
     this.app = {
-      vault: { adapter: { getBasePath: () => root } },
+      vault: { adapter: { getBasePath: () => "C:\\Vaults\\Sloski" }, getName: () => "Sloski" },
       workspace: {
         getLeavesOfType: () => [],
         getLeaf: () => ({ setViewState: async (state) => { activated = state; } }),
@@ -56,7 +57,7 @@ class Plugin {
         detachLeavesOfType: () => {},
       },
     };
-    this.manifest = { dir: "dist/poppy-ops-cockpit" };
+    this.manifest = { dir: path.join(root, "dist", "poppy-ops-cockpit") };
   }
   registerView(type, factory) { registeredType = type; registeredFactory = factory; }
   addRibbonIcon(icon, title, callback) { ribbon = { icon, title, callback }; }
@@ -81,6 +82,7 @@ Module._load = function (request, parent, isMain) {
     ItemView,
     Notice: class {},
     requestUrl: async (options) => {
+      lastApiRequest = options;
       if (String(options.url).endsWith("/health")) {
         healthChecks += 1;
         return healthChecks === 1
@@ -100,6 +102,7 @@ async function run() {
   const plugin = new PluginClass();
   await plugin.onload();
   await plugin.ensureBridge();
+  if (plugin.project.key !== "sloski" || plugin.project.name !== "Sloski") throw new Error("Plugin did not resolve the active vault to its project scope");
   if (!spawnedBridge) throw new Error("Plugin did not start its packaged bridge when health was unavailable");
   if (spawnedBridge.commandName !== (process.platform === "win32" ? "python" : "python3")) throw new Error("Plugin selected an unexpected Python command");
   if (!spawnedBridge.args[0].endsWith(path.join("dist", "poppy-ops-cockpit", "bridge", "poppy_ops_bridge.py")) || spawnedBridge.args[1] !== "serve") throw new Error("Plugin did not launch the packaged bridge entrypoint");
@@ -126,6 +129,8 @@ async function run() {
   if (![...outgoing.values()].some((count) => count > 1) || ![...incoming.values()].some((count) => count > 1)) throw new Error("Topology does not expose branches and joins");
 
   const view = new PluginClass.PoppyOpsView({}, plugin);
+  await view.api("/api/state");
+  if (lastApiRequest.headers["X-Poppy-Ops-Project"] !== "sloski") throw new Error("Plugin API request did not carry its project scope");
   view.state = { codex: { connection_state: "disconnected", interface_state: "supported" } };
   const dock = view.renderDock();
   const labels = findAll(dock, (node) => node.tagName === "LABEL");

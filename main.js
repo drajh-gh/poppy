@@ -11,11 +11,11 @@ const NAV = [
   ["execution", "Live run", "route"],
   ["runs", "Runs", "history"],
   ["evidence", "Evidence", "scan-search"],
-  ["vaults", "Vaults", "archive"],
-  ["operations", "Core ops", "list-checks"],
-  ["capabilities", "Capabilities", "workflow"],
-  ["issues", "Optimize", "wrench"],
-  ["dock", "Poppy dock", "messages-square"],
+  ["vaults", "Project", "archive"],
+  ["operations", "Operations", "list-checks"],
+  ["capabilities", "System", "workflow"],
+  ["issues", "Issues", "wrench"],
+  ["dock", "New task", "messages-square"],
 ];
 
 const STATE_LABELS = {
@@ -112,7 +112,8 @@ function emptyState(title, detail) {
 
 function sectionTitle(kicker, title, note) {
   const node = h("header", "poppy-section-title");
-  append(node, eyebrow(kicker), h("h2", "", title));
+  if (kicker) append(node, h("span", "poppy-section-label", kicker));
+  append(node, h("h2", "", title));
   if (note) append(node, h("p", "", note));
   return node;
 }
@@ -215,7 +216,7 @@ class PoppyOpsView extends ItemView {
 
     const brand = h("div", "poppy-brand");
     append(brand, h("div", "poppy-brand__sigil", "P"), h("div", "poppy-brand__words"));
-    append(brand.lastChild, h("strong", "", "Poppy"), h("span", "", "Ops cockpit"));
+    append(brand.lastChild, h("strong", "", "Poppy"), h("span", "", this.plugin.project?.name || "Project cockpit"));
     this.rail.appendChild(brand);
 
     const nav = h("nav", "poppy-nav");
@@ -240,7 +241,7 @@ class PoppyOpsView extends ItemView {
 
     this.header = h("header", "poppy-stage__header");
     const heading = h("div", "poppy-stage__heading");
-    append(heading, eyebrow("Private instrument panel"), h("h1", "", "Project operations, exposed"));
+    append(heading, h("span", "poppy-project-context", `${this.plugin.project?.name || "Project"} · private operations`), h("h1", "", "Operations cockpit"));
     this.headerActions = h("div", "poppy-stage__actions");
     const refresh = h("button", "poppy-button poppy-button--quiet", "Refresh index");
     refresh.type = "button";
@@ -257,10 +258,11 @@ class PoppyOpsView extends ItemView {
   }
 
   async api(path, options = {}) {
+    const project = this.plugin.project?.key;
     const response = await requestUrl({
       url: `${API}${path}`,
       method: options.method || "GET",
-      headers: { "X-Poppy-Ops-Client": "obsidian-plugin", "Content-Type": "application/json" },
+      headers: { "X-Poppy-Ops-Client": "obsidian-plugin", "X-Poppy-Ops-Project": project || "", "Content-Type": "application/json" },
       body: options.body ? JSON.stringify(options.body) : undefined,
       throw: false,
     });
@@ -274,6 +276,7 @@ class PoppyOpsView extends ItemView {
     if (!silent) { this.error = null; this.render(); }
     try {
       this.state = await this.api("/api/state");
+      if (this.plugin.project?.key && this.state?.scope?.project !== this.plugin.project.key) throw new Error("Bridge returned a mismatched project scope");
       this.error = null;
     } catch (error) {
       this.error = error instanceof Error ? error.message : String(error);
@@ -285,7 +288,7 @@ class PoppyOpsView extends ItemView {
 
   async refreshVaults(notify) {
     try {
-      await this.api("/api/refresh", { method: "POST", body: { scope: "configured-vaults", mode: "read-only-index" } });
+      await this.api("/api/refresh", { method: "POST", body: { scope: this.plugin.project?.key || "active-project", mode: "read-only-index" } });
       await this.fetchState(true);
       if (notify) new Notice("Poppy refreshed the local read-only vault index.");
     } catch (error) {
@@ -297,7 +300,8 @@ class PoppyOpsView extends ItemView {
   connectEvents() {
     if (typeof EventSource === "undefined") return;
     try {
-      this.eventSource = new EventSource(`${API}/events`);
+      const project = encodeURIComponent(this.plugin.project?.key || "");
+      this.eventSource = new EventSource(`${API}/events?project=${project}`);
       this.eventSource.addEventListener("poppy", () => this.fetchState(true));
       this.eventSource.onerror = () => {
         this.updateConnection();
@@ -363,49 +367,51 @@ class PoppyOpsView extends ItemView {
   renderOverview() {
     const root = h("section", "poppy-page poppy-page--overview");
     const vaults = this.state?.vaults || [];
+    const vault = vaults[0];
     const runs = this.state?.runs || [];
+    const findings = this.state?.findings || [];
     const active = runs.filter((run) => ["current", "waiting", "blocked", "failed"].includes(run.status));
-    const gray = vaults.filter((vault) => vault.state === "gray");
+    const signal = vault?.health || { state: "gray", label: "Gray", headline: "Current assessment unavailable", next_action_count: 0 };
     const current = (this.state?.events || []).find((event) => event.status === "current") || (this.state?.events || [])[0];
-    append(root, sectionTitle("Portfolio control", "One desk, two vaults", "The cockpit reads canonical project memory in place and keeps unavailable evidence Gray."));
+    append(root, sectionTitle("Project overview", `${vault?.project?.name || vault?.name || "Project"} at a glance`, "This cockpit is isolated to the active vault. Cross-project records and telemetry are excluded at the bridge boundary."));
 
     const pulse = h("div", "poppy-overview-pulse");
     const statement = h("div", "poppy-overview-pulse__statement");
-    append(statement, eyebrow(current ? "Now moving" : "No active event"), h("strong", "", current?.message || "No live run has reported a current step."), current ? stateBadge(current.status) : stateBadge("gray"));
+    append(statement, h("span", "poppy-pulse-label", current ? "Current activity" : "Current project state"), h("strong", "", current?.message || signal.headline || vault?.project?.next_milestone || "No current activity has been recorded."), current ? stateBadge(current.status) : stateBadge(signal.state, signal.label));
     const metrics = h("div", "poppy-metrics");
     append(metrics,
-      metric("Vault coverage", `${vaults.length - gray.length}/${vaults.length || 2}`, gray.length ? `${gray.length} Gray` : "both indexed", gray.length ? "gray" : "completed"),
-      metric("Runs in view", String(runs.length), `${active.length} need attention`, active.length ? "current" : "completed"),
-      metric("Capability map", String(this.state?.graph?.nodes?.length || 0), this.state?.graph?.state === "completed" ? "source-backed" : "unavailable", this.state?.graph?.state),
-      metric("Optimization", String(this.state?.findings?.length || 0), "deterministic findings", this.state?.findings?.some((item) => item.severity === "high") ? "failed" : "completed")
+      metric("Health", signal.label || "Gray", signal.valid_as_of ? `valid ${signal.valid_as_of}` : "current record", signal.state),
+      metric("Next actions", String(signal.next_action_count || 0), `review ${signal.review_after || "not scheduled"}`, signal.state),
+      metric("Runs", String(runs.length), `${active.length} need attention`, active.length ? "current" : "completed"),
+      metric("Open issues", String(findings.length), findings.length ? "evidence-linked" : "none detected", findings.some((item) => item.severity === "high") ? "failed" : findings.length ? "waiting" : "completed")
     );
     append(pulse, statement, metrics);
     root.appendChild(pulse);
 
     const split = h("div", "poppy-split");
     const attention = h("section", "poppy-ledger");
-    append(attention, sectionTitle("Attention", "What needs a decision"));
+    append(attention, sectionTitle("Attention", "What needs action"));
     const attentionItems = [];
-    for (const run of active.slice(0, 5)) attentionItems.push({ state: run.status, title: run.run_id, note: `${run.project} · ${formatTime(run.updated_at)}` });
-    for (const vault of gray) attentionItems.push({ state: "gray", title: `${vault.name} evidence coverage`, note: vault.reason });
-    if (!attentionItems.length) attention.appendChild(emptyState("Nothing is escalated", "All visible runs and vault snapshots are outside blocked, failed, and Gray states."));
+    for (const run of active.slice(0, 3)) attentionItems.push({ state: run.status, title: run.run_id, note: formatTime(run.updated_at), page: "runs" });
+    for (const item of findings.filter((finding) => finding.severity !== "low").slice(0, 3)) attentionItems.push({ state: item.severity === "high" ? "failed" : "waiting", title: item.message, note: item.action, page: "issues" });
+    if (!attentionItems.length) attention.appendChild(emptyState("Nothing needs intervention", "No blocked run, failed step, or material deterministic finding is visible for this project."));
     for (const item of attentionItems) {
       const row = h("button", "poppy-ledger-row");
       row.type = "button";
       append(row, stateBadge(item.state), h("strong", "", item.title), h("span", "", item.note));
-      row.addEventListener("click", () => { this.page = item.title.startsWith("run") ? "runs" : "vaults"; this.render(); });
+      row.addEventListener("click", () => { this.page = item.page; this.render(); });
       attention.appendChild(row);
     }
 
     const projects = h("section", "poppy-project-lines");
-    append(projects, sectionTitle("Project lines", "Canonical memory at a glance"));
-    for (const vault of vaults) {
+    append(projects, sectionTitle("Current plan", "Project memory"));
+    if (vault) {
       const line = h("article", "poppy-project-line");
       const header = h("div", "poppy-project-line__header");
-      append(header, h("div", "", `${vault.name} / ${vault.project?.stage || "unknown stage"}`), stateBadge(vault.state));
+      append(header, h("div", "", `${vault.project?.stage || "unknown stage"}`), stateBadge(vault.state));
       append(line, header, h("h3", "", vault.project?.next_milestone || "No verified milestone"));
       const details = h("div", "poppy-project-line__details");
-      append(details, h("span", "", `${vault.sources?.length || 0} configured sources`), h("span", "", `${vault.records?.base_count || 0} operational Bases`), h("span", "", `${vault.contradictions?.length || 0} preserved tensions`));
+      append(details, h("span", "", `${vault.sources?.length || 0} sources`), h("span", "", `${vault.records?.base_count || 0} operational views`), h("span", "", `${vault.contradictions?.length || 0} known tensions`));
       line.appendChild(details);
       projects.appendChild(line);
     }
@@ -544,18 +550,18 @@ class PoppyOpsView extends ItemView {
 
   renderRuns() {
     const root = h("section", "poppy-page");
-    append(root, sectionTitle("Run history", "Time, tokens, cost basis", "Cost figures distinguish exact, estimated, shadow price, and unavailable bases."));
+    append(root, sectionTitle("Run history", "Execution cost and timing", "Only runs tagged to this project appear here. Cost figures distinguish exact, estimated, shadow price, and unavailable bases."));
     const runs = this.state?.runs || [];
     if (!runs.length) return append(root, emptyState("No runs recorded", "Replay a ledger or connect a supported event source.")), root;
     const table = h("div", "poppy-run-table");
     const head = h("div", "poppy-run-row poppy-run-row--head");
-    for (const label of ["State", "Run", "Project", "Updated", "Elapsed", "Tokens", "Cost"]) head.appendChild(h("span", "", label));
+    for (const label of ["State", "Run", "Updated", "Elapsed", "Tokens", "Cost"]) head.appendChild(h("span", "", label));
     table.appendChild(head);
     for (const run of runs) {
       const row = h("button", "poppy-run-row");
       row.type = "button";
       const cost = run.cost?.basis === "unavailable" ? stateBadge("gray", "unavailable") : h("span", "poppy-mono", formatCost(run.cost));
-      append(row, stateBadge(run.status), h("strong", "", run.run_id), h("span", "", run.project), h("span", "", formatTime(run.updated_at)), h("span", "poppy-mono", formatDuration(run.duration_ms)), h("span", "poppy-mono", formatTokens(run.tokens)), cost);
+      append(row, stateBadge(run.status), h("strong", "", run.run_id), h("span", "", formatTime(run.updated_at)), h("span", "poppy-mono", formatDuration(run.duration_ms)), h("span", "poppy-mono", formatTokens(run.tokens)), cost);
       row.addEventListener("click", () => { this.selectedRun = this.selectedRun === run.run_id ? null : run.run_id; this.render(); });
       table.appendChild(row);
       if (this.selectedRun === run.run_id) table.appendChild(this.renderRunDetail(run.run_id));
@@ -616,7 +622,7 @@ class PoppyOpsView extends ItemView {
 
   renderVaults() {
     const root = h("section", "poppy-page");
-    append(root, sectionTitle("Compiled memory", "Vault integration and refresh", "Refresh re-indexes local files only. It never rewrites canonical notes or contacts a provider."));
+    append(root, sectionTitle("Project memory", "Sources, freshness, and tensions", "Refresh re-indexes this project's local files only. It never rewrites canonical notes or contacts a provider."));
     for (const vault of this.state?.vaults || []) {
       const section = h("article", "poppy-vault");
       const head = h("header", "poppy-vault__head");
@@ -663,7 +669,7 @@ class PoppyOpsView extends ItemView {
 
   renderOperations() {
     const root = h("section", "poppy-page");
-    append(root, sectionTitle("Core operations", "Health, actions, records, authority", "This view uses compiled project memory. Connector identities without a live receipt remain Gray even when configured."));
+    append(root, sectionTitle("Operations", "Health, actions, records, and authority", "This view uses the active project's compiled memory. Connector identities without a live receipt remain Gray even when configured."));
     for (const vault of this.state?.vaults || []) {
       const project = h("article", "poppy-ops-project");
       const signal = vault.health || { state: "gray", label: "Gray", headline: "Assessment unavailable" };
@@ -775,18 +781,23 @@ class PoppyOpsView extends ItemView {
 
   renderDock() {
     const root = h("section", "poppy-page poppy-page--dock");
-    append(root, sectionTitle("Supported task boundary", "Prepare a dashboard-owned Codex task", "The dock creates or resumes a read-only App Server thread. It stores your prompt as a draft but does not submit a turn, preventing an unreviewed tool or external-system action."));
+    append(root, sectionTitle("New project task", `Prepare a ${this.plugin.project?.name || "project"} Codex task`, "The dock creates or resumes a project-tagged, read-only App Server thread. It stores your prompt as a draft but does not submit a turn."));
     const layout = h("div", "poppy-dock");
     const form = h("form", "poppy-dock__form");
     const label = h("label", "", "What should Poppy examine?");
     const textarea = h("textarea", "poppy-dock__input");
     textarea.id = "poppy-dock-draft";
+    textarea.name = "project-task-draft";
+    textarea.autocomplete = "off";
     label.htmlFor = textarea.id;
     textarea.rows = 8;
-    textarea.placeholder = "Review the latest operational evidence, identify the highest-leverage maintenance issue, and explain the source basis.";
+    textarea.placeholder = "Example: Review the latest operational evidence and identify the highest-leverage maintenance issue…";
     const threadLabel = h("label", "", "Existing dashboard-owned thread ID (optional)");
     const thread = h("input", "poppy-dock__thread");
     thread.id = "poppy-dock-thread";
+    thread.name = "dashboard-thread-id";
+    thread.autocomplete = "off";
+    thread.spellcheck = false;
     threadLabel.htmlFor = thread.id;
     thread.type = "text";
     thread.placeholder = "Leave blank to prepare a new task";
@@ -835,6 +846,7 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
     this.bridgeProcess = null;
     this.bridgeStartup = null;
     this.bridgeStatus = { state: "pending", detail: "startup scheduled" };
+    this.project = this.resolveProjectScope();
     this.registerView(VIEW_TYPE, (leaf) => new PoppyOpsView(leaf, this));
     this.addRibbonIcon("activity", "Open Poppy Ops Cockpit", () => this.activateView());
     this.addCommand({ id: "open-poppy-ops-cockpit", name: "Open operations cockpit", callback: () => this.activateView() });
@@ -850,7 +862,21 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
     const adapter = this.app?.vault?.adapter;
     const basePath = typeof adapter?.getBasePath === "function" ? adapter.getBasePath() : null;
     const pluginDir = this.manifest?.dir;
-    return basePath && pluginDir ? path.resolve(basePath, pluginDir) : null;
+    return basePath && pluginDir ? (path.isAbsolute(pluginDir) ? pluginDir : path.resolve(basePath, pluginDir)) : null;
+  }
+
+  resolveProjectScope() {
+    const root = this.pluginRoot();
+    const basePath = typeof this.app?.vault?.adapter?.getBasePath === "function" ? this.app.vault.adapter.getBasePath() : null;
+    if (!root || !basePath) return { key: null, name: this.app?.vault?.getName?.() || "Project", path: basePath };
+    try {
+      const config = JSON.parse(fs.readFileSync(path.join(root, "config", "bridge.json"), "utf8"));
+      const normalizedBase = path.resolve(basePath).toLowerCase();
+      const match = (config.vaults || []).find((vault) => path.resolve(String(vault.path || "")).toLowerCase() === normalizedBase);
+      return match ? { key: String(match.key), name: String(match.name || match.key), path: String(match.path) } : { key: null, name: this.app?.vault?.getName?.() || path.basename(basePath), path: basePath };
+    } catch (_) {
+      return { key: null, name: this.app?.vault?.getName?.() || path.basename(basePath), path: basePath };
+    }
   }
 
   async bridgeIsHealthy() {

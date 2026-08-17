@@ -245,10 +245,14 @@ class EventStore:
                     thread_id TEXT PRIMARY KEY,
                     created_at TEXT NOT NULL,
                     interface TEXT NOT NULL,
-                    controls_digest TEXT NOT NULL
+                    controls_digest TEXT NOT NULL,
+                    project TEXT NOT NULL DEFAULT 'portfolio'
                 );
                 """
             )
+            owned_thread_columns = {row["name"] for row in connection.execute("PRAGMA table_info(owned_threads)")}
+            if "project" not in owned_thread_columns:
+                connection.execute("ALTER TABLE owned_threads ADD COLUMN project TEXT NOT NULL DEFAULT 'portfolio'")
 
     def append(self, raw: dict[str, Any], *, persist: bool = True) -> tuple[dict[str, Any], bool]:
         material = dict(raw)
@@ -309,19 +313,25 @@ class EventStore:
                     accepted += 1
         return {"accepted": accepted, "malformed": malformed, "duplicate": duplicate}
 
-    def events(self, limit: int = 300, run_id: str | None = None) -> list[dict[str, Any]]:
+    def events(self, limit: int = 300, run_id: str | None = None, project: str | None = None) -> list[dict[str, Any]]:
         limit = min(max(int(limit), 1), 2000)
         query = "SELECT raw_json FROM events"
         params: list[Any] = []
+        clauses = []
         if run_id:
-            query += " WHERE run_id = ?"
+            clauses.append("run_id = ?")
             params.append(run_id)
+        if project:
+            clauses.append("project = ?")
+            params.append(project)
+        if clauses:
+            query += " WHERE " + " AND ".join(clauses)
         query += " ORDER BY timestamp DESC, event_id DESC LIMIT ?"
         params.append(limit)
         with self.connect() as connection:
             return [json.loads(row["raw_json"]) for row in connection.execute(query, params)]
 
-    def runs(self, limit: int = 100) -> list[dict[str, Any]]:
+    def runs(self, limit: int = 100, project: str | None = None) -> list[dict[str, Any]]:
         query = """
         SELECT run_id, project, MIN(timestamp) AS started_at, MAX(timestamp) AS updated_at,
                COUNT(*) AS event_count,
@@ -337,12 +347,18 @@ class EventStore:
                MIN(CASE WHEN cost_amount IS NOT NULL AND cost_basis != 'unavailable' THEN cost_currency END) AS available_currency,
                MAX(CASE status WHEN 'failed' THEN 7 WHEN 'blocked' THEN 6 WHEN 'current' THEN 5
                    WHEN 'waiting' THEN 4 WHEN 'gray' THEN 3 WHEN 'pending' THEN 2 ELSE 1 END) AS state_rank
-        FROM events GROUP BY run_id, project ORDER BY updated_at DESC LIMIT ?
+        FROM events
         """
         states = {7: "failed", 6: "blocked", 5: "current", 4: "waiting", 3: "gray", 2: "pending", 1: "completed"}
+        params: list[Any] = []
+        if project:
+            query += " WHERE project = ?"
+            params.append(project)
+        query += " GROUP BY run_id, project ORDER BY updated_at DESC LIMIT ?"
+        params.append(min(max(limit, 1), 500))
         with self.connect() as connection:
             result = []
-            for row in connection.execute(query, (min(max(limit, 1), 500),)):
+            for row in connection.execute(query, params):
                 item = dict(row)
                 item["status"] = states.get(item.pop("state_rank"), "gray")
                 item["tokens"] = {key: item.pop(f"{key}_tokens") for key in ("input", "cached", "reasoning", "output")}
@@ -378,12 +394,16 @@ class EventStore:
         with self.connect() as connection:
             return [row["thread_id"] for row in connection.execute("SELECT thread_id FROM owned_threads ORDER BY created_at, thread_id")]
 
+    def owned_thread_projects(self) -> dict[str, str]:
+        with self.connect() as connection:
+            return {row["thread_id"]: row["project"] for row in connection.execute("SELECT thread_id, project FROM owned_threads")}
+
     def register_owned_thread(self, thread_id: str, controls: dict[str, Any]) -> None:
         digest = stable_id("controls", controls)
         with self.connect() as connection:
             connection.execute(
-                "INSERT OR IGNORE INTO owned_threads(thread_id,created_at,interface,controls_digest) VALUES (?,?,?,?)",
-                (thread_id, utc_now(), "official-app-server-stdio-jsonrpc", digest),
+                "INSERT OR IGNORE INTO owned_threads(thread_id,created_at,interface,controls_digest,project) VALUES (?,?,?,?,?)",
+                (thread_id, utc_now(), "official-app-server-stdio-jsonrpc", digest, str(controls.get("project") or "portfolio")),
             )
 
 
@@ -664,6 +684,7 @@ class CodexAppServerClient:
         self.last_error: str | None = None
         self.user_agent: str | None = None
         self.thread_ids: list[str] = []
+        self.thread_projects: dict[str, str] = {}
 
     def status(self) -> dict[str, Any]:
         executable = Path(str(self.config.get("executable", "")))
@@ -681,7 +702,7 @@ class CodexAppServerClient:
             "external_mcp_policy": self.config.get("external_mcp_policy") or "gray",
         }
 
-    def ensure_started(self) -> dict[str, Any]:
+    def ensure_started(self, project: str = "portfolio") -> dict[str, Any]:
         with self.lock:
             if self.process and self.process.poll() is None and self.connection_state == "connected":
                 return self.status()
@@ -722,7 +743,7 @@ class CodexAppServerClient:
             self.user_agent = response.get("result", {}).get("userAgent")
             self.notify("initialized", {})
             self.connection_state = "connected"
-            self.on_event({"kind": "codex.initialize", "status": "completed", "run_id": "codex-appserver", "project": "portfolio", "message": "Official Codex App Server initialized", "metadata": {"user_agent": self.user_agent, "interface": "stdio-jsonrpc", "mcp_isolation": isolation}})
+            self.on_event({"kind": "codex.initialize", "status": "completed", "run_id": "codex-appserver", "project": project, "message": "Official Codex App Server initialized", "metadata": {"user_agent": self.user_agent, "interface": "stdio-jsonrpc", "mcp_isolation": isolation}})
             return self.status()
 
     def request(self, method: str, params: dict[str, Any], timeout: float = 15) -> dict[str, Any]:
@@ -748,8 +769,8 @@ class CodexAppServerClient:
         self.process.stdin.write(json_dumps(payload) + "\n")
         self.process.stdin.flush()
 
-    def create_thread(self, draft: str = "") -> dict[str, Any]:
-        self.ensure_started()
+    def create_thread(self, draft: str = "", project: str = "portfolio") -> dict[str, Any]:
+        self.ensure_started(project)
         response = self.request(
             "thread/start",
             {"cwd": str(ROOT), "approvalPolicy": "never", "sandbox": "read-only", "ephemeral": False, "threadSource": "appServer"},
@@ -757,19 +778,21 @@ class CodexAppServerClient:
         )
         validated = validate_thread_controls(response)
         thread_id = validated["thread_id"]
+        self.thread_projects[thread_id] = project
         if self.on_owned_thread:
-            self.on_owned_thread(thread_id, {"approval_policy": validated["approval_policy"], "sandbox": validated["sandbox"], "thread_source": "appServer"})
+            self.on_owned_thread(thread_id, {"approval_policy": validated["approval_policy"], "sandbox": validated["sandbox"], "thread_source": "appServer", "project": project})
         self.thread_ids.append(thread_id)
-        self.on_event({"kind": "codex.thread.prepared", "status": "waiting", "run_id": thread_id or "codex-appserver", "project": "portfolio", "message": "Dashboard-owned read-only Codex task prepared; draft not submitted", "worker": "codex-appserver", "approval": "turn-not-authorized", "metadata": {"thread_id": thread_id, "draft": draft, "draft_submitted": False}})
+        self.on_event({"kind": "codex.thread.prepared", "status": "waiting", "run_id": thread_id or "codex-appserver", "project": project, "message": "Dashboard-owned read-only Codex task prepared; draft not submitted", "worker": "codex-appserver", "approval": "turn-not-authorized", "metadata": {"thread_id": thread_id, "draft": draft, "draft_submitted": False}})
         return {"thread_id": thread_id, "status": "waiting", "draft_submitted": False, "next_action": "Copy the draft and continue the task in an approval-aware Codex surface."}
 
-    def resume_thread(self, thread_id: str, draft: str = "") -> dict[str, Any]:
+    def resume_thread(self, thread_id: str, draft: str = "", project: str = "portfolio") -> dict[str, Any]:
         if thread_id not in self.thread_ids:
             raise RuntimeError("Refusing to resume a thread not created and owned by this dashboard adapter")
-        self.ensure_started()
+        self.ensure_started(project)
+        self.thread_projects[thread_id] = project
         response = self.request("thread/resume", {"threadId": thread_id}, timeout=30)
         validate_thread_controls(response, expected_thread_id=thread_id)
-        self.on_event({"kind": "codex.thread.resumed", "status": "waiting", "run_id": thread_id, "project": "portfolio", "message": "Dashboard-owned Codex task resumed; draft not submitted", "worker": "codex-appserver", "approval": "turn-not-authorized", "metadata": {"thread_id": thread_id, "draft": draft, "draft_submitted": False}})
+        self.on_event({"kind": "codex.thread.resumed", "status": "waiting", "run_id": thread_id, "project": project, "message": "Dashboard-owned Codex task resumed; draft not submitted", "worker": "codex-appserver", "approval": "turn-not-authorized", "metadata": {"thread_id": thread_id, "draft": draft, "draft_submitted": False}})
         return {"thread_id": thread_id, "status": "waiting", "draft_submitted": False, "next_action": "Copy the draft and continue in Codex."}
 
     def _read_stdout(self) -> None:
@@ -822,7 +845,7 @@ class CodexAppServerClient:
         event_tokens = normalize_tokens(usage)
         if method.lower().startswith("reasoning"):
             safe_metadata["content_redacted"] = "hidden-reasoning-boundary"
-        self.on_event({"kind": method, "status": status, "run_id": run_id or "codex-appserver", "project": "portfolio", "message": method, "worker": "codex-appserver", "durationMs": params.get("durationMs"), "tokens": event_tokens, "emittedAtMs": payload.get("emittedAtMs"), "metadata": safe_metadata})
+        self.on_event({"kind": method, "status": status, "run_id": run_id or "codex-appserver", "project": self.thread_projects.get(str(run_id), "portfolio"), "message": method, "worker": "codex-appserver", "durationMs": params.get("durationMs"), "tokens": event_tokens, "emittedAtMs": payload.get("emittedAtMs"), "metadata": safe_metadata})
 
     def stop(self) -> None:
         with self.lock:
@@ -854,6 +877,7 @@ class Application:
         placeholder = cls(config, store, VaultIndexer(config, store), CapabilityGraph(config.get("capability_graph", "")), None, subscribers, [])  # type: ignore[arg-type]
         placeholder.codex = CodexAppServerClient(config.get("codex", {}), placeholder.record_event, store.register_owned_thread)
         placeholder.codex.thread_ids = store.owned_thread_ids()
+        placeholder.codex.thread_projects = store.owned_thread_projects()
         placeholder.vaults = placeholder.indexer.refresh()
         return placeholder
 
@@ -867,23 +891,45 @@ class Application:
                     self.subscribers.discard(subscriber)
         return event
 
-    def refresh(self) -> dict[str, Any]:
-        self.vaults = self.indexer.refresh()
-        event = self.record_event({"kind": "vault.refresh", "status": "completed" if all(v["exists"] for v in self.vaults) else "gray", "run_id": f"refresh-{datetime.now(timezone.utc).date().isoformat()}", "project": "portfolio", "message": "Local read-only vault index refreshed", "evidence": [{"source": v["name"], "locator": v["path"], "freshness": v["freshness"].get("current", {}).get("reason", "unknown"), "authority": "compiled-memory", "contradiction": bool(v["contradictions"]), "state": v["state"]} for v in self.vaults]})
-        return {"captured_at": utc_now(), "vaults": self.vaults, "event": event}
+    def project_keys(self) -> set[str]:
+        return {str(vault.get("key")) for vault in self.vaults if vault.get("key")}
 
-    def state(self) -> dict[str, Any]:
-        recent_events = self.store.events(500)
+    def refresh(self, project: str | None = None) -> dict[str, Any]:
+        self.vaults = self.indexer.refresh()
+        scoped_vaults = [vault for vault in self.vaults if not project or vault.get("key") == project]
+        events = []
+        for vault in scoped_vaults:
+            events.append(self.record_event({
+                "kind": "vault.refresh",
+                "status": "completed" if vault.get("exists") else "gray",
+                "run_id": f"refresh-{datetime.now(timezone.utc).date().isoformat()}-{vault.get('key')}",
+                "project": vault.get("key"),
+                "message": f"{vault.get('name')} local index refreshed",
+                "evidence": [{
+                    "source": vault.get("name"),
+                    "locator": vault.get("path"),
+                    "freshness": vault.get("freshness", {}).get("current", {}).get("reason", "unknown"),
+                    "authority": "compiled-memory",
+                    "contradiction": bool(vault.get("contradictions")),
+                    "state": vault.get("state"),
+                }],
+            }))
+        return {"captured_at": utc_now(), "vaults": scoped_vaults, "events": events, "event": events[0] if events else None}
+
+    def state(self, project: str | None = None) -> dict[str, Any]:
+        scoped_vaults = [vault for vault in self.vaults if not project or vault.get("key") == project]
+        recent_events = self.store.events(500, project=project)
         return {
             "schema_version": 1,
             "captured_at": utc_now(),
+            "scope": {"mode": "project" if project else "portfolio", "project": project},
             "service": {"state": "completed", "bind": self.config.get("bind"), "port": self.config.get("port"), "storage": {"ledger": str(self.store.ledger), "database": str(self.store.database)}},
             "codex": self.codex.status(),
-            "vaults": self.vaults,
+            "vaults": scoped_vaults,
             "graph": self.graph.read(),
-            "runs": self.store.runs(),
+            "runs": self.store.runs(project=project),
             "events": recent_events,
-            "findings": findings(recent_events, self.vaults),
+            "findings": findings(recent_events, scoped_vaults),
             "controls": {"vault_writes": "disabled", "external_writes": "disabled", "local_refresh": "read-only-index", "dock_turn_submission": "disabled"},
         }
 
@@ -935,17 +981,36 @@ class Handler(BaseHTTPRequestHandler):
         client = self.headers.get("X-Poppy-Ops-Client")
         return client == "obsidian-plugin" and (not origin or origin.startswith("app://obsidian"))
 
+    def _project_scope(self, parsed: urllib.parse.ParseResult | None = None) -> str | None:
+        query = urllib.parse.parse_qs(parsed.query) if parsed else {}
+        requested = str(self.headers.get("X-Poppy-Ops-Project") or query.get("project", [""])[0]).strip()
+        if not requested:
+            return None
+        if requested not in self.app.project_keys():
+            raise ValueError("Unknown project scope")
+        return requested
+
     def do_GET(self) -> None:  # noqa: N802
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/health":
             self._json({"state": "completed", "service": "poppy-ops-bridge", "time": utc_now()})
         elif parsed.path == "/api/state":
-            self._json(self.app.state())
+            try:
+                self._json(self.app.state(self._project_scope(parsed)))
+            except ValueError as error:
+                self._json({"error": str(error), "state": "gray"}, HTTPStatus.BAD_REQUEST)
         elif parsed.path == "/api/events":
-            query = urllib.parse.parse_qs(parsed.query)
-            self._json({"events": self.app.store.events(int(query.get("limit", ["300"])[0]), query.get("run_id", [None])[0])})
+            try:
+                query = urllib.parse.parse_qs(parsed.query)
+                project = self._project_scope(parsed)
+                self._json({"events": self.app.store.events(int(query.get("limit", ["300"])[0]), query.get("run_id", [None])[0], project)})
+            except ValueError as error:
+                self._json({"error": str(error), "state": "gray"}, HTTPStatus.BAD_REQUEST)
         elif parsed.path == "/events":
-            self._sse()
+            try:
+                self._sse(self._project_scope(parsed))
+            except ValueError as error:
+                self._json({"error": str(error), "state": "gray"}, HTTPStatus.BAD_REQUEST)
         else:
             self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
 
@@ -955,16 +1020,21 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             body = self._body()
+            project = self._project_scope()
             if self.path == "/api/refresh":
-                self._json(self.app.refresh())
+                self._json(self.app.refresh(project))
             elif self.path == "/api/event":
+                if project and body.get("project") not in {None, "", project}:
+                    raise ValueError("Event project does not match the requested project scope")
+                if project:
+                    body["project"] = project
                 self._json({"event": self.app.record_event(body)}, HTTPStatus.CREATED)
             elif self.path == "/api/codex/connect":
-                self._json({"codex": self.app.codex.ensure_started()})
+                self._json({"codex": self.app.codex.ensure_started(project or "portfolio")})
             elif self.path == "/api/dock":
                 draft = str(body.get("draft") or "")[:12_000]
                 thread_id = str(body.get("thread_id") or "").strip()
-                result = self.app.codex.resume_thread(thread_id, draft) if thread_id else self.app.codex.create_thread(draft)
+                result = self.app.codex.resume_thread(thread_id, draft, project or "portfolio") if thread_id else self.app.codex.create_thread(draft, project or "portfolio")
                 self._json(result, HTTPStatus.CREATED)
             else:
                 self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
@@ -973,7 +1043,7 @@ class Handler(BaseHTTPRequestHandler):
         except RuntimeError as error:
             self._json({"error": str(error), "state": "gray"}, HTTPStatus.SERVICE_UNAVAILABLE)
 
-    def _sse(self) -> None:
+    def _sse(self, project: str | None = None) -> None:
         subscriber: queue.Queue = queue.Queue(maxsize=100)
         self.app.subscribers.add(subscriber)
         self._headers(200, "text/event-stream; charset=utf-8")
@@ -984,6 +1054,8 @@ class Handler(BaseHTTPRequestHandler):
             while time.monotonic() < deadline:
                 try:
                     event = subscriber.get(timeout=10)
+                    if project and event.get("project") != project:
+                        continue
                     self.wfile.write(f"event: poppy\ndata: {json_dumps(event)}\n\n".encode("utf-8"))
                 except queue.Empty:
                     self.wfile.write(b": keepalive\n\n")

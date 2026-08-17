@@ -1,6 +1,6 @@
 {
   "name": "poppy-ops-cockpit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Dependency-free Obsidian ItemView with a Python standard-library bridge",
   "scripts": {

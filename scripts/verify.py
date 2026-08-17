@@ -104,13 +104,27 @@ def bridge_smoke() -> dict:
                 raise RuntimeError("Available run cost lacks an explicit three-letter currency")
             if any(not finding.get("action") or not finding.get("references") for finding in state.get("findings", [])):
                 raise RuntimeError("A deterministic finding lacks actionable lineage")
+            scoped_states = {}
+            for project in ("sloski", "everaway"):
+                connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+                connection.request("GET", "/api/state", headers={"X-Poppy-Ops-Project": project})
+                scoped_response = connection.getresponse()
+                scoped = json.loads(scoped_response.read())
+                connection.close()
+                if scoped_response.status != 200 or scoped.get("scope", {}).get("project") != project:
+                    raise RuntimeError(f"Project scope was not preserved for {project}")
+                if [vault.get("key") for vault in scoped.get("vaults", [])] != [project]:
+                    raise RuntimeError(f"Project state leaked another vault into {project}")
+                if any(item.get("project") != project for item in [*scoped.get("runs", []), *scoped.get("events", [])]):
+                    raise RuntimeError(f"Project telemetry leaked into {project}")
+                scoped_states[project] = {"vaults": len(scoped.get("vaults", [])), "runs": len(scoped.get("runs", [])), "events": len(scoped.get("events", [])), "findings": len(scoped.get("findings", []))}
             connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
             body = json.dumps({"scope": "configured-vaults", "mode": "read-only-index"})
-            connection.request("POST", "/api/refresh", body=body, headers={"Content-Type": "application/json", "X-Poppy-Ops-Client": "obsidian-plugin"})
+            connection.request("POST", "/api/refresh", body=body, headers={"Content-Type": "application/json", "X-Poppy-Ops-Client": "obsidian-plugin", "X-Poppy-Ops-Project": "sloski"})
             refresh_response = connection.getresponse()
             refresh = json.loads(refresh_response.read())
             connection.close()
-            if refresh_response.status != 200 or len(refresh.get("vaults", [])) != 2:
+            if refresh_response.status != 200 or [vault.get("key") for vault in refresh.get("vaults", [])] != ["sloski"] or refresh.get("event", {}).get("project") != "sloski":
                 raise RuntimeError("Read-only refresh smoke failed")
             after = {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in protected if path.is_file()}
             if before != after:
@@ -119,6 +133,7 @@ def bridge_smoke() -> dict:
                 "name": "localhost bridge smoke", "status": "pass", "port": port,
                 "health": health, "vaults": [{"key": item["key"], "exists": item["exists"], "state": item["state"]} for item in state["vaults"]],
                 "graph_nodes": len(state["graph"]["nodes"]), "graph_edges": len(state["graph"]["edges"]), "runs": len(state["runs"]), "unavailable_cost_runs": len(unavailable_runs), "findings_with_lineage": len(state["findings"]), "refresh_event": refresh["event"]["event_id"],
+                "project_scopes": scoped_states,
                 "owned_process_pid": process.pid,
                 "canonical_vault_hashes_unchanged": len(before),
             }

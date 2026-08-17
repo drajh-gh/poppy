@@ -31,6 +31,10 @@ The desktop plugin packages and starts the Python bridge automatically when the 
 
 The bridge binds only to `127.0.0.1:7317`. Both packaged instances use the shared repository-local `runtime/events.jsonl` and `runtime/poppy-ops.sqlite3` paths declared in `config/bridge.json`, so startup order cannot split run history between vaults. Refreshing the cockpit never rewrites either project vault's canonical records.
 
+## Project isolation
+
+Each installed plugin resolves its active vault against `config/bridge.json` and sends that project key on every state, event, refresh, and Codex-dock request. The bridge filters vault snapshots, runs, events, findings, and server-sent updates before returning a response. Sloski cannot receive EverAway records through the cockpit API, and EverAway cannot receive Sloski records. Untagged or portfolio-level historical events remain in the audit ledger but do not appear in either project workspace.
+
 ## Verify and package
 
 ```powershell
