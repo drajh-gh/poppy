@@ -12,7 +12,11 @@ let revealed = false;
 let spawnedBridge = null;
 let healthChecks = 0;
 let lastApiRequest = null;
+let apiRequestCount = 0;
+let apiResponseJson = {};
+let eventSourceCount = 0;
 const syntheticVaultPath = path.resolve("C:\\Synthetic", "AtlasDemo");
+let currentVaultPath = syntheticVaultPath;
 const originalReadFileSync = fs.readFileSync.bind(fs);
 fs.readFileSync = function (file, ...args) {
   if (String(file).endsWith(path.join("config", "bridge.json"))) {
@@ -49,6 +53,11 @@ global.document = {
   createElement: (tag) => new FakeElement(tag),
   createElementNS: (_namespace, tag) => new FakeElement(tag),
 };
+global.EventSource = class {
+  constructor(url) { this.url = url; this.listeners = {}; eventSourceCount += 1; }
+  addEventListener(name, callback) { this.listeners[name] = callback; }
+  close() {}
+};
 
 function findAll(root, predicate, result = []) {
   if (predicate(root)) result.push(root);
@@ -60,7 +69,7 @@ class Plugin {
   constructor() {
     const root = path.resolve(__dirname, "..");
     this.app = {
-      vault: { adapter: { getBasePath: () => syntheticVaultPath }, getName: () => "Atlas Demo" },
+      vault: { adapter: { getBasePath: () => currentVaultPath }, getName: () => currentVaultPath === syntheticVaultPath ? "Atlas Demo" : "Unconfigured Demo" },
       workspace: {
         getLeavesOfType: () => [],
         getLeaf: () => ({ setViewState: async (state) => { activated = state; } }),
@@ -93,6 +102,7 @@ Module._load = function (request, parent, isMain) {
     ItemView,
     Notice: class {},
     requestUrl: async (options) => {
+      apiRequestCount += 1;
       lastApiRequest = options;
       if (String(options.url).endsWith("/health")) {
         healthChecks += 1;
@@ -100,7 +110,7 @@ Module._load = function (request, parent, isMain) {
           ? { status: 503, json: { state: "gray" } }
           : { status: 200, json: { state: "completed", service: "poppy-ops-bridge" } };
       }
-      return { status: 200, json: {} };
+      return { status: 200, json: apiResponseJson };
     },
   };
   return originalLoad.apply(this, arguments);
@@ -142,6 +152,11 @@ async function run() {
   const view = new PluginClass.PoppyOpsView({}, plugin);
   await view.api("/api/state");
   if (lastApiRequest.headers["X-Poppy-Ops-Project"] !== "atlas-demo") throw new Error("Plugin API request did not carry its project scope");
+  apiResponseJson = { scope: { mode: "project", project: "beacon-demo" }, vaults: [{ key: "beacon-demo" }] };
+  view.state = { scope: { mode: "project", project: "atlas-demo" } };
+  await view.fetchState();
+  if (view.state !== null || !String(view.error).includes("mismatched project scope")) throw new Error("Plugin accepted a mismatched bridge response scope");
+  apiResponseJson = {};
   view.state = { codex: { connection_state: "disconnected", interface_state: "supported" } };
   const dock = view.renderDock();
   const labels = findAll(dock, (node) => node.tagName === "LABEL");
@@ -200,6 +215,24 @@ async function run() {
 
   await plugin.onunload();
   if (!spawnedBridge.child.killed) throw new Error("Plugin did not stop its owned bridge during unload");
+
+  currentVaultPath = path.resolve("C:\\Synthetic", "UnconfiguredDemo");
+  const requestsBeforeUnconfigured = apiRequestCount;
+  const eventsBeforeUnconfigured = eventSourceCount;
+  const unconfigured = new PluginClass();
+  await unconfigured.onload();
+  if (unconfigured.project.key !== null || unconfigured.project.state !== "gray" || !String(unconfigured.project.reason).includes("not configured")) throw new Error("Unmatched vault did not resolve to explicit Gray scope");
+  if (apiRequestCount !== requestsBeforeUnconfigured) throw new Error("Unconfigured plugin contacted the bridge during load");
+  const unconfiguredView = new PluginClass.PoppyOpsView({}, unconfigured);
+  let rejected = false;
+  try { await unconfiguredView.api("/api/state"); } catch (error) { rejected = String(error).includes("not configured"); }
+  if (!rejected || apiRequestCount !== requestsBeforeUnconfigured) throw new Error("Unconfigured view did not reject state locally before HTTP");
+  unconfiguredView.connectEvents();
+  if (eventSourceCount !== eventsBeforeUnconfigured) throw new Error("Unconfigured view opened an SSE connection");
+  const unavailable = unconfiguredView.renderUnavailable();
+  const unavailableText = findAll(unavailable, () => true).map((node) => node.textContent).filter(Boolean).join(" | ");
+  if (!unavailableText.includes("not configured for Poppy") || !unavailableText.includes("no portfolio scope")) throw new Error("Unconfigured vault did not render explicit fail-closed guidance");
+  await unconfigured.onunload();
 
   process.stdout.write(JSON.stringify({ status: "pass", registeredType, command: command.id, ribbon: ribbon.icon, activated, bridgeStartup: { command: spawnedBridge.commandName, healthChecks, stoppedOnUnload: spawnedBridge.child.killed }, topology: { nodes: graph.nodes.length, edges: topology.edges.length, levels: topology.levels }, accessibility: { labels: labels.length, liveRegion: receipt.id }, cost: { unavailable: "gray", nonUsd: eurCost } }) + "\n");
 }

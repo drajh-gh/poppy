@@ -193,6 +193,11 @@ class PoppyOpsView extends ItemView {
   async onOpen() {
     this.containerEl.addClass("poppy-ops-view");
     this.renderShell();
+    if (!this.plugin.project?.key) {
+      this.error = this.plugin.project?.reason || "This vault is not configured for Poppy operations.";
+      this.render();
+      return;
+    }
     await this.plugin.ensureBridge();
     await this.fetchState();
     this.connectEvents();
@@ -264,11 +269,12 @@ class PoppyOpsView extends ItemView {
   }
 
   async api(path, options = {}) {
-    const project = this.plugin.project?.key;
+    const project = String(this.plugin.project?.key || "").trim();
+    if (!project) throw new Error(this.plugin.project?.reason || "This vault is not configured for Poppy operations.");
     const response = await requestUrl({
       url: `${API}${path}`,
       method: options.method || "GET",
-      headers: { "X-Poppy-Ops-Client": "obsidian-plugin", "X-Poppy-Ops-Project": project || "", "Content-Type": "application/json" },
+      headers: { "X-Poppy-Ops-Client": "obsidian-plugin", "X-Poppy-Ops-Project": project, "Content-Type": "application/json" },
       body: options.body ? JSON.stringify(options.body) : undefined,
       throw: false,
     });
@@ -281,10 +287,12 @@ class PoppyOpsView extends ItemView {
     this.loading = true;
     if (!silent) { this.error = null; this.render(); }
     try {
-      this.state = await this.api("/api/state");
-      if (this.plugin.project?.key && this.state?.scope?.project !== this.plugin.project.key) throw new Error("Bridge returned a mismatched project scope");
+      const nextState = await this.api("/api/state");
+      if (nextState?.scope?.project !== this.plugin.project.key) throw new Error("Bridge returned a mismatched project scope");
+      this.state = nextState;
       this.error = null;
     } catch (error) {
+      this.state = null;
       this.error = error instanceof Error ? error.message : String(error);
     } finally {
       this.loading = false;
@@ -304,9 +312,14 @@ class PoppyOpsView extends ItemView {
   }
 
   connectEvents() {
+    if (!this.plugin.project?.key) {
+      this.error = this.plugin.project?.reason || "This vault is not configured for Poppy operations.";
+      this.render();
+      return;
+    }
     if (typeof EventSource === "undefined") return;
     try {
-      const project = encodeURIComponent(this.plugin.project?.key || "");
+      const project = encodeURIComponent(this.plugin.project.key);
       this.eventSource = new EventSource(`${API}/events?project=${project}`);
       this.eventSource.addEventListener("poppy", () => this.fetchState(true));
       this.eventSource.onerror = () => {
@@ -322,7 +335,8 @@ class PoppyOpsView extends ItemView {
     if (!this.connection) return;
     clear(this.connection);
     const bridgeState = this.state?.service?.state || "gray";
-    append(this.connection, stateBadge(this.error ? "gray" : bridgeState, this.error ? "bridge offline" : "localhost"));
+    const errorLabel = !this.plugin.project?.key ? "scope unavailable" : "bridge offline";
+    append(this.connection, stateBadge(this.error ? "gray" : bridgeState, this.error ? errorLabel : "localhost"));
     const time = h("span", "", this.state?.captured_at ? formatTime(this.state.captured_at) : "No snapshot");
     this.connection.appendChild(time);
   }
@@ -342,7 +356,7 @@ class PoppyOpsView extends ItemView {
       return;
     }
     if (this.error && !this.state) {
-      append(this.body, this.renderOffline());
+      append(this.body, this.renderUnavailable());
       return;
     }
     const renderer = {
@@ -360,8 +374,12 @@ class PoppyOpsView extends ItemView {
     }
   }
 
-  renderOffline() {
+  renderUnavailable() {
     const node = h("section", "poppy-offline");
+    if (!this.plugin.project?.key) {
+      append(node, stateBadge("gray", "scope unconfigured"), h("h2", "", "This vault is not configured for Poppy"), h("p", "", "Add this vault to the cockpit's local bridge configuration. Operational data remains unavailable and no portfolio scope is used."));
+      return node;
+    }
     append(node, stateBadge("gray", "bridge unavailable"), h("h2", "", "The cockpit has no live instrument feed"), h("p", "", "Automatic startup did not reach the packaged localhost bridge. Confirm desktop Python is available; missing telemetry remains Gray."));
     const code = h("code", "", "python .obsidian/plugins/poppy-ops-cockpit/bridge/poppy_ops_bridge.py serve");
     const retry = h("button", "poppy-button", "Try again");
@@ -856,7 +874,8 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
     this.registerView(VIEW_TYPE, (leaf) => new PoppyOpsView(leaf, this));
     this.addRibbonIcon("activity", "Open Poppy Ops Cockpit", () => this.activateView());
     this.addCommand({ id: "open-poppy-ops-cockpit", name: "Open operations cockpit", callback: () => this.activateView() });
-    void this.ensureBridge();
+    if (this.project.key) void this.ensureBridge();
+    else this.bridgeStatus = { state: "gray", detail: this.project.reason };
   }
 
   async onunload() {
@@ -874,14 +893,15 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
   resolveProjectScope() {
     const root = this.pluginRoot();
     const basePath = typeof this.app?.vault?.adapter?.getBasePath === "function" ? this.app.vault.adapter.getBasePath() : null;
-    if (!root || !basePath) return { key: null, name: this.app?.vault?.getName?.() || "Project", path: basePath };
+    const unavailable = (reason) => ({ key: null, name: this.app?.vault?.getName?.() || (basePath ? path.basename(basePath) : "Project"), path: basePath, state: "gray", reason });
+    if (!root || !basePath) return unavailable("The desktop vault path is unavailable, so project scope cannot be resolved.");
     try {
       const config = JSON.parse(fs.readFileSync(path.join(root, "config", "bridge.json"), "utf8"));
       const normalizedBase = path.resolve(basePath).toLowerCase();
       const match = (config.vaults || []).find((vault) => path.resolve(String(vault.path || "")).toLowerCase() === normalizedBase);
-      return match ? { key: String(match.key), name: String(match.name || match.key), path: String(match.path) } : { key: null, name: this.app?.vault?.getName?.() || path.basename(basePath), path: basePath };
+      return match ? { key: String(match.key), name: String(match.name || match.key), path: String(match.path), state: "completed", reason: null } : unavailable("This vault is not configured for Poppy operations.");
     } catch (_) {
-      return { key: null, name: this.app?.vault?.getName?.() || path.basename(basePath), path: basePath };
+      return unavailable("Poppy's local bridge configuration could not be read, so project scope remains Gray.");
     }
   }
 

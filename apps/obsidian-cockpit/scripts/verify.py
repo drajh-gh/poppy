@@ -66,7 +66,7 @@ def wait_health(port: int, timeout: float = 12) -> dict:
 def request_json(port: int, method: str, route: str, *, project: str | None = None, body: dict | None = None) -> tuple[int, dict]:
     headers = {"X-Poppy-Ops-Client": "obsidian-plugin"}
     payload = None
-    if project:
+    if project is not None:
         headers["X-Poppy-Ops-Project"] = project
     if body is not None:
         headers["Content-Type"] = "application/json"
@@ -131,11 +131,12 @@ def bridge_smoke() -> dict:
         )
         try:
             health = wait_health(port)
-            status, state = request_json(port, "GET", "/api/state")
-            if status != 200 or [item.get("key") for item in state.get("vaults", [])] != ["atlas-demo", "beacon-demo"]:
-                raise RuntimeError("Unscoped synthetic bridge state is incomplete")
-            if len(state.get("graph", {}).get("nodes", [])) != 37 or len(state.get("graph", {}).get("edges", [])) != 81:
-                raise RuntimeError("Canonical capability graph topology changed")
+            rejected_scopes = {}
+            for label, project in (("missing", None), ("empty", ""), ("unknown", "unknown-demo")):
+                rejected_status, rejected = request_json(port, "GET", "/api/state", project=project)
+                if rejected_status < 400 or rejected.get("state") != "gray" or {"vaults", "runs", "events"} & rejected.keys():
+                    raise RuntimeError(f"{label} project scope did not fail closed: {rejected_status} {rejected}")
+                rejected_scopes[label] = rejected_status
             scopes = {}
             for project in ("atlas-demo", "beacon-demo"):
                 scoped_status, scoped = request_json(port, "GET", "/api/state", project=project)
@@ -145,6 +146,8 @@ def bridge_smoke() -> dict:
                     raise RuntimeError(f"Project state leaked another vault into {project}")
                 if any(item.get("project") != project for item in [*scoped.get("runs", []), *scoped.get("events", [])]):
                     raise RuntimeError(f"Project telemetry leaked into {project}")
+                if len(scoped.get("graph", {}).get("nodes", [])) != 37 or len(scoped.get("graph", {}).get("edges", [])) != 81:
+                    raise RuntimeError("Canonical capability graph topology changed")
                 scopes[project] = {"runs": len(scoped.get("runs", [])), "events": len(scoped.get("events", []))}
             refresh_status, refresh = request_json(port, "POST", "/api/refresh", project="atlas-demo", body={"scope": "configured-vaults", "mode": "read-only-index"})
             if refresh_status != 200 or [vault.get("key") for vault in refresh.get("vaults", [])] != ["atlas-demo"] or refresh.get("event", {}).get("project") != "atlas-demo":
@@ -152,7 +155,7 @@ def bridge_smoke() -> dict:
             after = {str(path): digest(path) for path in protected}
             if before != after:
                 raise RuntimeError("Synthetic vault fixtures changed during read-only bridge smoke")
-            return {"name": "synthetic localhost integration", "status": "pass", "health": health, "project_scopes": scopes, "replay": replay["stdout"], "protected_hashes_unchanged": len(before)}
+            return {"name": "synthetic localhost integration", "status": "pass", "health": health, "rejected_scopes": rejected_scopes, "project_scopes": scopes, "replay": replay["stdout"], "protected_hashes_unchanged": len(before)}
         finally:
             process.terminate()
             try:

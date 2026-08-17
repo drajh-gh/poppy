@@ -10,6 +10,7 @@ It is a subsystem of the Poppy product. Canonical orchestration skills, contract
 - Python standard-library localhost bridge bound to `127.0.0.1`
 - Append-only JSONL telemetry and replayable SQLite projection
 - Server-enforced project scoping for vaults, runs, events, findings, refresh, SSE, and owned Codex tasks
+- Fail-closed Gray behavior when a vault has no configured project key or a response scope does not match
 - Read-only vault indexing; no canonical vault writes
 - Gray semantics for missing, stale, malformed, unsupported, or contradictory evidence
 - External providers disabled in the shipped example configuration
@@ -19,6 +20,8 @@ It is a subsystem of the Poppy product. Canonical orchestration skills, contract
 `config/bridge.example.json` is a safe, inert template. It contains no projects, paths, credentials, or enabled Codex launch. For repository-local development, copy it to ignored `config/bridge.local.json` and supply approved project paths.
 
 The build packages the safe template as `config/bridge.json`. A separately authorized installation workflow must provide its approved local config. Relative runtime paths are resolved inside the installed plugin directory; absolute paths are also supported when explicitly configured.
+
+An installed cockpit never falls back to portfolio data. If the active vault does not exactly match one configured project, the plugin opens no operational HTTP or SSE stream and shows an explicit Gray configuration state. The bridge independently rejects missing, empty, and unknown scope on every operational endpoint.
 
 ## Verify and package
 

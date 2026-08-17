@@ -23,6 +23,6 @@ project adapter + project sources (owned outside this repository)
 
 `references/poppy-capability-graph.json` is the canonical topology. The cockpit build copies that exact file into its installable package and verification asserts byte parity.
 
-Project sources retain authority for their facts. Poppy stores durable compiled understanding in the project's chosen memory surface and applies explicit authority, freshness, contradiction, and Gray-state rules. The cockpit reads configured vaults and its own append-only event ledger; it does not write canonical vault content.
+Project sources retain authority for their facts. Poppy stores durable compiled understanding in the project's chosen memory surface and applies explicit authority, freshness, contradiction, and Gray-state rules. The cockpit reads configured vaults and its own append-only event ledger; it does not write canonical vault content. Operational access always requires one exact configured project key; missing, empty, unknown, or response-mismatched scope fails Gray and never broadens to portfolio data.
 
 The bridge is standard-library Python bound to loopback. SQLite is a replayable read model, not an authority source. The Obsidian plugin is dependency-free CommonJS JavaScript and CSS. Codex task preparation is disabled in the shipped example and must be explicitly enabled and revalidated by local configuration.

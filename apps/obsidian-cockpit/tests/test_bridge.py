@@ -150,6 +150,10 @@ class StrictStateSerializationTests(unittest.TestCase):
     def test_state_endpoint_fails_gray_without_emitting_nonstandard_json(self) -> None:
         class InvalidStateApplication:
             @staticmethod
+            def project_keys() -> set[str]:
+                return {"atlas-demo"}
+
+            @staticmethod
             def state(_project=None) -> dict:
                 return {"cost": {"amount": float("nan")}}
 
@@ -158,7 +162,7 @@ class StrictStateSerializationTests(unittest.TestCase):
         worker.start()
         try:
             connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
-            connection.request("GET", "/api/state")
+            connection.request("GET", "/api/state", headers={"X-Poppy-Ops-Project": "atlas-demo"})
             response = connection.getresponse()
             payload = response.read().decode("utf-8")
             connection.close()
@@ -171,6 +175,85 @@ class StrictStateSerializationTests(unittest.TestCase):
             server.server_close()
             worker.join(timeout=5)
         self.assertFalse(worker.is_alive())
+
+
+class HttpProjectScopeTests(unittest.TestCase):
+    class Store:
+        def events(self, *_args, **_kwargs) -> list[dict]:
+            raise AssertionError("event store must not be reached for invalid scope")
+
+    class Codex:
+        def ensure_started(self, *_args, **_kwargs) -> dict:
+            raise AssertionError("Codex must not be reached for invalid scope")
+
+        def create_thread(self, *_args, **_kwargs) -> dict:
+            raise AssertionError("Codex must not be reached for invalid scope")
+
+        def resume_thread(self, *_args, **_kwargs) -> dict:
+            raise AssertionError("Codex must not be reached for invalid scope")
+
+    class Application:
+        def __init__(self) -> None:
+            self.store = HttpProjectScopeTests.Store()
+            self.codex = HttpProjectScopeTests.Codex()
+            self.subscribers: set = set()
+
+        @staticmethod
+        def project_keys() -> set[str]:
+            return {"atlas-demo", "beacon-demo"}
+
+        def state(self, _project: str) -> dict:
+            raise AssertionError("state must not be reached for invalid scope")
+
+        def refresh(self, _project: str) -> dict:
+            raise AssertionError("refresh must not be reached for invalid scope")
+
+        def record_event(self, _body: dict) -> dict:
+            raise AssertionError("event ingestion must not be reached for invalid scope")
+
+    def setUp(self) -> None:
+        self.server = Server(("127.0.0.1", 0), self.Application())  # type: ignore[arg-type]
+        self.worker = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.worker.start()
+
+    def tearDown(self) -> None:
+        self.server.shutdown()
+        self.server.server_close()
+        self.worker.join(timeout=5)
+        self.assertFalse(self.worker.is_alive())
+
+    def request(self, method: str, route: str, scope: str | None) -> tuple[int, dict]:
+        headers = {"X-Poppy-Ops-Client": "obsidian-plugin"}
+        if scope is not None:
+            headers["X-Poppy-Ops-Project"] = scope
+        body = json.dumps({"draft": "synthetic", "kind": "synthetic.event"}) if method == "POST" else None
+        if body is not None:
+            headers["Content-Type"] = "application/json"
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port, timeout=5)
+        connection.request(method, route, body=body, headers=headers)
+        response = connection.getresponse()
+        payload = json.loads(response.read())
+        connection.close()
+        return response.status, payload
+
+    def test_every_operational_endpoint_rejects_missing_empty_and_unknown_scope(self) -> None:
+        routes = [
+            ("GET", "/api/state"),
+            ("GET", "/api/events"),
+            ("GET", "/events"),
+            ("POST", "/api/refresh"),
+            ("POST", "/api/event"),
+            ("POST", "/api/codex/connect"),
+            ("POST", "/api/dock"),
+        ]
+        for scope in (None, "", "unknown-demo"):
+            for method, route in routes:
+                with self.subTest(scope=scope, method=method, route=route):
+                    status, payload = self.request(method, route, scope)
+                    self.assertEqual(status, 400)
+                    self.assertEqual(payload.get("state"), "gray")
+                    self.assertIn("scope", payload.get("error", "").casefold())
+                    self.assertFalse({"vaults", "runs", "events"} & payload.keys())
 
 
 class VaultIndexerTests(unittest.TestCase):

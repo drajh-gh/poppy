@@ -573,7 +573,7 @@ class VaultWatcher:
             fingerprint = self.app.indexer.fingerprint()
             if fingerprint != self.last_fingerprint:
                 self.last_fingerprint = fingerprint
-                self.app.refresh()
+                self.app._refresh_all_private()
 
 
 class CapabilityGraph:
@@ -900,7 +900,15 @@ class Application:
     def project_keys(self) -> set[str]:
         return {str(vault.get("key")) for vault in self.vaults if vault.get("key")}
 
-    def refresh(self, project: str | None = None) -> dict[str, Any]:
+    def _validated_project(self, project: str) -> str:
+        requested = str(project or "").strip()
+        if not requested:
+            raise ValueError("Project scope is required")
+        if requested not in self.project_keys():
+            raise ValueError("Unknown project scope")
+        return requested
+
+    def _refresh(self, project: str | None) -> dict[str, Any]:
         self.vaults = self.indexer.refresh()
         scoped_vaults = [vault for vault in self.vaults if not project or vault.get("key") == project]
         events = []
@@ -922,13 +930,21 @@ class Application:
             }))
         return {"captured_at": utc_now(), "vaults": scoped_vaults, "events": events, "event": events[0] if events else None}
 
-    def state(self, project: str | None = None) -> dict[str, Any]:
-        scoped_vaults = [vault for vault in self.vaults if not project or vault.get("key") == project]
+    def _refresh_all_private(self) -> dict[str, Any]:
+        """Refresh every configured project for the private filesystem watcher only."""
+        return self._refresh(None)
+
+    def refresh(self, project: str) -> dict[str, Any]:
+        return self._refresh(self._validated_project(project))
+
+    def state(self, project: str) -> dict[str, Any]:
+        project = self._validated_project(project)
+        scoped_vaults = [vault for vault in self.vaults if vault.get("key") == project]
         recent_events = self.store.events(500, project=project)
         return {
             "schema_version": 1,
             "captured_at": utc_now(),
-            "scope": {"mode": "project" if project else "portfolio", "project": project},
+            "scope": {"mode": "project", "project": project},
             "service": {"state": "completed", "bind": self.config.get("bind"), "port": self.config.get("port"), "storage": {"ledger": str(self.store.ledger), "database": str(self.store.database)}},
             "codex": self.codex.status(),
             "vaults": scoped_vaults,
@@ -987,11 +1003,12 @@ class Handler(BaseHTTPRequestHandler):
         client = self.headers.get("X-Poppy-Ops-Client")
         return client == "obsidian-plugin" and (not origin or origin.startswith("app://obsidian"))
 
-    def _project_scope(self, parsed: urllib.parse.ParseResult | None = None) -> str | None:
-        query = urllib.parse.parse_qs(parsed.query) if parsed else {}
-        requested = str(self.headers.get("X-Poppy-Ops-Project") or query.get("project", [""])[0]).strip()
+    def _project_scope(self, parsed: urllib.parse.ParseResult | None = None) -> str:
+        query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True) if parsed else {}
+        header_scope = self.headers.get("X-Poppy-Ops-Project")
+        requested = str(header_scope if header_scope is not None else query.get("project", [""])[0]).strip()
         if not requested:
-            return None
+            raise ValueError("Project scope is required")
         if requested not in self.app.project_keys():
             raise ValueError("Unknown project scope")
         return requested
@@ -1025,31 +1042,31 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"error": "Obsidian client header required"}, HTTPStatus.FORBIDDEN)
             return
         try:
+            parsed = urllib.parse.urlparse(self.path)
             body = self._body()
-            project = self._project_scope()
-            if self.path == "/api/refresh":
+            project = self._project_scope(parsed)
+            if parsed.path == "/api/refresh":
                 self._json(self.app.refresh(project))
-            elif self.path == "/api/event":
-                if project and body.get("project") not in {None, "", project}:
+            elif parsed.path == "/api/event":
+                if body.get("project") not in {None, "", project}:
                     raise ValueError("Event project does not match the requested project scope")
-                if project:
-                    body["project"] = project
+                body["project"] = project
                 self._json({"event": self.app.record_event(body)}, HTTPStatus.CREATED)
-            elif self.path == "/api/codex/connect":
-                self._json({"codex": self.app.codex.ensure_started(project or "portfolio")})
-            elif self.path == "/api/dock":
+            elif parsed.path == "/api/codex/connect":
+                self._json({"codex": self.app.codex.ensure_started(project)})
+            elif parsed.path == "/api/dock":
                 draft = str(body.get("draft") or "")[:12_000]
                 thread_id = str(body.get("thread_id") or "").strip()
-                result = self.app.codex.resume_thread(thread_id, draft, project or "portfolio") if thread_id else self.app.codex.create_thread(draft, project or "portfolio")
+                result = self.app.codex.resume_thread(thread_id, draft, project) if thread_id else self.app.codex.create_thread(draft, project)
                 self._json(result, HTTPStatus.CREATED)
             else:
                 self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
         except (ValueError, json.JSONDecodeError) as error:
-            self._json({"error": str(error)}, HTTPStatus.BAD_REQUEST)
+            self._json({"error": str(error), "state": "gray"}, HTTPStatus.BAD_REQUEST)
         except RuntimeError as error:
             self._json({"error": str(error), "state": "gray"}, HTTPStatus.SERVICE_UNAVAILABLE)
 
-    def _sse(self, project: str | None = None) -> None:
+    def _sse(self, project: str) -> None:
         subscriber: queue.Queue = queue.Queue(maxsize=100)
         self.app.subscribers.add(subscriber)
         self._headers(200, "text/event-stream; charset=utf-8")
@@ -1060,7 +1077,7 @@ class Handler(BaseHTTPRequestHandler):
             while time.monotonic() < deadline:
                 try:
                     event = subscriber.get(timeout=10)
-                    if project and event.get("project") != project:
+                    if event.get("project") != project:
                         continue
                     self.wfile.write(f"event: poppy\ndata: {json_dumps(event)}\n\n".encode("utf-8"))
                 except queue.Empty:
@@ -1111,16 +1128,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ledger", type=Path, default=LEDGER)
     parser.add_argument("--database", type=Path, default=DATABASE)
     parser.add_argument("--source", type=Path)
+    parser.add_argument("--project", help="Configured project key required by state and refresh commands")
     args = parser.parse_args(argv)
     if args.command == "serve":
         return serve(args.config, args.ledger, args.database)
     app = Application.create(args.config, args.ledger, args.database)
     if args.command == "refresh":
-        print(json.dumps(app.refresh(), ensure_ascii=False, indent=2))
+        if not args.project or args.project not in app.project_keys():
+            parser.error("refresh requires a configured --project")
+        print(json.dumps(app.refresh(args.project), ensure_ascii=False, indent=2))
     elif args.command == "replay":
         print(json.dumps(app.store.replay(args.source), indent=2))
     elif args.command == "state":
-        print(json.dumps(app.state(), ensure_ascii=False, indent=2))
+        if not args.project or args.project not in app.project_keys():
+            parser.error("state requires a configured --project")
+        print(json.dumps(app.state(args.project), ensure_ascii=False, indent=2))
     return 0
 
 
