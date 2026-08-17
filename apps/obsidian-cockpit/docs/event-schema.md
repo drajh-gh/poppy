@@ -6,9 +6,9 @@ Every event is normalized to the following envelope:
 {
   "schema_version": 1,
   "event_id": "evt-stable-id",
-  "timestamp": "2026-08-17T09:15:00Z",
+  "timestamp": "2026-01-02T09:15:00Z",
   "run_id": "run-id",
-  "project": "everaway",
+  "project": "atlas-demo",
   "kind": "capability.started",
   "status": "current",
   "capability": "delivery",

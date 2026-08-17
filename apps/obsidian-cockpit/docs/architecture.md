@@ -1,35 +1,20 @@
-# Architecture
-
-Poppy Ops Cockpit is a desktop-only Obsidian `ItemView` backed by a localhost Python service. The plugin is a deliberately thin read interface; the bridge owns cross-vault discovery, event normalization, append-only storage, deterministic projections, and supported Codex adapter boundaries.
+# Cockpit architecture
 
 ```text
 Obsidian ItemView  --HTTP/SSE-->  127.0.0.1 bridge
-        |                             |-- read Sloski vault
-        |                             |-- read EverAway vault
-        |                             |-- read Poppy capability graph
-        |                             |-- append runtime/events.jsonl
-        |                             `-- derive runtime/poppy-ops.sqlite3
-        `-- no canonical vault writes
+        |                             |-- read configured project vaults
+        |                             |-- read canonical packaged Poppy graph
+        |                             |-- append local JSONL telemetry
+        |                             `-- rebuild disposable SQLite projection
+        `-- never writes project vaults
 ```
 
-## Trust and authority boundaries
+The configured project vault remains authoritative for compiled project memory. The cockpit derives views and never copies records back into a vault. External providers remain disabled unless project-local configuration and authority explicitly enable a supported boundary.
 
-The two vaults remain authoritative for compiled project memory. The cockpit derives views and never copies canonical records back into either vault. External providers remain behind read-only status and deep links. The bridge binds to loopback, responds with restrictive headers, accepts JSON bodies only on bounded local endpoints, and has no provider credentials.
+Every plugin request carries the active project key. The bridge validates it against configuration and applies the scope before returning vault snapshots, runs, events, findings, or server-sent updates. Untagged portfolio history never leaks into a project workspace.
 
-Codex is an adapter, not an inferred data source. The bridge exposes compatibility as `green` only after it receives a real event from an explicitly supported interface. Process discovery, synthetic fixtures, or private storage never satisfy that contract.
+The product root owns `references/poppy-capability-graph.json`. The package build copies it to `config/poppy-capability-graph.json`; the verifier requires byte-for-byte parity.
 
-## Storage
+The bridge binds only to loopback, accepts bounded JSON bodies, and sends restrictive response headers. Raw events are append-only. SQLite is a deterministic replay target and can be deleted and rebuilt. Missing or malformed evidence remains Gray.
 
-`events.jsonl` is immutable telemetry input. Every accepted event receives a stable event ID and schema version. SQLite event projections are replayable and deterministic. The same database also contains a deliberately separate, fail-closed dashboard-owned thread registry: only a successfully validated App Server `thread/start` response can register ownership, arbitrary event ingestion cannot, and deleting the registry removes resume authority rather than widening it. Price estimates include the label and basis used; unknown model pricing remains unavailable.
-
-## Design direction
-
-Subject: one operator maintaining Poppy across confidential project vaults. Job: reveal what the system is doing beneath the surface without turning operations into a generic admin console.
-
-- Palette: Night ledger `#111417`, graphite `#1b2025`, paper mist `#e7e9e4`, signal cyan `#70d6c8`, amber `#e7b66b`, fault coral `#df776f`.
-- Type: Obsidian system UI for body, condensed system faces for headings, tabular monospace for telemetry.
-- Layout: narrow command rail, wide live execution rail, quiet evidence desk.
-- Signature: a vertical live execution rail that reads like an instrument trace; node states illuminate in place rather than becoming decorative cards.
-- Motion: one brief rail pulse for new events, removed under reduced-motion preferences.
-
-Initial critique removed gradients, oversized KPI cards, and a decorative grid. State and lineage now carry the visual character. This is specific to Poppy's graph and evidence vocabulary rather than a reusable SaaS dashboard theme.
+The shipped example has no vaults and disables Codex launch. Real paths and supported Codex compatibility live only in ignored or installed local configuration.

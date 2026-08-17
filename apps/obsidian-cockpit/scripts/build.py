@@ -25,6 +25,8 @@ def digest(path: Path) -> str:
 
 
 def build() -> dict:
+    if DIST.is_dir():
+        shutil.rmtree(DIST)
     DIST.mkdir(parents=True, exist_ok=True)
     hashes = {}
     for source, name in INPUTS:

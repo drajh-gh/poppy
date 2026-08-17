@@ -1,65 +1,55 @@
 # Poppy Ops Cockpit
 
-A private, Obsidian-native instrument panel for understanding Poppy across the Sloski and EverAway project vaults. It exposes capability execution, run history, evidence lineage, source freshness, time/tokens/cost basis, deterministic maintenance findings, and a bounded Codex task dock.
+The Ops Cockpit is Poppy's private, Obsidian-native operational instrument panel. It exposes capability execution, project-scoped run history, evidence lineage, source freshness, time/tokens/cost basis, deterministic maintenance findings, and a bounded Codex task dock.
 
-## What is implemented
+It is a subsystem of the Poppy product. Canonical orchestration skills, contracts, templates, and the capability graph live at the repository root.
+
+## Boundaries
 
 - Native dependency-free Obsidian `ItemView`, command, and ribbon entry
-- Calm instrument-panel interface with a signature live execution rail
-- Cross-vault read-only index for the two configured Project Operations vaults
-- Source-backed Poppy graph loaded from a pinned local graph copy and checked by digest
-- Append-only JSONL telemetry and deterministic SQLite projection
-- Run, trace, evidence, source, freshness, capability, approval, worker, tool, token, duration, and cost views
-- Full 37-node/81-edge directed topology plus the signature execution rail
-- Official Codex App Server stdio adapter using the explicitly approved sandbox-bin executable
-- Task preparation/resumption only for dashboard-owned, control-validated read-only threads; drafts are not automatically submitted
-- Read-only local refresh plus SSE and polling updates
-- Deterministic optimization rules linked to events
-- Structured finding drill-through to exact event/run or source/locator lineage
-- Gray semantics for every missing, stale, malformed, unsupported, or contradictory input
+- Python standard-library localhost bridge bound to `127.0.0.1`
+- Append-only JSONL telemetry and replayable SQLite projection
+- Server-enforced project scoping for vaults, runs, events, findings, refresh, SSE, and owned Codex tasks
+- Read-only vault indexing; no canonical vault writes
+- Gray semantics for missing, stale, malformed, unsupported, or contradictory evidence
+- External providers disabled in the shipped example configuration
 
-## Start locally
+## Configuration
 
-```powershell
-python bridge/poppy_ops_bridge.py replay --source fixtures/events.jsonl
-python bridge/poppy_ops_bridge.py serve
-```
+`config/bridge.example.json` is a safe, inert template. It contains no projects, paths, credentials, or enabled Codex launch. For repository-local development, copy it to ignored `config/bridge.local.json` and supply approved project paths.
 
-Open Obsidian and run **Poppy Ops Cockpit: Open operations cockpit** after the post-assurance development installation is complete.
-
-The desktop plugin packages and starts the Python bridge automatically when the first cockpit instance loads. It checks `127.0.0.1:7317` before spawning, launches Python without a shell in a hidden window, and stops only a process it owns when that plugin instance unloads. A second vault reuses the healthy bridge and will restart it if the owning instance closes. The commands above remain available for diagnostics.
-
-The bridge binds only to `127.0.0.1:7317`. Both packaged instances use the shared repository-local `runtime/events.jsonl` and `runtime/poppy-ops.sqlite3` paths declared in `config/bridge.json`, so startup order cannot split run history between vaults. Refreshing the cockpit never rewrites either project vault's canonical records.
-
-## Project isolation
-
-Each installed plugin resolves its active vault against `config/bridge.json` and sends that project key on every state, event, refresh, and Codex-dock request. The bridge filters vault snapshots, runs, events, findings, and server-sent updates before returning a response. Sloski cannot receive EverAway records through the cockpit API, and EverAway cannot receive Sloski records. Untagged or portfolio-level historical events remain in the audit ledger but do not appear in either project workspace.
+The build packages the safe template as `config/bridge.json`. A separately authorized installation workflow must provide its approved local config. Relative runtime paths are resolved inside the installed plugin directory; absolute paths are also supported when explicitly configured.
 
 ## Verify and package
 
+From the product root:
+
 ```powershell
-python scripts/verify.py
+python scripts/verify_product.py
 ```
 
-The verifier runs unit tests, event replay, an HTTP integration smoke, JavaScript syntax and Obsidian activation smoke, package build, fixture installation, and hash read-back. The distributable files are:
+Or run the cockpit gate directly:
 
-- `dist/poppy-ops-cockpit/manifest.json`
-- `dist/poppy-ops-cockpit/main.js`
-- `dist/poppy-ops-cockpit/styles.css`
+```powershell
+python scripts/verify.py --check
+```
 
-Do not copy them into a real vault before Functional QA and Final Assurance pass against the frozen candidate.
+The cockpit verifier runs Python unit tests, deterministic synthetic event replay, localhost HTTP integration, JavaScript syntax, Obsidian activation smoke, package build, project-isolation checks, temporary fixture installation, hash read-back, and canonical graph parity. It creates only temporary synthetic vaults.
 
-Use `python scripts/verify.py --check` during review to rerun every gate without changing the frozen evidence file.
+The generated six-file package is under ignored `dist/poppy-ops-cockpit/`:
 
-## Supported Codex boundary
+- `manifest.json`
+- `main.js`
+- `styles.css`
+- `bridge/poppy_ops_bridge.py`
+- `config/bridge.json`
+- `config/poppy-capability-graph.json`
 
-The bridge uses `codex app-server --stdio` through `C:\Users\david\.codex\.sandbox-bin\codex.exe`. Compatibility was proven with an initialization response and a real ephemeral `thread/started` event. The earlier WindowsApps executable failed with `Access is denied` and is not used.
+Do not copy it into a real vault without separate exact authority and completed review gates.
 
-The dock can create or resume a dashboard-owned read-only thread through App Server. Before launch, the bridge uses the official `codex mcp list` command and refuses any unclassified server. It disables Codex apps/plugins and the two configured remote MCP servers for these threads; the final isolation probe started only the local `node_repl` server. It retains the prompt as a draft and deliberately does not call `turn/start`, preventing a prompt from invoking tools or external providers without a stronger approval-aware control surface.
+## Codex boundary
 
-## Rollback
-
-Stop the bridge and disable the Obsidian plugin. The cockpit does not modify canonical vault records. Repository-local runtime data may be retained for audit; deletion is not part of rollback.
+The bridge supports the official Codex App Server stdio interface, but the shipped example leaves launch disabled and compatibility unverified. A local operator must nominate the executable and controls, validate MCP isolation, and record compatibility before enabling the task dock. Draft preparation never implies tool or external-write authority.
 
 ## Waku
 
