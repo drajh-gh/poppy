@@ -892,6 +892,8 @@ class PoppyOpsView extends ItemView {
 module.exports = class PoppyOpsCockpitPlugin extends Plugin {
   async onload() {
     this.bridgeProcess = null;
+    this.bridgeProcessToken = null;
+    this.bridgeStartupChildren = new Set();
     this.bridgeStartup = null;
     this.bridgeStopping = false;
     this.bridgeStartupAttempts = BRIDGE_STARTUP_ATTEMPTS;
@@ -978,9 +980,21 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
         return this.bridgeStatus;
       }
     }
+    const ownedChild = childIsRunning(this.bridgeProcess) ? this.bridgeProcess : null;
+    const ownedToken = ownedChild ? this.bridgeProcessToken : null;
     const existing = await this.bridgeHealth();
     if (existing) {
-      this.bridgeStatus = { state: "completed", detail: "existing localhost bridge" };
+      if (ownedChild && existing.instance_token !== ownedToken) {
+        const stopped = await this.terminateBridgeChild(ownedChild);
+        if (!stopped) {
+          this.bridgeStatus = { state: "gray", detail: "stale owned bridge child did not exit" };
+          return this.bridgeStatus;
+        }
+      }
+      this.bridgeStatus = {
+        state: "completed",
+        detail: ownedChild && existing.instance_token === ownedToken ? "owned localhost bridge healthy" : "existing localhost bridge",
+      };
       return this.bridgeStatus;
     }
     const root = this.pluginRoot();
@@ -1021,9 +1035,23 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
         stdio: "ignore",
         shell: false,
       });
-      this.bridgeProcess = child;
-      child.once("error", (error) => { startupError = error; if (this.bridgeProcess === child) this.bridgeProcess = null; });
-      child.once("exit", () => { childExited = true; if (this.bridgeProcess === child) this.bridgeProcess = null; });
+      this.bridgeStartupChildren.add(child);
+      child.once("error", (error) => {
+        startupError = error;
+        this.bridgeStartupChildren.delete(child);
+        if (this.bridgeProcess === child) {
+          this.bridgeProcess = null;
+          this.bridgeProcessToken = null;
+        }
+      });
+      child.once("exit", () => {
+        childExited = true;
+        this.bridgeStartupChildren.delete(child);
+        if (this.bridgeProcess === child) {
+          this.bridgeProcess = null;
+          this.bridgeProcessToken = null;
+        }
+      });
     } catch (error) {
       startupError = error;
     }
@@ -1032,6 +1060,17 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
       const health = await this.bridgeHealth();
       if (health) {
         if (health.instance_token === instanceToken && !childExited) {
+          if (ownedChild && ownedChild !== child) {
+            const stopped = await this.terminateBridgeChild(ownedChild);
+            if (!stopped) {
+              await this.terminateBridgeChild(child);
+              this.bridgeStatus = { state: "gray", detail: "previous owned bridge child did not exit" };
+              return this.bridgeStatus;
+            }
+          }
+          this.bridgeStartupChildren.delete(child);
+          this.bridgeProcess = child;
+          this.bridgeProcessToken = instanceToken;
           this.bridgeStatus = { state: "completed", detail: "packaged localhost bridge started" };
           return this.bridgeStatus;
         }
@@ -1040,7 +1079,17 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
           this.bridgeStatus = { state: "gray", detail: "losing bridge startup child did not exit" };
           return this.bridgeStatus;
         }
-        this.bridgeStatus = { state: "completed", detail: "shared localhost bridge won startup" };
+        if (ownedChild && health.instance_token !== ownedToken) {
+          const ownerStopped = await this.terminateBridgeChild(ownedChild);
+          if (!ownerStopped) {
+            this.bridgeStatus = { state: "gray", detail: "stale owned bridge child did not exit" };
+            return this.bridgeStatus;
+          }
+        }
+        this.bridgeStatus = {
+          state: "completed",
+          detail: ownedChild && health.instance_token === ownedToken ? "owned localhost bridge recovered" : "shared localhost bridge won startup",
+        };
         return this.bridgeStatus;
       }
     }
@@ -1052,7 +1101,11 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
 
   async terminateBridgeChild(child) {
     if (!child || !childIsRunning(child)) {
-      if (this.bridgeProcess === child) this.bridgeProcess = null;
+      this.bridgeStartupChildren?.delete(child);
+      if (this.bridgeProcess === child) {
+        this.bridgeProcess = null;
+        this.bridgeProcessToken = null;
+      }
       return true;
     }
     try { child.kill("SIGTERM"); } catch (_) { /* Process may already have exited. */ }
@@ -1062,13 +1115,21 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
       exited = await waitForChildExit(child, this.bridgeStopGraceMs);
     }
     const stopped = exited || !childIsRunning(child);
-    if (stopped && this.bridgeProcess === child) this.bridgeProcess = null;
+    if (stopped) {
+      this.bridgeStartupChildren?.delete(child);
+      if (this.bridgeProcess === child) {
+        this.bridgeProcess = null;
+        this.bridgeProcessToken = null;
+      }
+    }
     return stopped;
   }
 
   async stopOwnedBridge() {
-    const child = this.bridgeProcess;
-    return this.terminateBridgeChild(child);
+    const children = new Set(this.bridgeStartupChildren || []);
+    if (this.bridgeProcess) children.add(this.bridgeProcess);
+    const stopped = await Promise.all([...children].map((child) => this.terminateBridgeChild(child)));
+    return stopped.every(Boolean);
   }
 
   async activateView() {

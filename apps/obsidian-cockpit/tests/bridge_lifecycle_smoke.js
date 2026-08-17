@@ -10,6 +10,7 @@ const vaults = [
 const pluginRoot = path.resolve(__dirname, "..", "dist", "poppy-ops-cockpit");
 let nextVault = 0;
 let serviceToken = null;
+let healthFailures = 0;
 let spawnMode = "normal";
 let spawnCount = 0;
 const children = [];
@@ -100,6 +101,10 @@ Module._load = function (request, parent, isMain) {
     Notice: class {},
     requestUrl: async (options) => {
       if (String(options.url).endsWith("/health")) {
+        if (healthFailures > 0) {
+          healthFailures -= 1;
+          return { status: 503, json: { state: "gray" } };
+        }
         return serviceToken
           ? { status: 200, json: { state: "completed", service: "poppy-ops-bridge", instance_token: serviceToken } }
           : { status: 503, json: { state: "gray" } };
@@ -145,11 +150,20 @@ async function run() {
 
   const owner = atlas.bridgeProcess ? atlas : beacon;
   const peer = owner === atlas ? beacon : atlas;
+  const originalOwnerChild = owner.bridgeProcess;
+  const beforeTransient = spawnCount;
+  healthFailures = 1;
+  await owner.ensureBridge();
+  if (spawnCount !== beforeTransient + 1) throw new Error("Transient owner health failure did not exercise one bounded contender");
+  if (owner.bridgeProcess !== originalOwnerChild || owner.bridgeProcessToken !== serviceToken) throw new Error("Losing contender cleared or replaced the healthy owner handle");
+  if (owner.bridgeStartupChildren.size !== 0 || runningChildren().length !== 1) throw new Error("Transient-health contender did not exit cleanly");
+  if (owner.bridgeStatus.detail !== "owned localhost bridge recovered") throw new Error(`Owner recovery was not recorded: ${owner.bridgeStatus.detail}`);
   await owner.onunload();
   if (runningChildren().length !== 0 || serviceToken) throw new Error("Owner unload left its bridge child running");
   source.onerror();
+  const beforePeerRecovery = spawnCount;
   await peer.ensureBridge();
-  if (runningChildren().length !== 1 || !serviceToken || spawnCount !== 3) throw new Error("Remaining vault did not recover exactly one bridge after owner reload");
+  if (runningChildren().length !== 1 || !serviceToken || spawnCount !== beforePeerRecovery + 1) throw new Error("Remaining vault did not recover exactly one bridge after owner reload");
   await peer.onunload();
   view.onClose();
   if (runningChildren().length !== 0 || serviceToken) throw new Error("Peer unload left a recovered bridge child running");
@@ -174,6 +188,7 @@ async function run() {
     status: "pass",
     concurrent_startup: { contenders: 2, survivors: 1 },
     repeated_poll_sse_spawn_delta: 0,
+    transient_health_contender: { owner_handle_preserved: true, unload_survivors: 0 },
     reload_cycles: 2,
     timeout_child_survivors: 0,
     final_owned_survivors: runningChildren().length,
