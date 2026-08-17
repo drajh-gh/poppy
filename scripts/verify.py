@@ -18,7 +18,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "evidence" / "verification.json"
-FILES = ("manifest.json", "main.js", "styles.css")
+FILES = (
+    "manifest.json",
+    "main.js",
+    "styles.css",
+    "bridge/poppy_ops_bridge.py",
+    "config/bridge.json",
+    "config/poppy-capability-graph.json",
+)
 MANIFEST = Path(r"C:\Users\david\Documents\Codex\2026-08-17\ho\work\poppy-ops-cockpit-delivery-manifest.json")
 PREFLIGHT = Path(r"C:\Users\david\Documents\Codex\2026-08-17\ho\work\poppy-ops-cockpit-local-preflight.json")
 PLUGIN_ROOT = Path(r"C:\Users\david\.codex\plugins\cache\personal\project-operations\0.1.0+codex.20260816213000")
@@ -136,8 +143,13 @@ def fixture_install() -> dict:
         destination.mkdir(parents=True, exist_ok=True)
         hashes = {}
         for name in FILES:
-            shutil.copy2(source / name, destination / name)
+            target = destination / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source / name, target)
             hashes[name] = hashlib.sha256((destination / name).read_bytes()).hexdigest()
+        inventory = sorted(path.relative_to(destination).as_posix() for path in destination.rglob("*") if path.is_file())
+        if inventory != sorted(FILES):
+            raise RuntimeError(f"Fixture installation inventory mismatch: {destination}: {inventory}")
         if hashes != source_hashes:
             raise RuntimeError(f"Fixture installation hash mismatch: {destination}")
         results.append({"path": str(destination), "files": hashes})

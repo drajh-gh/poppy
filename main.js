@@ -1,7 +1,11 @@
 const { Plugin, ItemView, Notice, requestUrl } = require("obsidian");
+const fs = require("fs");
+const path = require("path");
+const { spawn } = require("child_process");
 
 const VIEW_TYPE = "poppy-ops-cockpit";
 const API = "http://127.0.0.1:7317";
+const BRIDGE_FILES = ["bridge/poppy_ops_bridge.py", "config/bridge.json", "config/poppy-capability-graph.json"];
 const NAV = [
   ["overview", "Overview", "portfolio"],
   ["execution", "Live run", "route"],
@@ -41,6 +45,10 @@ function append(parent, ...children) {
 
 function clear(node) {
   while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function stateBadge(state, label) {
@@ -178,6 +186,7 @@ class PoppyOpsView extends ItemView {
   async onOpen() {
     this.containerEl.addClass("poppy-ops-view");
     this.renderShell();
+    await this.plugin.ensureBridge();
     await this.fetchState();
     this.connectEvents();
     this.pollTimer = window.setInterval(() => this.fetchState(true), 30000);
@@ -290,7 +299,10 @@ class PoppyOpsView extends ItemView {
     try {
       this.eventSource = new EventSource(`${API}/events`);
       this.eventSource.addEventListener("poppy", () => this.fetchState(true));
-      this.eventSource.onerror = () => this.updateConnection();
+      this.eventSource.onerror = () => {
+        this.updateConnection();
+        this.plugin.ensureBridge().then(() => this.fetchState(true));
+      };
     } catch (_) {
       this.eventSource = null;
     }
@@ -340,8 +352,8 @@ class PoppyOpsView extends ItemView {
 
   renderOffline() {
     const node = h("section", "poppy-offline");
-    append(node, stateBadge("gray", "bridge unavailable"), h("h2", "", "The cockpit has no live instrument feed"), h("p", "", "Start the localhost bridge from the repository. Missing telemetry remains Gray; the cockpit will not infer a healthy state."));
-    const code = h("code", "", "python bridge/poppy_ops_bridge.py serve");
+    append(node, stateBadge("gray", "bridge unavailable"), h("h2", "", "The cockpit has no live instrument feed"), h("p", "", "Automatic startup did not reach the packaged localhost bridge. Confirm desktop Python is available; missing telemetry remains Gray."));
+    const code = h("code", "", "python .obsidian/plugins/poppy-ops-cockpit/bridge/poppy_ops_bridge.py serve");
     const retry = h("button", "poppy-button", "Try again");
     retry.addEventListener("click", () => this.fetchState());
     append(node, code, retry);
@@ -820,13 +832,91 @@ class PoppyOpsView extends ItemView {
 
 module.exports = class PoppyOpsCockpitPlugin extends Plugin {
   async onload() {
+    this.bridgeProcess = null;
+    this.bridgeStartup = null;
+    this.bridgeStatus = { state: "pending", detail: "startup scheduled" };
     this.registerView(VIEW_TYPE, (leaf) => new PoppyOpsView(leaf, this));
     this.addRibbonIcon("activity", "Open Poppy Ops Cockpit", () => this.activateView());
     this.addCommand({ id: "open-poppy-ops-cockpit", name: "Open operations cockpit", callback: () => this.activateView() });
+    void this.ensureBridge();
   }
 
   async onunload() {
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
+    this.stopOwnedBridge();
+  }
+
+  pluginRoot() {
+    const adapter = this.app?.vault?.adapter;
+    const basePath = typeof adapter?.getBasePath === "function" ? adapter.getBasePath() : null;
+    const pluginDir = this.manifest?.dir;
+    return basePath && pluginDir ? path.resolve(basePath, pluginDir) : null;
+  }
+
+  async bridgeIsHealthy() {
+    try {
+      const response = await requestUrl({ url: `${API}/health`, method: "GET", throw: false });
+      return response.status === 200 && response.json?.service === "poppy-ops-bridge" && response.json?.state === "completed";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  ensureBridge() {
+    if (!this.bridgeStartup) {
+      this.bridgeStartup = this.startBridge().finally(() => { this.bridgeStartup = null; });
+    }
+    return this.bridgeStartup;
+  }
+
+  async startBridge() {
+    if (await this.bridgeIsHealthy()) {
+      this.bridgeStatus = { state: "completed", detail: "existing localhost bridge" };
+      return this.bridgeStatus;
+    }
+    const root = this.pluginRoot();
+    if (!root) {
+      this.bridgeStatus = { state: "gray", detail: "desktop plugin path unavailable" };
+      return this.bridgeStatus;
+    }
+    const missing = BRIDGE_FILES.filter((name) => !fs.existsSync(path.join(root, ...name.split("/"))));
+    if (missing.length) {
+      this.bridgeStatus = { state: "gray", detail: `packaged bridge file missing: ${missing.join(", ")}` };
+      return this.bridgeStatus;
+    }
+    const script = path.join(root, "bridge", "poppy_ops_bridge.py");
+    const python = process.env.POPPY_OPS_PYTHON || (process.platform === "win32" ? "python" : "python3");
+    let startupError = null;
+    try {
+      const child = spawn(python, [script, "serve"], {
+        cwd: root,
+        windowsHide: true,
+        stdio: "ignore",
+        shell: false,
+      });
+      this.bridgeProcess = child;
+      child.once("error", (error) => { startupError = error; if (this.bridgeProcess === child) this.bridgeProcess = null; });
+      child.once("exit", () => { if (this.bridgeProcess === child) this.bridgeProcess = null; });
+    } catch (error) {
+      startupError = error;
+    }
+    for (let attempt = 0; attempt < 32 && !startupError; attempt += 1) {
+      await delay(250);
+      if (await this.bridgeIsHealthy()) {
+        this.bridgeStatus = { state: "completed", detail: "packaged localhost bridge started" };
+        return this.bridgeStatus;
+      }
+    }
+    this.bridgeStatus = { state: "gray", detail: startupError instanceof Error ? startupError.message : "bridge health check timed out" };
+    return this.bridgeStatus;
+  }
+
+  stopOwnedBridge() {
+    const child = this.bridgeProcess;
+    this.bridgeProcess = null;
+    if (child && !child.killed) {
+      try { child.kill(); } catch (_) { /* Process may already have exited. */ }
+    }
   }
 
   async activateView() {

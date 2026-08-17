@@ -1,6 +1,7 @@
 const Module = require("module");
 const path = require("path");
 const fs = require("fs");
+const { EventEmitter } = require("events");
 
 let registeredType = null;
 let registeredFactory = null;
@@ -8,6 +9,8 @@ let command = null;
 let ribbon = null;
 let activated = null;
 let revealed = false;
+let spawnedBridge = null;
+let healthChecks = 0;
 
 class FakeElement {
   constructor(tag) {
@@ -43,7 +46,9 @@ function findAll(root, predicate, result = []) {
 
 class Plugin {
   constructor() {
+    const root = path.resolve(__dirname, "..");
     this.app = {
+      vault: { adapter: { getBasePath: () => root } },
       workspace: {
         getLeavesOfType: () => [],
         getLeaf: () => ({ setViewState: async (state) => { activated = state; } }),
@@ -51,6 +56,7 @@ class Plugin {
         detachLeavesOfType: () => {},
       },
     };
+    this.manifest = { dir: "dist/poppy-ops-cockpit" };
   }
   registerView(type, factory) { registeredType = type; registeredFactory = factory; }
   addRibbonIcon(icon, title, callback) { ribbon = { icon, title, callback }; }
@@ -61,7 +67,29 @@ class ItemView { constructor(leaf) { this.leaf = leaf; this.app = {}; } }
 
 const originalLoad = Module._load;
 Module._load = function (request, parent, isMain) {
-  if (request === "obsidian") return { Plugin, ItemView, Notice: class {}, requestUrl: async () => ({ status: 200, json: {} }) };
+  if (request === "child_process") return {
+    spawn: (commandName, args, options) => {
+      const child = new EventEmitter();
+      child.killed = false;
+      child.kill = () => { child.killed = true; child.emit("exit", 0); return true; };
+      spawnedBridge = { commandName, args, options, child };
+      return child;
+    },
+  };
+  if (request === "obsidian") return {
+    Plugin,
+    ItemView,
+    Notice: class {},
+    requestUrl: async (options) => {
+      if (String(options.url).endsWith("/health")) {
+        healthChecks += 1;
+        return healthChecks === 1
+          ? { status: 503, json: { state: "gray" } }
+          : { status: 200, json: { state: "completed", service: "poppy-ops-bridge" } };
+      }
+      return { status: 200, json: {} };
+    },
+  };
   return originalLoad.apply(this, arguments);
 };
 
@@ -71,6 +99,12 @@ async function run() {
   const PluginClass = require(entry);
   const plugin = new PluginClass();
   await plugin.onload();
+  await plugin.ensureBridge();
+  if (!spawnedBridge) throw new Error("Plugin did not start its packaged bridge when health was unavailable");
+  if (spawnedBridge.commandName !== (process.platform === "win32" ? "python" : "python3")) throw new Error("Plugin selected an unexpected Python command");
+  if (!spawnedBridge.args[0].endsWith(path.join("dist", "poppy-ops-cockpit", "bridge", "poppy_ops_bridge.py")) || spawnedBridge.args[1] !== "serve") throw new Error("Plugin did not launch the packaged bridge entrypoint");
+  if (!spawnedBridge.options.windowsHide || spawnedBridge.options.shell !== false || spawnedBridge.options.stdio !== "ignore") throw new Error("Packaged bridge launch is not hidden and shell-free");
+  if (plugin.bridgeStatus.state !== "completed") throw new Error("Plugin did not verify bridge health after launch");
   if (registeredType !== "poppy-ops-cockpit") throw new Error(`Unexpected view type: ${registeredType}`);
   if (typeof registeredFactory !== "function") throw new Error("View factory was not registered");
   if (!command || command.id !== "open-poppy-ops-cockpit") throw new Error("Open command was not registered");
@@ -147,7 +181,10 @@ async function run() {
     if (!source.includes(token)) throw new Error(`Trace or finding lineage surface missing: ${token}`);
   }
 
-  process.stdout.write(JSON.stringify({ status: "pass", registeredType, command: command.id, ribbon: ribbon.icon, activated, topology: { nodes: graph.nodes.length, edges: topology.edges.length, levels: topology.levels }, accessibility: { labels: labels.length, liveRegion: receipt.id }, cost: { unavailable: "gray", nonUsd: eurCost } }) + "\n");
+  await plugin.onunload();
+  if (!spawnedBridge.child.killed) throw new Error("Plugin did not stop its owned bridge during unload");
+
+  process.stdout.write(JSON.stringify({ status: "pass", registeredType, command: command.id, ribbon: ribbon.icon, activated, bridgeStartup: { command: spawnedBridge.commandName, healthChecks, stoppedOnUnload: spawnedBridge.child.killed }, topology: { nodes: graph.nodes.length, edges: topology.edges.length, levels: topology.levels }, accessibility: { labels: labels.length, liveRegion: receipt.id }, cost: { unavailable: "gray", nonUsd: eurCost } }) + "\n");
 }
 
 run().catch((error) => { console.error(error.stack || error); process.exit(1); });

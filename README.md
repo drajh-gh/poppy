@@ -27,7 +27,9 @@ python bridge/poppy_ops_bridge.py serve
 
 Open Obsidian and run **Poppy Ops Cockpit: Open operations cockpit** after the post-assurance development installation is complete.
 
-The bridge binds only to `127.0.0.1:7317`. It writes only `runtime/events.jsonl` and `runtime/poppy-ops.sqlite3`. Refreshing the cockpit never rewrites either project vault.
+The desktop plugin packages and starts the Python bridge automatically when the first cockpit instance loads. It checks `127.0.0.1:7317` before spawning, launches Python without a shell in a hidden window, and stops only a process it owns when that plugin instance unloads. A second vault reuses the healthy bridge and will restart it if the owning instance closes. The commands above remain available for diagnostics.
+
+The bridge binds only to `127.0.0.1:7317`. Its packaged instance writes only `.obsidian/plugins/poppy-ops-cockpit/runtime/events.jsonl` and `.obsidian/plugins/poppy-ops-cockpit/runtime/poppy-ops.sqlite3` in the vault that owns the process. Refreshing the cockpit never rewrites either project vault's canonical records.
 
 ## Verify and package
 
