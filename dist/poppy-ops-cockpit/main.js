@@ -100,6 +100,12 @@ function formatTime(value) {
   return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+function formatDate(value) {
+  if (!value) return "unknown";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" }).format(date);
+}
+
 function eyebrow(text) {
   return h("div", "poppy-eyebrow", text);
 }
@@ -372,16 +378,16 @@ class PoppyOpsView extends ItemView {
     const findings = this.state?.findings || [];
     const active = runs.filter((run) => ["current", "waiting", "blocked", "failed"].includes(run.status));
     const signal = vault?.health || { state: "gray", label: "Gray", headline: "Current assessment unavailable", next_action_count: 0 };
-    const current = (this.state?.events || []).find((event) => event.status === "current") || (this.state?.events || [])[0];
-    append(root, sectionTitle("Project overview", `${vault?.project?.name || vault?.name || "Project"} at a glance`, "This cockpit is isolated to the active vault. Cross-project records and telemetry are excluded at the bridge boundary."));
+    const current = (this.state?.events || []).find((event) => ["current", "waiting", "blocked", "failed"].includes(event.status));
+    append(root, sectionTitle("Project overview", `${vault?.project?.name || vault?.name || "Project"} at a glance`, "Current health, work, and evidence for this vault."));
 
     const pulse = h("div", "poppy-overview-pulse");
     const statement = h("div", "poppy-overview-pulse__statement");
     append(statement, h("span", "poppy-pulse-label", current ? "Current activity" : "Current project state"), h("strong", "", current?.message || signal.headline || vault?.project?.next_milestone || "No current activity has been recorded."), current ? stateBadge(current.status) : stateBadge(signal.state, signal.label));
     const metrics = h("div", "poppy-metrics");
     append(metrics,
-      metric("Health", signal.label || "Gray", signal.valid_as_of ? `valid ${signal.valid_as_of}` : "current record", signal.state),
-      metric("Next actions", String(signal.next_action_count || 0), `review ${signal.review_after || "not scheduled"}`, signal.state),
+      metric("Health", signal.label || "Gray", signal.valid_as_of ? `valid ${formatDate(signal.valid_as_of)}` : "current record", signal.state),
+      metric("Next actions", String(signal.next_action_count || 0), signal.review_after ? `review ${formatDate(signal.review_after)}` : "review not scheduled", signal.next_action_count ? "current" : "completed"),
       metric("Runs", String(runs.length), `${active.length} need attention`, active.length ? "current" : "completed"),
       metric("Open issues", String(findings.length), findings.length ? "evidence-linked" : "none detected", findings.some((item) => item.severity === "high") ? "failed" : findings.length ? "waiting" : "completed")
     );
