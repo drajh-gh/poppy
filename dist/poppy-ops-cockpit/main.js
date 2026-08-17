@@ -101,6 +101,44 @@ function semanticState(value) {
   return ["completed", "current", "waiting", "blocked", "pending", "failed", "gray"].includes(value) ? value : "gray";
 }
 
+function computeTopology(nodes = [], edges = []) {
+  const ids = new Set(nodes.map((node) => node.id));
+  const validEdges = edges.filter((edge) => ids.has(edge.from) && ids.has(edge.to));
+  const incoming = new Map(nodes.map((node) => [node.id, 0]));
+  const outgoing = new Map(nodes.map((node) => [node.id, []]));
+  for (const edge of validEdges) {
+    incoming.set(edge.to, (incoming.get(edge.to) || 0) + 1);
+    outgoing.get(edge.from).push(edge.to);
+  }
+  const level = new Map(nodes.map((node) => [node.id, 0]));
+  const queue = nodes.filter((node) => incoming.get(node.id) === 0).map((node) => node.id);
+  const visited = new Set();
+  while (queue.length) {
+    const id = queue.shift();
+    if (visited.has(id)) continue;
+    visited.add(id);
+    for (const target of outgoing.get(id) || []) {
+      level.set(target, Math.max(level.get(target) || 0, (level.get(id) || 0) + 1));
+      incoming.set(target, incoming.get(target) - 1);
+      if (incoming.get(target) === 0) queue.push(target);
+    }
+  }
+  const buckets = new Map();
+  for (const node of nodes) {
+    const value = level.get(node.id) || 0;
+    if (!buckets.has(value)) buckets.set(value, []);
+    buckets.get(value).push(node.id);
+  }
+  const maxLevel = Math.max(0, ...buckets.keys());
+  const maxRows = Math.max(1, ...[...buckets.values()].map((items) => items.length));
+  const positions = new Map();
+  for (const [column, items] of buckets) {
+    const offset = (maxRows - items.length) * 38;
+    items.forEach((id, row) => positions.set(id, { x: 38 + column * 176, y: 36 + offset + row * 76, level: column }));
+  }
+  return { positions, edges: validEdges, width: Math.max(760, 150 + maxLevel * 176), height: Math.max(240, 72 + maxRows * 76), levels: maxLevel + 1 };
+}
+
 class PoppyOpsView extends ItemView {
   constructor(leaf, plugin) {
     super(leaf);
@@ -167,6 +205,9 @@ class PoppyOpsView extends ItemView {
     this.rail.appendChild(nav);
 
     this.connection = h("div", "poppy-connection");
+    this.connection.setAttribute("role", "status");
+    this.connection.setAttribute("aria-live", "polite");
+    this.connection.setAttribute("aria-atomic", "true");
     this.rail.appendChild(this.connection);
 
     this.header = h("header", "poppy-stage__header");
@@ -254,6 +295,7 @@ class PoppyOpsView extends ItemView {
     }
     this.updateConnection();
     clear(this.body);
+    this.body.setAttribute("aria-busy", this.loading ? "true" : "false");
     if (this.loading && !this.state) {
       append(this.body, h("div", "poppy-loading", "Reading the instruments…"));
       return;
@@ -270,6 +312,8 @@ class PoppyOpsView extends ItemView {
     append(this.body, renderer ? renderer() : this.renderOverview());
     if (this.error) {
       const warning = h("div", "poppy-inline-warning");
+      warning.setAttribute("role", "status");
+      warning.setAttribute("aria-live", "polite");
       append(warning, stateBadge("gray"), h("span", "", this.error));
       this.body.prepend(warning);
     }
@@ -362,6 +406,7 @@ class PoppyOpsView extends ItemView {
   renderExecution() {
     const root = h("section", "poppy-page poppy-page--execution");
     append(root, sectionTitle("Execution trace", "Poppy's capability rail", "The rail is sourced from the installed capability graph; observed events illuminate nodes in place."));
+    root.appendChild(this.renderTopology());
     const layout = h("div", "poppy-execution-layout");
     const rail = h("div", "poppy-execution-rail");
     const statusMap = this.statusByCapability();
@@ -402,6 +447,70 @@ class PoppyOpsView extends ItemView {
     return root;
   }
 
+  renderTopology() {
+    const section = h("section", "poppy-topology");
+    const head = h("div", "poppy-topology__head");
+    const graph = this.state?.graph || { nodes: [], edges: [] };
+    append(head, h("div", ""), h("span", "poppy-mono", `${graph.nodes?.length || 0} nodes / ${graph.edges?.length || 0} edges`));
+    append(head.firstChild, eyebrow("Control-flow topology"), h("h3", "", "Branches, joins, and authority gates"));
+    section.appendChild(head);
+    if (!graph.nodes?.length) return append(section, emptyState("Topology is Gray", graph.reason || "No graph was loaded.")), section;
+    const topology = computeTopology(graph.nodes, graph.edges || []);
+    const viewport = h("div", "poppy-topology__viewport");
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", `0 0 ${topology.width} ${topology.height}`);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", `Poppy capability topology with ${graph.nodes.length} nodes, ${topology.edges.length} directed edges, and ${topology.levels} control-flow levels`);
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+    marker.setAttribute("id", "poppy-topology-arrow");
+    marker.setAttribute("viewBox", "0 0 6 6");
+    marker.setAttribute("refX", "5"); marker.setAttribute("refY", "3");
+    marker.setAttribute("markerWidth", "5"); marker.setAttribute("markerHeight", "5");
+    marker.setAttribute("orient", "auto-start-reverse");
+    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrow.setAttribute("d", "M 0 0 L 6 3 L 0 6 z");
+    arrow.setAttribute("class", "poppy-topology-arrow");
+    marker.appendChild(arrow); defs.appendChild(marker); svg.appendChild(defs);
+    const statusMap = this.statusByCapability();
+    for (const edge of topology.edges) {
+      const source = topology.positions.get(edge.from);
+      const target = topology.positions.get(edge.to);
+      if (!source || !target) continue;
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const startX = source.x + 116;
+      const startY = source.y + 16;
+      const endX = target.x;
+      const endY = target.y + 16;
+      const bend = Math.max(28, Math.abs(endX - startX) * .44);
+      path.setAttribute("d", `M ${startX} ${startY} C ${startX + bend} ${startY}, ${endX - bend} ${endY}, ${endX} ${endY}`);
+      path.setAttribute("class", "poppy-topology-edge");
+      path.setAttribute("marker-end", "url(#poppy-topology-arrow)");
+      path.dataset.from = edge.from;
+      path.dataset.to = edge.to;
+      svg.appendChild(path);
+    }
+    for (const node of graph.nodes) {
+      const position = topology.positions.get(node.id);
+      if (!position) continue;
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const state = semanticState(statusMap.get(node.id)?.status || "pending");
+      group.setAttribute("class", `poppy-topology-node is-${state}`);
+      group.setAttribute("transform", `translate(${position.x} ${position.y})`);
+      group.setAttribute("role", "group");
+      group.setAttribute("aria-label", `${node.id}, ${state}, handled by ${node.handler}`);
+      const box = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      box.setAttribute("width", "116"); box.setAttribute("height", "34"); box.setAttribute("rx", "2");
+      const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      label.setAttribute("x", "9"); label.setAttribute("y", "21"); label.textContent = node.id;
+      append(group, box, label);
+      svg.appendChild(group);
+    }
+    viewport.appendChild(svg);
+    section.appendChild(viewport);
+    return section;
+  }
+
   renderRuns() {
     const root = h("section", "poppy-page");
     append(root, sectionTitle("Run history", "Time, tokens, cost basis", "Dollar figures distinguish exact, estimated, shadow price, and unavailable bases."));
@@ -414,7 +523,8 @@ class PoppyOpsView extends ItemView {
     for (const run of runs) {
       const row = h("button", "poppy-run-row");
       row.type = "button";
-      append(row, stateBadge(run.status), h("strong", "", run.run_id), h("span", "", run.project), h("span", "", formatTime(run.updated_at)), h("span", "poppy-mono", formatDuration(run.duration_ms)), h("span", "poppy-mono", formatTokens(run.tokens)), h("span", "poppy-mono", formatCost(run.cost)));
+      const cost = run.cost?.basis === "unavailable" ? stateBadge("gray", "unavailable") : h("span", "poppy-mono", formatCost(run.cost));
+      append(row, stateBadge(run.status), h("strong", "", run.run_id), h("span", "", run.project), h("span", "", formatTime(run.updated_at)), h("span", "poppy-mono", formatDuration(run.duration_ms)), h("span", "poppy-mono", formatTokens(run.tokens)), cost);
       row.addEventListener("click", () => { this.selectedRun = this.selectedRun === run.run_id ? null : run.run_id; this.render(); });
       table.appendChild(row);
       if (this.selectedRun === run.run_id) table.appendChild(this.renderRunDetail(run.run_id));
@@ -428,8 +538,15 @@ class PoppyOpsView extends ItemView {
     const events = (this.state?.events || []).filter((event) => event.run_id === runId).reverse();
     for (const event of events) {
       const row = h("div", "poppy-run-event");
-      append(row, h("time", "poppy-mono", formatTime(event.timestamp)), stateBadge(event.status), h("div", ""), h("span", "poppy-mono", formatDuration(event.duration_ms)), h("span", "poppy-mono", formatTokens(event.tokens)));
-      append(row.children[2], h("strong", "", event.message), h("span", "", [event.capability, event.skill, event.tool, event.worker].filter(Boolean).join(" · ")));
+      const eventCost = event.cost?.basis === "unavailable" ? stateBadge("gray", "cost unavailable") : h("span", "poppy-mono", formatCost(event.cost));
+      append(row, h("time", "poppy-mono", formatTime(event.timestamp)), stateBadge(event.status), h("div", ""), h("span", "poppy-mono", formatDuration(event.duration_ms)), h("span", "poppy-mono", formatTokens(event.tokens)), eventCost);
+      const verification = /verification|assurance|qa/i.test(event.kind) ? "verification event" : "execution event";
+      append(row.children[2], h("strong", "", event.message), h("span", "", [event.kind, verification, `approval: ${event.approval || "unresolved"}`, event.capability, event.skill, event.tool, event.worker].filter(Boolean).join(" · ")));
+      if (event.evidence?.length) {
+        const evidence = h("ul", "poppy-run-event__evidence");
+        for (const ref of event.evidence) evidence.appendChild(h("li", "", `${ref.source} — ${ref.locator || "unlinked locator"} · ${ref.authority || "unresolved authority"} · ${ref.state || "gray"}`));
+        row.children[2].appendChild(evidence);
+      }
       detail.appendChild(row);
     }
     return detail;
@@ -593,11 +710,36 @@ class PoppyOpsView extends ItemView {
       const state = item.severity === "high" ? "failed" : item.severity === "medium" ? "waiting" : "gray";
       const row = h("article", "poppy-finding");
       append(row, stateBadge(state, item.severity), h("div", ""), h("span", "poppy-mono", `${item.event_ids?.length || 0} refs`));
-      append(row.children[1], eyebrow(item.kind), h("strong", "", item.message));
+      append(row.children[1], eyebrow(item.kind), h("strong", "", item.message), h("p", "poppy-finding__action", item.action || "Inspect the linked evidence."));
+      const inspect = h("button", "poppy-button poppy-button--quiet", this.focusedFinding === item.id ? "Hide references" : "Inspect references");
+      inspect.type = "button";
+      inspect.setAttribute("aria-expanded", this.focusedFinding === item.id ? "true" : "false");
+      inspect.addEventListener("click", () => { this.focusedFinding = this.focusedFinding === item.id ? null : item.id; this.render(); });
+      row.children[1].appendChild(inspect);
       list.appendChild(row);
+      if (this.focusedFinding === item.id) list.appendChild(this.renderFindingReferences(item));
     }
     root.appendChild(list);
     return root;
+  }
+
+  renderFindingReferences(item) {
+    const panel = h("div", "poppy-finding-refs");
+    panel.setAttribute("role", "region");
+    panel.setAttribute("aria-label", `References for ${item.kind}`);
+    for (const ref of item.references || []) {
+      const button = h("button", "poppy-finding-ref");
+      button.type = "button";
+      append(button, stateBadge(ref.state || (ref.type === "event" ? "completed" : "gray"), ref.type), h("strong", "", ref.label || ref.id), h("span", "poppy-mono", ref.locator || ref.run_id || ref.id));
+      button.addEventListener("click", () => {
+        if (ref.type === "event") { this.selectedRun = ref.run_id; this.page = "runs"; }
+        else { this.page = "vaults"; }
+        this.render();
+      });
+      panel.appendChild(button);
+    }
+    if (!(item.references || []).length) panel.appendChild(emptyState("Reference lineage is Gray", "This finding cannot be acted on until a source or event reference is recorded."));
+    return panel;
   }
 
   renderDock() {
@@ -607,10 +749,14 @@ class PoppyOpsView extends ItemView {
     const form = h("form", "poppy-dock__form");
     const label = h("label", "", "What should Poppy examine?");
     const textarea = h("textarea", "poppy-dock__input");
+    textarea.id = "poppy-dock-draft";
+    label.htmlFor = textarea.id;
     textarea.rows = 8;
     textarea.placeholder = "Review the latest operational evidence, identify the highest-leverage maintenance issue, and explain the source basis.";
     const threadLabel = h("label", "", "Existing dashboard-owned thread ID (optional)");
     const thread = h("input", "poppy-dock__thread");
+    thread.id = "poppy-dock-thread";
+    threadLabel.htmlFor = thread.id;
     thread.type = "text";
     thread.placeholder = "Leave blank to prepare a new task";
     const actions = h("div", "poppy-dock__actions");
@@ -622,6 +768,11 @@ class PoppyOpsView extends ItemView {
     append(actions, prepare, copy);
     append(form, label, textarea, threadLabel, thread, actions);
     const receipt = h("div", "poppy-dock__receipt");
+    receipt.id = "poppy-dock-receipt";
+    receipt.setAttribute("role", "status");
+    receipt.setAttribute("aria-live", "polite");
+    receipt.setAttribute("aria-atomic", "true");
+    prepare.setAttribute("aria-describedby", receipt.id);
     append(receipt, stateBadge(this.state?.codex?.connection_state === "connected" ? "completed" : "waiting"), h("h3", "", "Execution remains approval-aware"), h("p", "", "Preparing a thread is a local Codex state change through the official App Server. The draft stays local and is not sent to a model."));
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -669,3 +820,4 @@ module.exports = class PoppyOpsCockpitPlugin extends Plugin {
 
 module.exports.VIEW_TYPE = VIEW_TYPE;
 module.exports.PoppyOpsView = PoppyOpsView;
+module.exports.computeTopology = computeTopology;

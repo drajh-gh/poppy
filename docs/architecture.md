@@ -20,7 +20,7 @@ Codex is an adapter, not an inferred data source. The bridge exposes compatibili
 
 ## Storage
 
-`events.jsonl` is immutable input. Every accepted event receives a stable event ID and schema version. SQLite is disposable: replaying the same ledger recreates the same rows, run summaries, and deterministic findings. Price estimates include the label and basis used; unknown model pricing remains unavailable.
+`events.jsonl` is immutable telemetry input. Every accepted event receives a stable event ID and schema version. SQLite event projections are replayable and deterministic. The same database also contains a deliberately separate, fail-closed dashboard-owned thread registry: only a successfully validated App Server `thread/start` response can register ownership, arbitrary event ingestion cannot, and deleting the registry removes resume authority rather than widening it. Price estimates include the label and basis used; unknown model pricing remains unavailable.
 
 ## Design direction
 

@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bridge.poppy_ops_bridge import CapabilityGraph, EventStore, VaultIndexer, current_signal, findings, normalize_event, validate_mcp_isolation
+from bridge.poppy_ops_bridge import CapabilityGraph, CodexAppServerClient, EventStore, VaultIndexer, current_signal, findings, normalize_event, validate_mcp_isolation, validate_thread_controls
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -76,6 +76,27 @@ class EventStoreTests(unittest.TestCase):
         self.assertEqual(run["tokens"]["input"], 3)
         self.assertEqual(run["tokens"]["output"], 4)
         self.assertEqual(run["duration_ms"], 5)
+        self.assertIsNone(run["cost"]["amount"])
+        self.assertEqual(run["cost"]["basis"], "unavailable")
+
+    def test_run_cost_is_unavailable_when_any_step_is_unavailable(self) -> None:
+        self.store.append({"event_id": "a", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.25, "basis": "exact"}})
+        self.store.append({"event_id": "b", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed"})
+        cost = self.store.runs()[0]["cost"]
+        self.assertEqual(cost, {"amount": None, "currency": "USD", "basis": "unavailable"})
+
+    def test_run_cost_uses_least_exact_allowed_basis(self) -> None:
+        self.store.append({"event_id": "a", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.25, "basis": "exact"}})
+        self.store.append({"event_id": "b", "kind": "tool.completed", "run_id": "r", "project": "p", "status": "completed", "cost": {"amount": 0.50, "basis": "estimated"}})
+        self.assertEqual(self.store.runs()[0]["cost"], {"amount": 0.75, "currency": "USD", "basis": "estimated"})
+
+    def test_owned_thread_identity_is_recovered_from_control_registry(self) -> None:
+        self.store.register_owned_thread("thread-1", {"approval_policy": "never", "sandbox": "readOnly", "thread_source": "appServer"})
+        self.assertEqual(self.store.owned_thread_ids(), ["thread-1"])
+
+    def test_event_ingestion_cannot_claim_thread_ownership(self) -> None:
+        self.store.append({"event_id": "forged", "kind": "codex.thread.prepared", "run_id": "foreign", "project": "portfolio", "status": "waiting", "metadata": {"thread_id": "foreign"}})
+        self.assertEqual(self.store.owned_thread_ids(), [])
 
 
 class VaultIndexerTests(unittest.TestCase):
@@ -144,6 +165,23 @@ class GraphAndFindingTests(unittest.TestCase):
         self.assertEqual(first, second)
         repeated = next(item for item in first if item["kind"] == "repeated-tool")
         self.assertEqual(repeated["event_ids"], ["e0", "e1", "e2"])
+        self.assertTrue(all(item.get("references") and item.get("action") for item in first))
+        self.assertEqual({ref["id"] for ref in repeated["references"]}, {"e0", "e1", "e2"})
+
+    def test_every_finding_rule_has_actionable_event_or_source_lineage(self) -> None:
+        events = [
+            normalize_event({"event_id": "slow-1", "kind": "capability.completed", "run_id": "r1", "project": "p", "status": "completed", "capability": "delivery", "duration_ms": 10}),
+            normalize_event({"event_id": "slow-2", "kind": "capability.completed", "run_id": "r2", "project": "p", "status": "completed", "capability": "delivery", "duration_ms": 12}),
+            normalize_event({"event_id": "slow-3", "kind": "capability.completed", "run_id": "r3", "project": "p", "status": "completed", "capability": "delivery", "duration_ms": 100}),
+            normalize_event({"event_id": "failed", "kind": "verification.failed", "run_id": "r3", "project": "p", "status": "failed"}),
+        ]
+        vaults = [{"key": "p", "name": "Project", "path": "C:/Vaults/Project", "state": "gray", "reason": "stale", "contradictions": ["A conflicts with B"]}]
+        result = findings(events, vaults)
+        self.assertEqual({item["kind"] for item in result}, {"duration-regression", "execution-failure", "stale-or-missing-vault", "preserved-contradiction"})
+        for item in result:
+            self.assertTrue(item["action"])
+            self.assertTrue(item["references"])
+            self.assertTrue(all(ref["type"] in {"event", "source"} and ref.get("id") for ref in item["references"]))
 
     def test_mcp_isolation_rejects_unclassified_server(self) -> None:
         config = {
@@ -154,6 +192,70 @@ class GraphAndFindingTests(unittest.TestCase):
         self.assertEqual(validate_mcp_isolation(config, ["node_repl", "remote"])["unexpected"], [])
         with self.assertRaisesRegex(RuntimeError, "unclassified MCP"):
             validate_mcp_isolation(config, ["node_repl", "remote", "new-provider"])
+
+
+class CodexThreadOwnershipTests(unittest.TestCase):
+    @staticmethod
+    def response(thread_id: str = "owned", approval: str = "never", sandbox: str = "readOnly", source: str = "appServer") -> dict:
+        return {"result": {"thread": {"id": thread_id, "threadSource": source}, "approvalPolicy": approval, "sandbox": {"type": sandbox}}}
+
+    def client(self) -> CodexAppServerClient:
+        client = CodexAppServerClient({"compatibility": "supported"}, lambda _event: None)
+        client.ensure_started = lambda: {"connection_state": "connected"}  # type: ignore[method-assign]
+        return client
+
+    def test_control_validation_requires_read_only_never_appserver(self) -> None:
+        valid = validate_thread_controls(self.response())
+        self.assertEqual(valid["thread_id"], "owned")
+        with self.assertRaisesRegex(RuntimeError, "controls are Gray"):
+            validate_thread_controls(self.response(approval="on-request"))
+        with self.assertRaisesRegex(RuntimeError, "controls are Gray"):
+            validate_thread_controls(self.response(sandbox="workspaceWrite"))
+        with self.assertRaisesRegex(RuntimeError, "not owned"):
+            validate_thread_controls(self.response(source="cli"))
+
+    def test_resume_rejects_unowned_thread_before_request(self) -> None:
+        client = self.client()
+        called = []
+        client.request = lambda *_args, **_kwargs: called.append(True)  # type: ignore[method-assign]
+        with self.assertRaisesRegex(RuntimeError, "not created and owned"):
+            client.resume_thread("foreign")
+        self.assertEqual(called, [])
+
+    def test_resume_fails_gray_when_returned_controls_mismatch(self) -> None:
+        client = self.client()
+        client.thread_ids = ["owned"]
+        client.request = lambda *_args, **_kwargs: self.response("owned", sandbox="workspaceWrite")  # type: ignore[method-assign]
+        with self.assertRaisesRegex(RuntimeError, "controls are Gray"):
+            client.resume_thread("owned")
+
+    def test_resume_accepts_only_confirmed_owned_controls(self) -> None:
+        events = []
+        client = CodexAppServerClient({"compatibility": "supported"}, events.append)
+        client.thread_ids = ["owned"]
+        client.ensure_started = lambda: {"connection_state": "connected"}  # type: ignore[method-assign]
+        client.request = lambda *_args, **_kwargs: self.response("owned")  # type: ignore[method-assign]
+        result = client.resume_thread("owned", "draft")
+        self.assertEqual(result["thread_id"], "owned")
+        self.assertFalse(result["draft_submitted"])
+        self.assertEqual(events[0]["approval"], "turn-not-authorized")
+
+    def test_create_registers_ownership_only_after_control_validation(self) -> None:
+        owned = []
+        client = CodexAppServerClient({"compatibility": "supported"}, lambda _event: None, lambda thread_id, controls: owned.append((thread_id, controls)))
+        client.ensure_started = lambda: {"connection_state": "connected"}  # type: ignore[method-assign]
+        client.request = lambda *_args, **_kwargs: self.response("new")  # type: ignore[method-assign]
+        client.create_thread("draft")
+        self.assertEqual(owned[0][0], "new")
+        self.assertEqual(owned[0][1]["sandbox"], "readOnly")
+
+        rejected = []
+        client = CodexAppServerClient({"compatibility": "supported"}, lambda _event: None, lambda thread_id, controls: rejected.append((thread_id, controls)))
+        client.ensure_started = lambda: {"connection_state": "connected"}  # type: ignore[method-assign]
+        client.request = lambda *_args, **_kwargs: self.response("bad", approval="on-request")  # type: ignore[method-assign]
+        with self.assertRaisesRegex(RuntimeError, "controls are Gray"):
+            client.create_thread("draft")
+        self.assertEqual(rejected, [])
 
 
 if __name__ == "__main__":

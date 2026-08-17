@@ -226,6 +226,12 @@ class EventStore:
                     captured_at TEXT NOT NULL,
                     payload_json TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS owned_threads (
+                    thread_id TEXT PRIMARY KEY,
+                    created_at TEXT NOT NULL,
+                    interface TEXT NOT NULL,
+                    controls_digest TEXT NOT NULL
+                );
                 """
             )
 
@@ -307,7 +313,11 @@ class EventStore:
                SUM(COALESCE(duration_ms,0)) AS duration_ms,
                SUM(input_tokens) AS input_tokens, SUM(cached_tokens) AS cached_tokens,
                SUM(reasoning_tokens) AS reasoning_tokens, SUM(output_tokens) AS output_tokens,
-               SUM(CASE WHEN cost_amount IS NULL THEN 0 ELSE cost_amount END) AS cost_amount,
+               SUM(cost_amount) AS known_cost_amount,
+               SUM(CASE WHEN cost_amount IS NULL OR cost_basis = 'unavailable' THEN 1 ELSE 0 END) AS unavailable_cost_count,
+               SUM(CASE WHEN cost_basis = 'exact' THEN 1 ELSE 0 END) AS exact_cost_count,
+               SUM(CASE WHEN cost_basis = 'estimated' THEN 1 ELSE 0 END) AS estimated_cost_count,
+               SUM(CASE WHEN cost_basis = 'shadow-price' THEN 1 ELSE 0 END) AS shadow_cost_count,
                MAX(CASE status WHEN 'failed' THEN 7 WHEN 'blocked' THEN 6 WHEN 'current' THEN 5
                    WHEN 'waiting' THEN 4 WHEN 'gray' THEN 3 WHEN 'pending' THEN 2 ELSE 1 END) AS state_rank
         FROM events GROUP BY run_id, project ORDER BY updated_at DESC LIMIT ?
@@ -319,7 +329,22 @@ class EventStore:
                 item = dict(row)
                 item["status"] = states.get(item.pop("state_rank"), "gray")
                 item["tokens"] = {key: item.pop(f"{key}_tokens") for key in ("input", "cached", "reasoning", "output")}
-                item["cost"] = {"amount": round(item.pop("cost_amount") or 0, 8), "currency": "USD", "basis": "mixed-or-unavailable"}
+                known_amount = item.pop("known_cost_amount")
+                unavailable_count = item.pop("unavailable_cost_count")
+                exact_count = item.pop("exact_cost_count")
+                estimated_count = item.pop("estimated_cost_count")
+                shadow_count = item.pop("shadow_cost_count")
+                if unavailable_count or known_amount is None:
+                    amount, basis = None, "unavailable"
+                elif shadow_count:
+                    amount, basis = round(known_amount, 8), "shadow-price"
+                elif estimated_count:
+                    amount, basis = round(known_amount, 8), "estimated"
+                elif exact_count:
+                    amount, basis = round(known_amount, 8), "exact"
+                else:
+                    amount, basis = None, "unavailable"
+                item["cost"] = {"amount": amount, "currency": "USD", "basis": basis}
                 result.append(item)
             return result
 
@@ -328,6 +353,18 @@ class EventStore:
             connection.execute(
                 "INSERT OR REPLACE INTO vault_snapshots(vault_key,captured_at,payload_json) VALUES (?,?,?)",
                 (snapshot["key"], snapshot["captured_at"], json_dumps(snapshot)),
+            )
+
+    def owned_thread_ids(self) -> list[str]:
+        with self.connect() as connection:
+            return [row["thread_id"] for row in connection.execute("SELECT thread_id FROM owned_threads ORDER BY created_at, thread_id")]
+
+    def register_owned_thread(self, thread_id: str, controls: dict[str, Any]) -> None:
+        digest = stable_id("controls", controls)
+        with self.connect() as connection:
+            connection.execute(
+                "INSERT OR IGNORE INTO owned_threads(thread_id,created_at,interface,controls_digest) VALUES (?,?,?,?)",
+                (thread_id, utc_now(), "official-app-server-stdio-jsonrpc", digest),
             )
 
 
@@ -522,29 +559,36 @@ def findings(events: Iterable[dict[str, Any]], vaults: Iterable[dict[str, Any]])
     events = list(events)
     result: list[dict[str, Any]] = []
     by_tool: dict[tuple[str, str], list[dict[str, Any]]] = {}
-    by_capability: dict[str, list[int]] = {}
+    by_capability: dict[str, list[tuple[dict[str, Any], int]]] = {}
     for event in events:
         if event.get("tool"):
             by_tool.setdefault((event.get("run_id", ""), event["tool"]), []).append(event)
         if event.get("capability") and isinstance(event.get("duration_ms"), int):
-            by_capability.setdefault(event["capability"], []).append(event["duration_ms"])
+            by_capability.setdefault(event["capability"], []).append((event, event["duration_ms"]))
         if event.get("status") in {"failed", "blocked"}:
-            result.append({"id": stable_id("finding", ["failure", event["event_id"]]), "severity": "high", "kind": "execution-failure", "message": event.get("message"), "event_ids": [event["event_id"]]})
+            refs = [{"type": "event", "id": event["event_id"], "run_id": event.get("run_id"), "project": event.get("project"), "label": event.get("message") or event.get("kind")}]
+            result.append({"id": stable_id("finding", ["failure", event["event_id"]]), "severity": "high", "kind": "execution-failure", "message": event.get("message"), "event_ids": [event["event_id"]], "references": refs, "action": "Open the linked trace and resolve or explicitly accept the failed step."})
     for (run_id, tool), items in by_tool.items():
         if len(items) >= 3:
-            result.append({"id": stable_id("finding", ["repeat", run_id, tool]), "severity": "medium", "kind": "repeated-tool", "message": f"{tool} was called {len(items)} times in {run_id}; inspect query overlap.", "event_ids": [item["event_id"] for item in items]})
-    for capability, durations in by_capability.items():
-        if len(durations) >= 3:
+            refs = [{"type": "event", "id": item["event_id"], "run_id": item.get("run_id"), "project": item.get("project"), "label": item.get("message") or tool} for item in items]
+            result.append({"id": stable_id("finding", ["repeat", run_id, tool]), "severity": "medium", "kind": "repeated-tool", "message": f"{tool} was called {len(items)} times in {run_id}; inspect query overlap.", "event_ids": [item["event_id"] for item in items], "references": refs, "action": "Compare the linked calls and consolidate overlapping logical requests."})
+    for capability, samples in by_capability.items():
+        if len(samples) >= 3:
+            durations = [duration for _, duration in samples]
             ordered = sorted(durations)
             median = ordered[len(ordered) // 2]
             maximum = max(durations)
             if median and maximum > median * 1.6:
-                result.append({"id": stable_id("finding", ["slow", capability, maximum]), "severity": "medium", "kind": "duration-regression", "message": f"{capability} peaked at {maximum} ms versus a {median} ms recent median.", "event_ids": []})
+                slow_events = [event for event, duration in samples if duration == maximum]
+                refs = [{"type": "event", "id": event["event_id"], "run_id": event.get("run_id"), "project": event.get("project"), "label": event.get("message") or capability} for event in slow_events]
+                result.append({"id": stable_id("finding", ["slow", capability, maximum]), "severity": "medium", "kind": "duration-regression", "message": f"{capability} peaked at {maximum} ms versus a {median} ms recent median.", "event_ids": [event["event_id"] for event in slow_events], "references": refs, "action": "Inspect the slowest linked step and compare its evidence and tool activity with the median run."})
     for vault in vaults:
         if vault.get("state") == "gray":
-            result.append({"id": stable_id("finding", ["vault", vault.get("key"), vault.get("reason")]), "severity": "medium", "kind": "stale-or-missing-vault", "message": f"{vault.get('name')} is Gray: {vault.get('reason')}.", "event_ids": []})
+            refs = [{"type": "source", "id": vault.get("key"), "project": vault.get("key"), "locator": vault.get("path"), "label": vault.get("name") or vault.get("key"), "state": "gray"}]
+            result.append({"id": stable_id("finding", ["vault", vault.get("key"), vault.get("reason")]), "severity": "medium", "kind": "stale-or-missing-vault", "message": f"{vault.get('name')} is Gray: {vault.get('reason')}.", "event_ids": [], "references": refs, "action": "Open the linked vault source and restore or explicitly retire the missing evidence surface."})
         for contradiction in vault.get("contradictions", []):
-            result.append({"id": stable_id("finding", ["contradiction", vault.get("key"), contradiction]), "severity": "low", "kind": "preserved-contradiction", "message": contradiction, "event_ids": []})
+            refs = [{"type": "source", "id": vault.get("key"), "project": vault.get("key"), "locator": vault.get("path"), "label": vault.get("name") or vault.get("key"), "state": vault.get("state") or "gray"}]
+            result.append({"id": stable_id("finding", ["contradiction", vault.get("key"), contradiction]), "severity": "low", "kind": "preserved-contradiction", "message": contradiction, "event_ids": [], "references": refs, "action": "Review the linked source and preserve or resolve the contradiction with authoritative evidence."})
     return result[:100]
 
 
@@ -562,6 +606,22 @@ def validate_mcp_isolation(config: dict[str, Any], configured_names: Iterable[st
     return {"allowed_local": sorted(allowed_local & names), "disabled_remote": sorted(disabled_remote & names), "unexpected": []}
 
 
+def validate_thread_controls(response: dict[str, Any], expected_thread_id: str | None = None) -> dict[str, Any]:
+    if "error" in response:
+        raise RuntimeError(f"Codex thread request failed: {response['error']}")
+    result = response.get("result") if isinstance(response.get("result"), dict) else {}
+    thread = result.get("thread") if isinstance(result.get("thread"), dict) else {}
+    thread_id = str(thread.get("id") or "")
+    if not thread_id or (expected_thread_id and thread_id != expected_thread_id):
+        raise RuntimeError("Codex returned a missing or mismatched dashboard thread identity")
+    sandbox = result.get("sandbox") if isinstance(result.get("sandbox"), dict) else {}
+    if result.get("approvalPolicy") != "never" or sandbox.get("type") != "readOnly":
+        raise RuntimeError("Codex thread controls are Gray: read-only sandbox and never approval were not confirmed")
+    if thread.get("threadSource") != "appServer":
+        raise RuntimeError("Codex thread is not owned by the supported App Server surface")
+    return {"thread_id": thread_id, "thread": thread, "approval_policy": "never", "sandbox": "readOnly"}
+
+
 class CodexAppServerClient:
     """Bounded official App Server stdio client.
 
@@ -570,9 +630,10 @@ class CodexAppServerClient:
     approval-aware surface, preventing an unreviewed prompt from invoking tools.
     """
 
-    def __init__(self, config: dict[str, Any], on_event) -> None:
+    def __init__(self, config: dict[str, Any], on_event, on_owned_thread=None) -> None:
         self.config = config
         self.on_event = on_event
+        self.on_owned_thread = on_owned_thread
         self.process: subprocess.Popen[str] | None = None
         self.reader: threading.Thread | None = None
         self.stderr_reader: threading.Thread | None = None
@@ -675,22 +736,20 @@ class CodexAppServerClient:
             {"cwd": str(ROOT), "approvalPolicy": "never", "sandbox": "read-only", "ephemeral": False, "threadSource": "appServer"},
             timeout=30,
         )
-        if "error" in response:
-            raise RuntimeError(f"thread/start failed: {response['error']}")
-        thread = response.get("result", {}).get("thread", {})
-        thread_id = str(thread.get("id") or "")
-        if thread_id:
-            self.thread_ids.append(thread_id)
+        validated = validate_thread_controls(response)
+        thread_id = validated["thread_id"]
+        if self.on_owned_thread:
+            self.on_owned_thread(thread_id, {"approval_policy": validated["approval_policy"], "sandbox": validated["sandbox"], "thread_source": "appServer"})
+        self.thread_ids.append(thread_id)
         self.on_event({"kind": "codex.thread.prepared", "status": "waiting", "run_id": thread_id or "codex-appserver", "project": "portfolio", "message": "Dashboard-owned read-only Codex task prepared; draft not submitted", "worker": "codex-appserver", "approval": "turn-not-authorized", "metadata": {"thread_id": thread_id, "draft": draft, "draft_submitted": False}})
         return {"thread_id": thread_id, "status": "waiting", "draft_submitted": False, "next_action": "Copy the draft and continue the task in an approval-aware Codex surface."}
 
     def resume_thread(self, thread_id: str, draft: str = "") -> dict[str, Any]:
+        if thread_id not in self.thread_ids:
+            raise RuntimeError("Refusing to resume a thread not created and owned by this dashboard adapter")
         self.ensure_started()
         response = self.request("thread/resume", {"threadId": thread_id}, timeout=30)
-        if "error" in response:
-            raise RuntimeError(f"thread/resume failed: {response['error']}")
-        if thread_id not in self.thread_ids:
-            self.thread_ids.append(thread_id)
+        validate_thread_controls(response, expected_thread_id=thread_id)
         self.on_event({"kind": "codex.thread.resumed", "status": "waiting", "run_id": thread_id, "project": "portfolio", "message": "Dashboard-owned Codex task resumed; draft not submitted", "worker": "codex-appserver", "approval": "turn-not-authorized", "metadata": {"thread_id": thread_id, "draft": draft, "draft_submitted": False}})
         return {"thread_id": thread_id, "status": "waiting", "draft_submitted": False, "next_action": "Copy the draft and continue in Codex."}
 
@@ -774,7 +833,8 @@ class Application:
         store = EventStore(ledger, database)
         subscribers: set[queue.Queue] = set()
         placeholder = cls(config, store, VaultIndexer(config, store), CapabilityGraph(config.get("capability_graph", "")), None, subscribers, [])  # type: ignore[arg-type]
-        placeholder.codex = CodexAppServerClient(config.get("codex", {}), placeholder.record_event)
+        placeholder.codex = CodexAppServerClient(config.get("codex", {}), placeholder.record_event, store.register_owned_thread)
+        placeholder.codex.thread_ids = store.owned_thread_ids()
         placeholder.vaults = placeholder.indexer.refresh()
         return placeholder
 

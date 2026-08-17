@@ -85,6 +85,15 @@ def bridge_smoke() -> dict:
             connection.close()
             if response.status != 200 or len(state.get("vaults", [])) != 2 or not state.get("graph", {}).get("nodes"):
                 raise RuntimeError("Bridge state response did not contain dual-vault and graph coverage")
+            if len(state["graph"].get("nodes", [])) != 37 or len(state["graph"].get("edges", [])) != 81:
+                raise RuntimeError("Bridge state did not preserve the full 37-node/81-edge topology")
+            if any(run.get("cost", {}).get("basis") not in {"exact", "estimated", "shadow-price", "unavailable"} for run in state.get("runs", [])):
+                raise RuntimeError("Run projection emitted an unsupported cost basis")
+            unavailable_runs = [run for run in state.get("runs", []) if run.get("cost", {}).get("basis") == "unavailable"]
+            if any(run.get("cost", {}).get("amount") is not None for run in unavailable_runs):
+                raise RuntimeError("Unavailable run cost was rendered as a numeric subtotal")
+            if any(not finding.get("action") or not finding.get("references") for finding in state.get("findings", [])):
+                raise RuntimeError("A deterministic finding lacks actionable lineage")
             connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
             body = json.dumps({"scope": "configured-vaults", "mode": "read-only-index"})
             connection.request("POST", "/api/refresh", body=body, headers={"Content-Type": "application/json", "X-Poppy-Ops-Client": "obsidian-plugin"})
@@ -99,7 +108,7 @@ def bridge_smoke() -> dict:
             return {
                 "name": "localhost bridge smoke", "status": "pass", "port": port,
                 "health": health, "vaults": [{"key": item["key"], "exists": item["exists"], "state": item["state"]} for item in state["vaults"]],
-                "graph_nodes": len(state["graph"]["nodes"]), "runs": len(state["runs"]), "refresh_event": refresh["event"]["event_id"],
+                "graph_nodes": len(state["graph"]["nodes"]), "graph_edges": len(state["graph"]["edges"]), "runs": len(state["runs"]), "unavailable_cost_runs": len(unavailable_runs), "findings_with_lineage": len(state["findings"]), "refresh_event": refresh["event"]["event_id"],
                 "owned_process_pid": process.pid,
                 "canonical_vault_hashes_unchanged": len(before),
             }
@@ -149,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     if manifest.get("id") != "poppy-ops-cockpit" or manifest.get("isDesktopOnly") is not True:
         raise RuntimeError("Plugin manifest identity mismatch")
     css = (ROOT / "styles.css").read_text(encoding="utf-8")
-    for requirement in ("prefers-reduced-motion", ":focus-visible", "--poppy-cyan", ".poppy-execution-rail"):
+    for requirement in ("prefers-reduced-motion", ":focus-visible", "--poppy-cyan", ".poppy-execution-rail", ".poppy-topology-edge", ".poppy-finding-ref"):
         if requirement not in css:
             raise RuntimeError(f"Stylesheet requirement missing: {requirement}")
     evidence = {

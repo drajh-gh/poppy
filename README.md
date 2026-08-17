@@ -10,10 +10,12 @@ A private, Obsidian-native instrument panel for understanding Poppy across the S
 - Source-backed Poppy graph loaded from a pinned local graph copy and checked by digest
 - Append-only JSONL telemetry and deterministic SQLite projection
 - Run, trace, evidence, source, freshness, capability, approval, worker, tool, token, duration, and cost views
+- Full 37-node/81-edge directed topology plus the signature execution rail
 - Official Codex App Server stdio adapter using the explicitly approved sandbox-bin executable
-- Task preparation/resumption in read-only threads; drafts are not automatically submitted
+- Task preparation/resumption only for dashboard-owned, control-validated read-only threads; drafts are not automatically submitted
 - Read-only local refresh plus SSE and polling updates
 - Deterministic optimization rules linked to events
+- Structured finding drill-through to exact event/run or source/locator lineage
 - Gray semantics for every missing, stale, malformed, unsupported, or contradictory input
 
 ## Start locally
