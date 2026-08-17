@@ -548,6 +548,20 @@ def findings(events: Iterable[dict[str, Any]], vaults: Iterable[dict[str, Any]])
     return result[:100]
 
 
+def validate_mcp_isolation(config: dict[str, Any], configured_names: Iterable[str]) -> dict[str, Any]:
+    allowed_local = {str(item) for item in config.get("allowed_local_mcp_servers", [])}
+    disabled_remote = {str(item) for item in config.get("disabled_remote_mcp_servers", [])}
+    names = {str(item) for item in configured_names}
+    unexpected = sorted(names - allowed_local - disabled_remote)
+    launch_args = config.get("launch_args") if isinstance(config.get("launch_args"), list) else []
+    missing_overrides = [name for name in sorted(disabled_remote) if not any(f"mcp_servers.{name}=" in str(arg) and "enabled=false" in str(arg) for arg in launch_args)]
+    if unexpected:
+        raise RuntimeError(f"Refusing Codex launch with unclassified MCP servers: {', '.join(unexpected)}")
+    if missing_overrides:
+        raise RuntimeError(f"Refusing Codex launch without disabled remote MCP overrides: {', '.join(missing_overrides)}")
+    return {"allowed_local": sorted(allowed_local & names), "disabled_remote": sorted(disabled_remote & names), "unexpected": []}
+
+
 class CodexAppServerClient:
     """Bounded official App Server stdio client.
 
@@ -596,6 +610,18 @@ class CodexAppServerClient:
             executable = Path(str(self.config.get("executable", "")))
             if not executable.is_file():
                 raise RuntimeError("Supported Codex executable is unavailable")
+            mcp_check = subprocess.run(
+                [str(executable), "mcp", "list"], cwd=ROOT, text=True, capture_output=True, encoding="utf-8", timeout=12,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0,
+            )
+            if mcp_check.returncode:
+                raise RuntimeError("Could not verify configured MCP isolation through the official Codex CLI")
+            configured_names = []
+            for line in mcp_check.stdout.splitlines():
+                match = re.match(r"^([A-Za-z0-9_.-]+)\s{2,}", line)
+                if match and match.group(1) != "Name":
+                    configured_names.append(match.group(1))
+            isolation = validate_mcp_isolation(self.config, configured_names)
             startup = {"stdin": subprocess.PIPE, "stdout": subprocess.PIPE, "stderr": subprocess.PIPE, "text": True, "encoding": "utf-8", "bufsize": 1, "cwd": str(ROOT)}
             if os.name == "nt":
                 startup["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
@@ -616,7 +642,7 @@ class CodexAppServerClient:
             self.user_agent = response.get("result", {}).get("userAgent")
             self.notify("initialized", {})
             self.connection_state = "connected"
-            self.on_event({"kind": "codex.initialize", "status": "completed", "run_id": "codex-appserver", "project": "portfolio", "message": "Official Codex App Server initialized", "metadata": {"user_agent": self.user_agent, "interface": "stdio-jsonrpc"}})
+            self.on_event({"kind": "codex.initialize", "status": "completed", "run_id": "codex-appserver", "project": "portfolio", "message": "Official Codex App Server initialized", "metadata": {"user_agent": self.user_agent, "interface": "stdio-jsonrpc", "mcp_isolation": isolation}})
             return self.status()
 
     def request(self, method: str, params: dict[str, Any], timeout: float = 15) -> dict[str, Any]:

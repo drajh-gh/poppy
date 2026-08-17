@@ -23,6 +23,8 @@
       "mcp_servers.povio_dashboard_mcp={url=\"https://app.povio.com/mcp\",enabled=false}"
     ],
     "external_mcp_policy": "explicitly-disabled-for-dashboard-owned-threads",
+    "allowed_local_mcp_servers": ["node_repl"],
+    "disabled_remote_mcp_servers": ["povio_boards", "povio_dashboard_mcp"],
     "compatibility": "supported",
     "verified_version": "codex-cli 0.147.0-alpha.6.6",
     "decision_receipt": "POC-DEC-002"

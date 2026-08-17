@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bridge.poppy_ops_bridge import CapabilityGraph, EventStore, VaultIndexer, current_signal, findings, normalize_event
+from bridge.poppy_ops_bridge import CapabilityGraph, EventStore, VaultIndexer, current_signal, findings, normalize_event, validate_mcp_isolation
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,6 +144,16 @@ class GraphAndFindingTests(unittest.TestCase):
         self.assertEqual(first, second)
         repeated = next(item for item in first if item["kind"] == "repeated-tool")
         self.assertEqual(repeated["event_ids"], ["e0", "e1", "e2"])
+
+    def test_mcp_isolation_rejects_unclassified_server(self) -> None:
+        config = {
+            "allowed_local_mcp_servers": ["node_repl"],
+            "disabled_remote_mcp_servers": ["remote"],
+            "launch_args": ["-c", 'mcp_servers.remote={url="https://example.test",enabled=false}'],
+        }
+        self.assertEqual(validate_mcp_isolation(config, ["node_repl", "remote"])["unexpected"], [])
+        with self.assertRaisesRegex(RuntimeError, "unclassified MCP"):
+            validate_mcp_isolation(config, ["node_repl", "remote", "new-provider"])
 
 
 if __name__ == "__main__":

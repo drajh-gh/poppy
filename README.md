@@ -47,7 +47,7 @@ Use `python scripts/verify.py --check` during review to rerun every gate without
 
 The bridge uses `codex app-server --stdio` through `C:\Users\david\.codex\.sandbox-bin\codex.exe`. Compatibility was proven with an initialization response and a real ephemeral `thread/started` event. The earlier WindowsApps executable failed with `Access is denied` and is not used.
 
-The dock can create or resume a dashboard-owned read-only thread through App Server. The bridge disables Codex apps/plugins and the two configured remote MCP servers for these threads; the final isolation probe started only the local `node_repl` server. It retains the prompt as a draft and deliberately does not call `turn/start`, preventing a prompt from invoking tools or external providers without a stronger approval-aware control surface.
+The dock can create or resume a dashboard-owned read-only thread through App Server. Before launch, the bridge uses the official `codex mcp list` command and refuses any unclassified server. It disables Codex apps/plugins and the two configured remote MCP servers for these threads; the final isolation probe started only the local `node_repl` server. It retains the prompt as a draft and deliberately does not call `turn/start`, preventing a prompt from invoking tools or external providers without a stronger approval-aware control surface.
 
 ## Rollback
 
