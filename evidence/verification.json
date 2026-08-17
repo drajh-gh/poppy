@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "pass",
-  "generated_at": "2026-08-17T07:48:41.410692Z",
+  "generated_at": "2026-08-17T07:50:25.769362Z",
   "candidate": "working-tree-pre-freeze",
   "checks": [
     {
@@ -46,7 +46,7 @@
       ],
       "exit_code": 0,
       "stdout": "",
-      "stderr": "test_control_validation_requires_read_only_never_appserver (test_bridge.CodexThreadOwnershipTests.test_control_validation_requires_read_only_never_appserver) ... ok\ntest_create_registers_ownership_only_after_control_validation (test_bridge.CodexThreadOwnershipTests.test_create_registers_ownership_only_after_control_validation) ... ok\ntest_resume_accepts_only_confirmed_owned_controls (test_bridge.CodexThreadOwnershipTests.test_resume_accepts_only_confirmed_owned_controls) ... ok\ntest_resume_fails_gray_when_returned_controls_mismatch (test_bridge.CodexThreadOwnershipTests.test_resume_fails_gray_when_returned_controls_mismatch) ... ok\ntest_resume_rejects_unowned_thread_before_request (test_bridge.CodexThreadOwnershipTests.test_resume_rejects_unowned_thread_before_request) ... ok\ntest_contradiction_is_preserved (test_bridge.EventNormalizationTests.test_contradiction_is_preserved) ... ok\ntest_cost_basis_is_bounded (test_bridge.EventNormalizationTests.test_cost_basis_is_bounded) ... ok\ntest_missing_evidence_and_cost_degrade_explicitly (test_bridge.EventNormalizationTests.test_missing_evidence_and_cost_degrade_explicitly) ... ok\ntest_append_is_idempotent_and_ledger_is_append_only (test_bridge.EventStoreTests.test_append_is_idempotent_and_ledger_is_append_only) ... ok\ntest_event_ingestion_cannot_claim_thread_ownership (test_bridge.EventStoreTests.test_event_ingestion_cannot_claim_thread_ownership) ... ok\ntest_owned_thread_identity_is_recovered_from_control_registry (test_bridge.EventStoreTests.test_owned_thread_identity_is_recovered_from_control_registry) ... ok\ntest_replay_is_deterministic_and_skips_malformed (test_bridge.EventStoreTests.test_replay_is_deterministic_and_skips_malformed) ... ok\ntest_run_cost_is_unavailable_when_any_step_is_unavailable (test_bridge.EventStoreTests.test_run_cost_is_unavailable_when_any_step_is_unavailable) ... ok\ntest_run_cost_uses_least_exact_allowed_basis (test_bridge.EventStoreTests.test_run_cost_uses_least_exact_allowed_basis) ... ok\ntest_run_projection_aggregates_tokens_and_status (test_bridge.EventStoreTests.test_run_projection_aggregates_tokens_and_status) ... ok\ntest_every_finding_rule_has_actionable_event_or_source_lineage (test_bridge.GraphAndFindingTests.test_every_finding_rule_has_actionable_event_or_source_lineage) ... ok\ntest_findings_are_deterministic_and_link_events (test_bridge.GraphAndFindingTests.test_findings_are_deterministic_and_link_events) ... ok\ntest_mcp_isolation_rejects_unclassified_server (test_bridge.GraphAndFindingTests.test_mcp_isolation_rejects_unclassified_server) ... ok\ntest_pinned_graph_is_available (test_bridge.GraphAndFindingTests.test_pinned_graph_is_available) ... ok\ntest_current_signal_preserves_traffic_light_and_review (test_bridge.VaultIndexerTests.test_current_signal_preserves_traffic_light_and_review) ... ok\ntest_missing_vault_is_gray (test_bridge.VaultIndexerTests.test_missing_vault_is_gray) ... ok\ntest_profile_is_read_without_canonical_write (test_bridge.VaultIndexerTests.test_profile_is_read_without_canonical_write) ... ok\n\n----------------------------------------------------------------------\nRan 22 tests in 0.840s\n\nOK"
+      "stderr": "test_control_validation_requires_read_only_never_appserver (test_bridge.CodexThreadOwnershipTests.test_control_validation_requires_read_only_never_appserver) ... ok\ntest_create_registers_ownership_only_after_control_validation (test_bridge.CodexThreadOwnershipTests.test_create_registers_ownership_only_after_control_validation) ... ok\ntest_resume_accepts_only_confirmed_owned_controls (test_bridge.CodexThreadOwnershipTests.test_resume_accepts_only_confirmed_owned_controls) ... ok\ntest_resume_fails_gray_when_returned_controls_mismatch (test_bridge.CodexThreadOwnershipTests.test_resume_fails_gray_when_returned_controls_mismatch) ... ok\ntest_resume_rejects_unowned_thread_before_request (test_bridge.CodexThreadOwnershipTests.test_resume_rejects_unowned_thread_before_request) ... ok\ntest_contradiction_is_preserved (test_bridge.EventNormalizationTests.test_contradiction_is_preserved) ... ok\ntest_cost_basis_is_bounded (test_bridge.EventNormalizationTests.test_cost_basis_is_bounded) ... ok\ntest_missing_amount_cannot_claim_exact_cost (test_bridge.EventNormalizationTests.test_missing_amount_cannot_claim_exact_cost) ... ok\ntest_missing_evidence_and_cost_degrade_explicitly (test_bridge.EventNormalizationTests.test_missing_evidence_and_cost_degrade_explicitly) ... ok\ntest_append_is_idempotent_and_ledger_is_append_only (test_bridge.EventStoreTests.test_append_is_idempotent_and_ledger_is_append_only) ... ok\ntest_event_ingestion_cannot_claim_thread_ownership (test_bridge.EventStoreTests.test_event_ingestion_cannot_claim_thread_ownership) ... ok\ntest_owned_thread_identity_is_recovered_from_control_registry (test_bridge.EventStoreTests.test_owned_thread_identity_is_recovered_from_control_registry) ... ok\ntest_replay_is_deterministic_and_skips_malformed (test_bridge.EventStoreTests.test_replay_is_deterministic_and_skips_malformed) ... ok\ntest_run_cost_is_unavailable_when_any_step_is_unavailable (test_bridge.EventStoreTests.test_run_cost_is_unavailable_when_any_step_is_unavailable) ... ok\ntest_run_cost_uses_least_exact_allowed_basis (test_bridge.EventStoreTests.test_run_cost_uses_least_exact_allowed_basis) ... ok\ntest_run_projection_aggregates_tokens_and_status (test_bridge.EventStoreTests.test_run_projection_aggregates_tokens_and_status) ... ok\ntest_every_finding_rule_has_actionable_event_or_source_lineage (test_bridge.GraphAndFindingTests.test_every_finding_rule_has_actionable_event_or_source_lineage) ... ok\ntest_findings_are_deterministic_and_link_events (test_bridge.GraphAndFindingTests.test_findings_are_deterministic_and_link_events) ... ok\ntest_mcp_isolation_rejects_unclassified_server (test_bridge.GraphAndFindingTests.test_mcp_isolation_rejects_unclassified_server) ... ok\ntest_pinned_graph_is_available (test_bridge.GraphAndFindingTests.test_pinned_graph_is_available) ... ok\ntest_current_signal_preserves_traffic_light_and_review (test_bridge.VaultIndexerTests.test_current_signal_preserves_traffic_light_and_review) ... ok\ntest_missing_vault_is_gray (test_bridge.VaultIndexerTests.test_missing_vault_is_gray) ... ok\ntest_profile_is_read_without_canonical_write (test_bridge.VaultIndexerTests.test_profile_is_read_without_canonical_write) ... ok\n\n----------------------------------------------------------------------\nRan 23 tests in 0.677s\n\nOK"
     },
     {
       "name": "package build",
@@ -82,11 +82,11 @@
     {
       "name": "localhost bridge smoke",
       "status": "pass",
-      "port": 60835,
+      "port": 50191,
       "health": {
         "state": "completed",
         "service": "poppy-ops-bridge",
-        "time": "2026-08-17T07:48:40.823078Z"
+        "time": "2026-08-17T07:50:25.480190Z"
       },
       "vaults": [
         {
@@ -105,8 +105,8 @@
       "runs": 3,
       "unavailable_cost_runs": 1,
       "findings_with_lineage": 5,
-      "refresh_event": "evt-ffc289df0fc245173a2b",
-      "owned_process_pid": 65928,
+      "refresh_event": "evt-ff8099ae833f2c1dda94",
+      "owned_process_pid": 63572,
       "canonical_vault_hashes_unchanged": 35
     },
     {
