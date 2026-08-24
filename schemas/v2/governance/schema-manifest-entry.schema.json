@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/governance/schema-manifest-entry/v1",
+  "title": "Poppy v2 schema manifest entry",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.governance.schema-manifest-entry",
+  "type": "object",
+  "required": [
+    "id", "kind", "domain", "status", "owner_decision_id", "version",
+    "compatibility", "stable_code", "test_id", "implementation",
+    "implementation_status", "positive_case", "negative_case"
+  ],
+  "properties": {
+    "id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/manifestEntryId"},
+    "kind": {"enum": ["schema", "invariant"]},
+    "domain": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "status": {"enum": ["proposed", "ratified", "retired"]},
+    "owner_decision_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/decisionId"},
+    "version": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/semver"},
+    "compatibility": {
+      "type": "object",
+      "required": ["minimum", "maximum_exclusive"],
+      "properties": {
+        "minimum": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/semver"},
+        "maximum_exclusive": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/semver"}
+      },
+      "unevaluatedProperties": false
+    },
+    "stable_code": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/stableCode"},
+    "test_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/testId"},
+    "implementation": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/artifactLocator"},
+    "implementation_status": {"enum": ["planned", "implemented", "retired"]},
+    "positive_case": {"type": "string", "pattern": "^CASE-TV2-[A-Z]{3}-[0-9]{3}-POS$"},
+    "negative_case": {"type": "string", "pattern": "^CASE-TV2-[A-Z]{3}-[0-9]{3}-NEG$"}
+  },
+  "unevaluatedProperties": false
+}

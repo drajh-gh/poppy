@@ -1,0 +1,201 @@
+{
+  "schema.governance.schema-manifest-entry": {
+    "positive": {
+      "id": "schema.evidence.claim",
+      "kind": "schema",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {"minimum": "1.0.0", "maximum_exclusive": "2.0.0"},
+      "stable_code": "POP2-SHP-EVD-300",
+      "test_id": "TV2-EVD-300",
+      "implementation": "schemas/v2/evidence-contracts/claim.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-300-POS",
+      "negative_case": "CASE-TV2-EVD-300-NEG"
+    },
+    "negative": {
+      "id": "schema.evidence.claim",
+      "kind": "schema",
+      "domain": "evidence",
+      "status": "ratified",
+      "version": "1.0.0"
+    }
+  },
+  "schema.governance.schema-set-identity": {
+    "positive": {
+      "id": "poppy.v2.foundation",
+      "version": "0.1.0",
+      "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "digest_basis": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)",
+      "complete": false,
+      "implemented_entry_count": 25,
+      "coverage_state": "gray",
+      "coverage_reason": "Synthetic partial foundation."
+    },
+    "negative": {
+      "id": "poppy.v2.foundation",
+      "version": "0.1.0",
+      "digest": "not-a-digest",
+      "digest_basis": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)",
+      "complete": false,
+      "implemented_entry_count": 25
+    }
+  },
+  "schema.governance.validation-error": {
+    "positive": {
+      "code": "POP2-INV-EVD-305",
+      "owner_decision_id": "POP-V2-007",
+      "manifest_entry_id": "invariant.evidence.required-dependency-propagates-gray",
+      "layer": "INVARIANT",
+      "locator": "synthetic:evidence-bundle",
+      "json_pointer": "/revisions/0",
+      "message": "Synthetic required dependency is Gray."
+    },
+    "negative": {
+      "code": "EVD-305",
+      "owner_decision_id": "POP-V2-007",
+      "manifest_entry_id": "invariant.evidence.required-dependency-propagates-gray",
+      "layer": "INVARIANT",
+      "locator": "synthetic:evidence-bundle",
+      "message": "Synthetic invalid code."
+    }
+  },
+  "schema.governance.error-code-catalog": {
+    "positive": {
+      "$schema": "poppy://schema/governance/error-code-catalog/v1",
+      "catalog_version": "1.0.0",
+      "entries": [{
+        "code": "POP2-INV-EVD-305",
+        "manifest_entry_id": "invariant.evidence.required-dependency-propagates-gray",
+        "owner_decision_id": "POP-V2-007",
+        "layer": "INVARIANT"
+      }]
+    },
+    "negative": {
+      "$schema": "poppy://schema/governance/error-code-catalog/v1",
+      "catalog_version": "1.0.0",
+      "entries": []
+    }
+  },
+  "schema.evidence.claim": {
+    "positive": {
+      "$schema": "poppy://schema/evidence/claim/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "kind": "delivery.readiness",
+      "statement": "Synthetic release evidence is complete.",
+      "material": true,
+      "value": {"artifact_count": 1, "verified": true},
+      "valid_as_of": "2026-08-24T10:00:00Z",
+      "created_at": "2026-08-24T10:00:00Z"
+    },
+    "negative": {
+      "$schema": "poppy://schema/evidence/claim/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "kind": "delivery.readiness",
+      "material": true,
+      "value": null,
+      "valid_as_of": "2026-08-24T10:00:00Z",
+      "created_at": "2026-08-24T10:00:00Z"
+    }
+  },
+  "schema.evidence.claim-revision": {
+    "positive": {
+      "$schema": "poppy://schema/evidence/claim-revision/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "revision": 1,
+      "state": "gray",
+      "reason_codes": ["required_dependency_gray"],
+      "required_dependencies": ["018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91"],
+      "dependency_reasons": [{"dependency_claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91", "reason_code": "required_dependency_gray"}],
+      "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recorded_at": "2026-08-24T10:01:00Z"
+    },
+    "negative": {
+      "$schema": "poppy://schema/evidence/claim-revision/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "revision": 1,
+      "state": "green",
+      "reason_codes": [],
+      "required_dependencies": [],
+      "dependency_reasons": [],
+      "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recorded_at": "2026-08-24T10:01:00Z"
+    }
+  },
+  "schema.evidence.observation": {
+    "positive": {
+      "$schema": "poppy://schema/evidence/observation/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "role": "supports",
+      "observed_at": "2026-08-24T10:02:00Z",
+      "coverage": "Synthetic complete fixture coverage.",
+      "limitations": [],
+      "content_ref": "synthetic:release-receipt",
+      "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "usable": true,
+      "material": true
+    },
+    "negative": {
+      "$schema": "poppy://schema/evidence/observation/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "role": "verifies",
+      "observed_at": "2026-08-24T10:02:00Z",
+      "coverage": "Synthetic invalid role.",
+      "limitations": [],
+      "content_ref": "synthetic:release-receipt",
+      "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "usable": true,
+      "material": true
+    }
+  },
+  "schema.evidence.contradiction-record": {
+    "positive": {
+      "$schema": "poppy://schema/evidence/contradiction-record/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "contradiction_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8ab0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "left_observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa0",
+      "right_observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa2",
+      "opened_at": "2026-08-24T10:03:00Z",
+      "status": "open",
+      "material": true
+    },
+    "negative": {
+      "$schema": "poppy://schema/evidence/contradiction-record/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "contradiction_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8ab0",
+      "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "left_observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa0",
+      "right_observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa2",
+      "opened_at": "2026-08-24T10:03:00Z",
+      "status": "unknown",
+      "material": true
+    }
+  },
+  "schema.evidence.claim-dependency": {
+    "positive": {
+      "$schema": "poppy://schema/evidence/claim-dependency/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "dependent_claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "dependency_claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91",
+      "relationship": "required"
+    },
+    "negative": {
+      "$schema": "poppy://schema/evidence/claim-dependency/v1",
+      "x-poppy-schema-version": "1.0.0",
+      "dependent_claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90",
+      "dependency_claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91",
+      "relationship": "blocks"
+    }
+  }
+}

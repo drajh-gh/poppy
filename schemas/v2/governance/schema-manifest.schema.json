@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/governance/schema-manifest/v1",
+  "title": "Poppy v2 canonical schema manifest",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.governance.schema-manifest",
+  "type": "object",
+  "required": ["$schema", "schema_version", "schema_set", "accepted_decisions", "entries"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/governance/schema-manifest/v1"},
+    "schema_version": {"const": 1},
+    "schema_set": {
+      "$ref": "poppy://schema/governance/schema-set-identity/v1"
+    },
+    "accepted_decisions": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/decisionId"}
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "poppy://schema/governance/schema-manifest-entry/v1"}
+    }
+  },
+  "unevaluatedProperties": false
+}

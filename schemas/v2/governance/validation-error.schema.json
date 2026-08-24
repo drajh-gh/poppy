@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/governance/validation-error/v1",
+  "title": "Poppy v2 stable validation error",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.governance.validation-error",
+  "type": "object",
+  "required": ["code", "owner_decision_id", "manifest_entry_id", "layer", "locator", "message"],
+  "properties": {
+    "code": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/stableCode"},
+    "owner_decision_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/decisionId"},
+    "manifest_entry_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/manifestEntryId"},
+    "layer": {"enum": ["SHAPE", "INVARIANT", "BEHAVIOR", "ASSEMBLY"]},
+    "locator": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/artifactLocator"},
+    "json_pointer": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/jsonPointer"},
+    "schema_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/schemaId"},
+    "schema_version": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/semver"},
+    "schema_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "message": {"type": "string", "minLength": 1}
+  },
+  "unevaluatedProperties": false
+}

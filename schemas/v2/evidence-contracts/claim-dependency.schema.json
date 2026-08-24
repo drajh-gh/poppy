@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/evidence/claim-dependency/v1",
+  "title": "Poppy v2 typed claim dependency",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.evidence.claim-dependency",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "dependent_claim_id", "dependency_claim_id", "relationship"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/evidence/claim-dependency/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "dependent_claim_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "dependency_claim_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "relationship": {"enum": ["required", "supporting", "contextual"]}
+  },
+  "unevaluatedProperties": false
+}

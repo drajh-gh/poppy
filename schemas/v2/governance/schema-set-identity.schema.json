@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/governance/schema-set-identity/v1",
+  "title": "Poppy v2 schema-set identity",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.governance.schema-set-identity",
+  "type": "object",
+  "required": ["id", "version", "digest", "digest_basis", "complete", "implemented_entry_count"],
+  "properties": {
+    "id": {"const": "poppy.v2.foundation"},
+    "version": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/semver"},
+    "digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "digest_basis": {"const": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)"},
+    "complete": {"type": "boolean"},
+    "implemented_entry_count": {"type": "integer", "minimum": 1},
+    "coverage_state": {"enum": ["supported", "gray"]},
+    "coverage_reason": {"type": "string", "minLength": 1}
+  },
+  "unevaluatedProperties": false
+}

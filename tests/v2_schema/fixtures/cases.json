@@ -1,0 +1,455 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "CASE-TV2-GOV-001-POS",
+      "entry_id": "schema.governance.common-definitions",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-document:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-001-NEG",
+      "entry_id": "schema.governance.common-definitions",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-GOV-001"
+      ],
+      "fixture_ref": "schema-document:negative"
+    },
+    {
+      "id": "CASE-TV2-GOV-002-POS",
+      "entry_id": "schema.governance.schema-manifest",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-002-NEG",
+      "entry_id": "schema.governance.schema-manifest",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-GOV-002"
+      ],
+      "fixture_ref": "manifest:negative"
+    },
+    {
+      "id": "CASE-TV2-GOV-003-POS",
+      "entry_id": "schema.governance.schema-manifest-entry",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.governance.schema-manifest-entry/positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-003-NEG",
+      "entry_id": "schema.governance.schema-manifest-entry",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-GOV-003"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.governance.schema-manifest-entry/negative"
+    },
+    {
+      "id": "CASE-TV2-GOV-004-POS",
+      "entry_id": "schema.governance.schema-set-identity",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.governance.schema-set-identity/positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-004-NEG",
+      "entry_id": "schema.governance.schema-set-identity",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-GOV-004"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.governance.schema-set-identity/negative"
+    },
+    {
+      "id": "CASE-TV2-GOV-005-POS",
+      "entry_id": "schema.governance.validation-error",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.governance.validation-error/positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-005-NEG",
+      "entry_id": "schema.governance.validation-error",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-GOV-005"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.governance.validation-error/negative"
+    },
+    {
+      "id": "CASE-TV2-GOV-006-POS",
+      "entry_id": "schema.governance.error-code-catalog",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.governance.error-code-catalog/positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-006-NEG",
+      "entry_id": "schema.governance.error-code-catalog",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-GOV-006"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.governance.error-code-catalog/negative"
+    },
+    {
+      "id": "CASE-TV2-GOV-011-POS",
+      "entry_id": "invariant.governance.exactly-one-accepted-owner",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-011-NEG",
+      "entry_id": "invariant.governance.exactly-one-accepted-owner",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-GOV-011"
+      ],
+      "fixture_ref": "manifest-mutation:POP2-INV-GOV-011"
+    },
+    {
+      "id": "CASE-TV2-GOV-012-POS",
+      "entry_id": "invariant.governance.only-ratified-is-normative",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-012-NEG",
+      "entry_id": "invariant.governance.only-ratified-is-normative",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-GOV-012"
+      ],
+      "fixture_ref": "manifest-mutation:POP2-INV-GOV-012"
+    },
+    {
+      "id": "CASE-TV2-GOV-013-POS",
+      "entry_id": "invariant.governance.schema-version-compatible",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-013-NEG",
+      "entry_id": "invariant.governance.schema-version-compatible",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-GOV-013"
+      ],
+      "fixture_ref": "manifest-mutation:POP2-INV-GOV-013"
+    },
+    {
+      "id": "CASE-TV2-GOV-014-POS",
+      "entry_id": "invariant.governance.stable-error-code-not-reused",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-014-NEG",
+      "entry_id": "invariant.governance.stable-error-code-not-reused",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-GOV-014"
+      ],
+      "fixture_ref": "manifest-mutation:POP2-INV-GOV-014"
+    },
+    {
+      "id": "CASE-TV2-GOV-015-POS",
+      "entry_id": "invariant.governance.schema-reference-resolves",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-015-NEG",
+      "entry_id": "invariant.governance.schema-reference-resolves",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-GOV-015"
+      ],
+      "fixture_ref": "manifest-mutation:POP2-INV-GOV-015"
+    },
+    {
+      "id": "CASE-TV2-GOV-016-POS",
+      "entry_id": "invariant.governance.test-cites-entry-and-owner",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-016-NEG",
+      "entry_id": "invariant.governance.test-cites-entry-and-owner",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-GOV-016"
+      ],
+      "fixture_ref": "manifest-mutation:POP2-INV-GOV-016"
+    },
+    {
+      "id": "CASE-TV2-GOV-017-POS",
+      "entry_id": "invariant.governance.positive-and-negative-case-present",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "manifest:positive"
+    },
+    {
+      "id": "CASE-TV2-GOV-017-NEG",
+      "entry_id": "invariant.governance.positive-and-negative-case-present",
+      "owner_decision_id": "POP-V2-011",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-GOV-017"
+      ],
+      "fixture_ref": "manifest-mutation:POP2-INV-GOV-017"
+    },
+    {
+      "id": "CASE-TV2-EVD-300-POS",
+      "entry_id": "schema.evidence.claim",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.evidence.claim/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-300-NEG",
+      "entry_id": "schema.evidence.claim",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-EVD-300"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.evidence.claim/negative"
+    },
+    {
+      "id": "CASE-TV2-EVD-301-POS",
+      "entry_id": "schema.evidence.claim-revision",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.evidence.claim-revision/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-301-NEG",
+      "entry_id": "schema.evidence.claim-revision",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-EVD-301"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.evidence.claim-revision/negative"
+    },
+    {
+      "id": "CASE-TV2-EVD-302-POS",
+      "entry_id": "schema.evidence.observation",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.evidence.observation/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-302-NEG",
+      "entry_id": "schema.evidence.observation",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-EVD-302"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.evidence.observation/negative"
+    },
+    {
+      "id": "CASE-TV2-EVD-303-POS",
+      "entry_id": "schema.evidence.contradiction-record",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.evidence.contradiction-record/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-303-NEG",
+      "entry_id": "schema.evidence.contradiction-record",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-EVD-303"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.evidence.contradiction-record/negative"
+    },
+    {
+      "id": "CASE-TV2-EVD-304-POS",
+      "entry_id": "schema.evidence.claim-dependency",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "schema-instances.json#/schema.evidence.claim-dependency/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-304-NEG",
+      "entry_id": "schema.evidence.claim-dependency",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-SHP-EVD-304"
+      ],
+      "fixture_ref": "schema-instances.json#/schema.evidence.claim-dependency/negative"
+    },
+    {
+      "id": "CASE-TV2-EVD-305-POS",
+      "entry_id": "invariant.evidence.required-dependency-propagates-gray",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "evidence-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-305-NEG",
+      "entry_id": "invariant.evidence.required-dependency-propagates-gray",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-EVD-305"
+      ],
+      "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-305"
+    },
+    {
+      "id": "CASE-TV2-EVD-306-POS",
+      "entry_id": "invariant.evidence.claim-revisions-append-only",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "evidence-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-306-NEG",
+      "entry_id": "invariant.evidence.claim-revisions-append-only",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-EVD-306"
+      ],
+      "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-306"
+    },
+    {
+      "id": "CASE-TV2-EVD-307-POS",
+      "entry_id": "invariant.evidence.state-is-three-valued",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "evidence-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-307-NEG",
+      "entry_id": "invariant.evidence.state-is-three-valued",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-EVD-307"
+      ],
+      "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-307"
+    },
+    {
+      "id": "CASE-TV2-EVD-308-POS",
+      "entry_id": "invariant.evidence.contradiction-preserves-both-sides",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "evidence-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-308-NEG",
+      "entry_id": "invariant.evidence.contradiction-preserves-both-sides",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-EVD-308"
+      ],
+      "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-308"
+    },
+    {
+      "id": "CASE-TV2-EVD-309-POS",
+      "entry_id": "invariant.evidence.supported-claim-gate",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "evidence-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-309-NEG",
+      "entry_id": "invariant.evidence.supported-claim-gate",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-EVD-309"
+      ],
+      "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-309"
+    },
+    {
+      "id": "CASE-TV2-EVD-310-POS",
+      "entry_id": "invariant.evidence.no-confidence-averaging",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "evidence-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-310-NEG",
+      "entry_id": "invariant.evidence.no-confidence-averaging",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-EVD-310"
+      ],
+      "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-310"
+    },
+    {
+      "id": "CASE-TV2-EVD-311-POS",
+      "entry_id": "invariant.evidence.dependency-cycle-invalid",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "positive",
+      "expected_codes": [],
+      "fixture_ref": "evidence-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EVD-311-NEG",
+      "entry_id": "invariant.evidence.dependency-cycle-invalid",
+      "owner_decision_id": "POP-V2-007",
+      "polarity": "negative",
+      "expected_codes": [
+        "POP2-INV-EVD-311"
+      ],
+      "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-311"
+    }
+  ]
+}
