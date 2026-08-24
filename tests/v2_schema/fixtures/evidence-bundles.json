@@ -1,0 +1,29 @@
+{
+  "positive": {
+    "claims": [
+      {"claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90"},
+      {"claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91"}
+    ],
+    "revisions": [
+      {"claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90", "revision": 1, "state": "supported", "reason_codes": [], "required_dependencies": ["018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91"], "dependency_reasons": [], "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+      {"claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91", "revision": 1, "state": "supported", "reason_codes": [], "required_dependencies": [], "dependency_reasons": [], "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+    ],
+    "observations": [
+      {"observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa0", "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90", "role": "supports", "usable": true, "material": true},
+      {"observation_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8aa1", "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91", "role": "supports", "usable": true, "material": true}
+    ],
+    "contradictions": [],
+    "dependencies": [
+      {"dependent_claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a90", "dependency_claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8a91", "relationship": "required"}
+    ]
+  },
+  "negative_by_code": {
+    "POP2-INV-EVD-305": {"mutation": "make-required-dependency-gray-without-propagation"},
+    "POP2-INV-EVD-306": {"mutation": "skip-claim-revision-number"},
+    "POP2-INV-EVD-307": {"mutation": "use-green-claim-state"},
+    "POP2-INV-EVD-308": {"mutation": "collapse-contradiction-sides"},
+    "POP2-INV-EVD-309": {"mutation": "remove-own-support-from-supported-claim"},
+    "POP2-INV-EVD-310": {"mutation": "add-confidence-score"},
+    "POP2-INV-EVD-311": {"mutation": "create-required-dependency-cycle"}
+  }
+}

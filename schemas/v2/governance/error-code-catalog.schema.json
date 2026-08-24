@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/governance/error-code-catalog/v1",
+  "title": "Poppy v2 stable error-code catalog",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.governance.error-code-catalog",
+  "type": "object",
+  "required": ["$schema", "catalog_version", "entries"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/governance/error-code-catalog/v1"},
+    "catalog_version": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/semver"},
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["code", "manifest_entry_id", "owner_decision_id", "layer"],
+        "properties": {
+          "code": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/stableCode"},
+          "manifest_entry_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/manifestEntryId"},
+          "owner_decision_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/decisionId"},
+          "layer": {"enum": ["SHAPE", "INVARIANT", "BEHAVIOR", "ASSEMBLY"]}
+        },
+        "unevaluatedProperties": false
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

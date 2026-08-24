@@ -1,0 +1,3540 @@
+{
+  "$schema": "poppy://schema/governance/schema-manifest/v1",
+  "schema_version": 1,
+  "schema_set": {
+    "id": "poppy.v2.foundation",
+    "version": "0.1.0",
+    "digest": "sha256:75b85cdedfc16a35572ef87d993b0c5e99b922c65eb23f2f320543fd662df001",
+    "digest_basis": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)",
+    "complete": false,
+    "implemented_entry_count": 25,
+    "coverage_state": "gray",
+    "coverage_reason": "Foundation tranche implements governance plus evidence/Gray only; all other ratified entries remain planned."
+  },
+  "accepted_decisions": [
+    "POP-V2-001",
+    "POP-V2-002",
+    "POP-V2-003",
+    "POP-V2-004",
+    "POP-V2-005",
+    "POP-V2-006",
+    "POP-V2-007",
+    "POP-V2-008",
+    "POP-V2-009",
+    "POP-V2-010",
+    "POP-V2-011",
+    "POP-V2-012"
+  ],
+  "entries": [
+    {
+      "id": "schema.product.component-boundary",
+      "kind": "schema",
+      "domain": "product",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-001",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-PRD-050",
+      "test_id": "TV2-PRD-050",
+      "implementation": "schemas/v2/product/component-boundary.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-PRD-050-POS",
+      "negative_case": "CASE-TV2-PRD-050-NEG"
+    },
+    {
+      "id": "schema.product.adapter-contract",
+      "kind": "schema",
+      "domain": "product",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-001",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-PRD-051",
+      "test_id": "TV2-PRD-051",
+      "implementation": "schemas/v2/product/adapter-contract.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-PRD-051-POS",
+      "negative_case": "CASE-TV2-PRD-051-NEG"
+    },
+    {
+      "id": "invariant.product.core-imports-product-only",
+      "kind": "invariant",
+      "domain": "product",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-001",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-PRD-052",
+      "test_id": "TV2-PRD-052",
+      "implementation": "scripts/poppy_v2_validation/product.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-PRD-052-POS",
+      "negative_case": "CASE-TV2-PRD-052-NEG"
+    },
+    {
+      "id": "invariant.product.cockpit-is-read-model-client",
+      "kind": "invariant",
+      "domain": "product",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-001",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-PRD-053",
+      "test_id": "TV2-PRD-053",
+      "implementation": "scripts/poppy_v2_validation/product.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-PRD-053-POS",
+      "negative_case": "CASE-TV2-PRD-053-NEG"
+    },
+    {
+      "id": "invariant.product.vault-is-project-owned",
+      "kind": "invariant",
+      "domain": "product",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-001",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-PRD-054",
+      "test_id": "TV2-PRD-054",
+      "implementation": "scripts/poppy_v2_validation/product.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-PRD-054-POS",
+      "negative_case": "CASE-TV2-PRD-054-NEG"
+    },
+    {
+      "id": "schema.governance.common-definitions",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-001",
+      "test_id": "TV2-GOV-001",
+      "implementation": "schemas/v2/governance/common-definitions.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-001-POS",
+      "negative_case": "CASE-TV2-GOV-001-NEG"
+    },
+    {
+      "id": "schema.governance.schema-manifest",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-002",
+      "test_id": "TV2-GOV-002",
+      "implementation": "schemas/v2/governance/schema-manifest.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-002-POS",
+      "negative_case": "CASE-TV2-GOV-002-NEG"
+    },
+    {
+      "id": "schema.governance.schema-manifest-entry",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-003",
+      "test_id": "TV2-GOV-003",
+      "implementation": "schemas/v2/governance/schema-manifest-entry.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-003-POS",
+      "negative_case": "CASE-TV2-GOV-003-NEG"
+    },
+    {
+      "id": "schema.governance.schema-set-identity",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-004",
+      "test_id": "TV2-GOV-004",
+      "implementation": "schemas/v2/governance/schema-set-identity.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-004-POS",
+      "negative_case": "CASE-TV2-GOV-004-NEG"
+    },
+    {
+      "id": "schema.governance.validation-error",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-005",
+      "test_id": "TV2-GOV-005",
+      "implementation": "schemas/v2/governance/validation-error.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-005-POS",
+      "negative_case": "CASE-TV2-GOV-005-NEG"
+    },
+    {
+      "id": "schema.governance.error-code-catalog",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-006",
+      "test_id": "TV2-GOV-006",
+      "implementation": "schemas/v2/governance/error-code-catalog.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-006-POS",
+      "negative_case": "CASE-TV2-GOV-006-NEG"
+    },
+    {
+      "id": "schema.governance.decision-record",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-007",
+      "test_id": "TV2-GOV-007",
+      "implementation": "schemas/v2/governance/decision-record.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-GOV-007-POS",
+      "negative_case": "CASE-TV2-GOV-007-NEG"
+    },
+    {
+      "id": "schema.governance.traceability-edge",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-008",
+      "test_id": "TV2-GOV-008",
+      "implementation": "schemas/v2/governance/traceability-edge.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-GOV-008-POS",
+      "negative_case": "CASE-TV2-GOV-008-NEG"
+    },
+    {
+      "id": "schema.governance.traceability-report",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-009",
+      "test_id": "TV2-GOV-009",
+      "implementation": "schemas/v2/governance/traceability-report.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-GOV-009-POS",
+      "negative_case": "CASE-TV2-GOV-009-NEG"
+    },
+    {
+      "id": "schema.governance.change-impact-report",
+      "kind": "schema",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-GOV-010",
+      "test_id": "TV2-GOV-010",
+      "implementation": "schemas/v2/governance/change-impact-report.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-GOV-010-POS",
+      "negative_case": "CASE-TV2-GOV-010-NEG"
+    },
+    {
+      "id": "invariant.governance.exactly-one-accepted-owner",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-011",
+      "test_id": "TV2-GOV-011",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-011-POS",
+      "negative_case": "CASE-TV2-GOV-011-NEG"
+    },
+    {
+      "id": "invariant.governance.only-ratified-is-normative",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-012",
+      "test_id": "TV2-GOV-012",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-012-POS",
+      "negative_case": "CASE-TV2-GOV-012-NEG"
+    },
+    {
+      "id": "invariant.governance.schema-version-compatible",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-013",
+      "test_id": "TV2-GOV-013",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-013-POS",
+      "negative_case": "CASE-TV2-GOV-013-NEG"
+    },
+    {
+      "id": "invariant.governance.stable-error-code-not-reused",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-014",
+      "test_id": "TV2-GOV-014",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-014-POS",
+      "negative_case": "CASE-TV2-GOV-014-NEG"
+    },
+    {
+      "id": "invariant.governance.schema-reference-resolves",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-015",
+      "test_id": "TV2-GOV-015",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-015-POS",
+      "negative_case": "CASE-TV2-GOV-015-NEG"
+    },
+    {
+      "id": "invariant.governance.test-cites-entry-and-owner",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-016",
+      "test_id": "TV2-GOV-016",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-016-POS",
+      "negative_case": "CASE-TV2-GOV-016-NEG"
+    },
+    {
+      "id": "invariant.governance.positive-and-negative-case-present",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-017",
+      "test_id": "TV2-GOV-017",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-GOV-017-POS",
+      "negative_case": "CASE-TV2-GOV-017-NEG"
+    },
+    {
+      "id": "invariant.governance.change-impact-closed",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-018",
+      "test_id": "TV2-GOV-018",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-GOV-018-POS",
+      "negative_case": "CASE-TV2-GOV-018-NEG"
+    },
+    {
+      "id": "invariant.governance.decision-supersession-explicit",
+      "kind": "invariant",
+      "domain": "governance",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-011",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-GOV-019",
+      "test_id": "TV2-GOV-019",
+      "implementation": "scripts/poppy_v2_validation/governance.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-GOV-019-POS",
+      "negative_case": "CASE-TV2-GOV-019-NEG"
+    },
+    {
+      "id": "schema.authority.source-reference",
+      "kind": "schema",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-AUT-100",
+      "test_id": "TV2-AUT-100",
+      "implementation": "schemas/v2/authority/source-reference.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-100-POS",
+      "negative_case": "CASE-TV2-AUT-100-NEG"
+    },
+    {
+      "id": "schema.authority.source-kind-registry",
+      "kind": "schema",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-AUT-101",
+      "test_id": "TV2-AUT-101",
+      "implementation": "schemas/v2/authority/source-kind-registry.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-101-POS",
+      "negative_case": "CASE-TV2-AUT-101-NEG"
+    },
+    {
+      "id": "schema.authority.claim-scope",
+      "kind": "schema",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-AUT-102",
+      "test_id": "TV2-AUT-102",
+      "implementation": "schemas/v2/authority/claim-scope.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-102-POS",
+      "negative_case": "CASE-TV2-AUT-102-NEG"
+    },
+    {
+      "id": "schema.authority.authority-query",
+      "kind": "schema",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-AUT-103",
+      "test_id": "TV2-AUT-103",
+      "implementation": "schemas/v2/authority/authority-query.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-103-POS",
+      "negative_case": "CASE-TV2-AUT-103-NEG"
+    },
+    {
+      "id": "schema.authority.candidate-authority",
+      "kind": "schema",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-AUT-104",
+      "test_id": "TV2-AUT-104",
+      "implementation": "schemas/v2/authority/candidate-authority.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-104-POS",
+      "negative_case": "CASE-TV2-AUT-104-NEG"
+    },
+    {
+      "id": "schema.authority.authority-resolution",
+      "kind": "schema",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-AUT-105",
+      "test_id": "TV2-AUT-105",
+      "implementation": "schemas/v2/authority/authority-resolution.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-105-POS",
+      "negative_case": "CASE-TV2-AUT-105-NEG"
+    },
+    {
+      "id": "invariant.authority.source-classification-registry-owned",
+      "kind": "invariant",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-AUT-106",
+      "test_id": "TV2-AUT-106",
+      "implementation": "scripts/poppy_v2_validation/authority.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-106-POS",
+      "negative_case": "CASE-TV2-AUT-106-NEG"
+    },
+    {
+      "id": "invariant.authority.no-precedence-number-or-last-wins",
+      "kind": "invariant",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-AUT-107",
+      "test_id": "TV2-AUT-107",
+      "implementation": "scripts/poppy_v2_validation/authority.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-107-POS",
+      "negative_case": "CASE-TV2-AUT-107-NEG"
+    },
+    {
+      "id": "invariant.authority.resolution-checks-ordered",
+      "kind": "invariant",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-AUT-108",
+      "test_id": "TV2-AUT-108",
+      "implementation": "scripts/poppy_v2_validation/authority.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-108-POS",
+      "negative_case": "CASE-TV2-AUT-108-NEG"
+    },
+    {
+      "id": "invariant.authority.resolution-exactly-bound",
+      "kind": "invariant",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-AUT-109",
+      "test_id": "TV2-AUT-109",
+      "implementation": "scripts/poppy_v2_validation/authority.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-109-POS",
+      "negative_case": "CASE-TV2-AUT-109-NEG"
+    },
+    {
+      "id": "invariant.authority.conflict-never-inferred-away",
+      "kind": "invariant",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-AUT-110",
+      "test_id": "TV2-AUT-110",
+      "implementation": "scripts/poppy_v2_validation/authority.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-110-POS",
+      "negative_case": "CASE-TV2-AUT-110-NEG"
+    },
+    {
+      "id": "invariant.authority.approval-is-not-boolean",
+      "kind": "invariant",
+      "domain": "authority",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-002",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-AUT-111",
+      "test_id": "TV2-AUT-111",
+      "implementation": "scripts/poppy_v2_validation/authority.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-AUT-111-POS",
+      "negative_case": "CASE-TV2-AUT-111-NEG"
+    },
+    {
+      "id": "schema.effect.proposal",
+      "kind": "schema",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EFF-200",
+      "test_id": "TV2-EFF-200",
+      "implementation": "schemas/v2/effect/proposal.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-200-POS",
+      "negative_case": "CASE-TV2-EFF-200-NEG"
+    },
+    {
+      "id": "schema.effect.target",
+      "kind": "schema",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EFF-201",
+      "test_id": "TV2-EFF-201",
+      "implementation": "schemas/v2/effect/target.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-201-POS",
+      "negative_case": "CASE-TV2-EFF-201-NEG"
+    },
+    {
+      "id": "schema.effect.rollback-plan",
+      "kind": "schema",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EFF-202",
+      "test_id": "TV2-EFF-202",
+      "implementation": "schemas/v2/effect/rollback-plan.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-202-POS",
+      "negative_case": "CASE-TV2-EFF-202-NEG"
+    },
+    {
+      "id": "schema.effect.verification-plan",
+      "kind": "schema",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EFF-203",
+      "test_id": "TV2-EFF-203",
+      "implementation": "schemas/v2/effect/verification-plan.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-203-POS",
+      "negative_case": "CASE-TV2-EFF-203-NEG"
+    },
+    {
+      "id": "schema.effect.execution-receipt",
+      "kind": "schema",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EFF-204",
+      "test_id": "TV2-EFF-204",
+      "implementation": "schemas/v2/effect/execution-receipt.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-204-POS",
+      "negative_case": "CASE-TV2-EFF-204-NEG"
+    },
+    {
+      "id": "invariant.effect.proposal-exactly-bound",
+      "kind": "invariant",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EFF-205",
+      "test_id": "TV2-EFF-205",
+      "implementation": "scripts/poppy_v2_validation/effect.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-205-POS",
+      "negative_case": "CASE-TV2-EFF-205-NEG"
+    },
+    {
+      "id": "invariant.effect.change-invalidates-authority",
+      "kind": "invariant",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EFF-206",
+      "test_id": "TV2-EFF-206",
+      "implementation": "scripts/poppy_v2_validation/effect.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-206-POS",
+      "negative_case": "CASE-TV2-EFF-206-NEG"
+    },
+    {
+      "id": "invariant.effect.high-risk-approval-distinct",
+      "kind": "invariant",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EFF-207",
+      "test_id": "TV2-EFF-207",
+      "implementation": "scripts/poppy_v2_validation/effect.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-207-POS",
+      "negative_case": "CASE-TV2-EFF-207-NEG"
+    },
+    {
+      "id": "invariant.effect.attempt-is-not-verification",
+      "kind": "invariant",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EFF-208",
+      "test_id": "TV2-EFF-208",
+      "implementation": "scripts/poppy_v2_validation/effect.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-208-POS",
+      "negative_case": "CASE-TV2-EFF-208-NEG"
+    },
+    {
+      "id": "invariant.effect.receipt-follows-authorized-attempt",
+      "kind": "invariant",
+      "domain": "effect",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-006",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EFF-209",
+      "test_id": "TV2-EFF-209",
+      "implementation": "scripts/poppy_v2_validation/effect.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-EFF-209-POS",
+      "negative_case": "CASE-TV2-EFF-209-NEG"
+    },
+    {
+      "id": "schema.evidence.claim",
+      "kind": "schema",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EVD-300",
+      "test_id": "TV2-EVD-300",
+      "implementation": "schemas/v2/evidence-contracts/claim.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-300-POS",
+      "negative_case": "CASE-TV2-EVD-300-NEG"
+    },
+    {
+      "id": "schema.evidence.claim-revision",
+      "kind": "schema",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EVD-301",
+      "test_id": "TV2-EVD-301",
+      "implementation": "schemas/v2/evidence-contracts/claim-revision.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-301-POS",
+      "negative_case": "CASE-TV2-EVD-301-NEG"
+    },
+    {
+      "id": "schema.evidence.observation",
+      "kind": "schema",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EVD-302",
+      "test_id": "TV2-EVD-302",
+      "implementation": "schemas/v2/evidence-contracts/observation.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-302-POS",
+      "negative_case": "CASE-TV2-EVD-302-NEG"
+    },
+    {
+      "id": "schema.evidence.contradiction-record",
+      "kind": "schema",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EVD-303",
+      "test_id": "TV2-EVD-303",
+      "implementation": "schemas/v2/evidence-contracts/contradiction-record.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-303-POS",
+      "negative_case": "CASE-TV2-EVD-303-NEG"
+    },
+    {
+      "id": "schema.evidence.claim-dependency",
+      "kind": "schema",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-EVD-304",
+      "test_id": "TV2-EVD-304",
+      "implementation": "schemas/v2/evidence-contracts/claim-dependency.schema.json",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-304-POS",
+      "negative_case": "CASE-TV2-EVD-304-NEG"
+    },
+    {
+      "id": "invariant.evidence.required-dependency-propagates-gray",
+      "kind": "invariant",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EVD-305",
+      "test_id": "TV2-EVD-305",
+      "implementation": "scripts/poppy_v2_validation/evidence.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-305-POS",
+      "negative_case": "CASE-TV2-EVD-305-NEG"
+    },
+    {
+      "id": "invariant.evidence.claim-revisions-append-only",
+      "kind": "invariant",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EVD-306",
+      "test_id": "TV2-EVD-306",
+      "implementation": "scripts/poppy_v2_validation/evidence.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-306-POS",
+      "negative_case": "CASE-TV2-EVD-306-NEG"
+    },
+    {
+      "id": "invariant.evidence.state-is-three-valued",
+      "kind": "invariant",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EVD-307",
+      "test_id": "TV2-EVD-307",
+      "implementation": "scripts/poppy_v2_validation/evidence.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-307-POS",
+      "negative_case": "CASE-TV2-EVD-307-NEG"
+    },
+    {
+      "id": "invariant.evidence.contradiction-preserves-both-sides",
+      "kind": "invariant",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EVD-308",
+      "test_id": "TV2-EVD-308",
+      "implementation": "scripts/poppy_v2_validation/evidence.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-308-POS",
+      "negative_case": "CASE-TV2-EVD-308-NEG"
+    },
+    {
+      "id": "invariant.evidence.supported-claim-gate",
+      "kind": "invariant",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EVD-309",
+      "test_id": "TV2-EVD-309",
+      "implementation": "scripts/poppy_v2_validation/evidence.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-309-POS",
+      "negative_case": "CASE-TV2-EVD-309-NEG"
+    },
+    {
+      "id": "invariant.evidence.no-confidence-averaging",
+      "kind": "invariant",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EVD-310",
+      "test_id": "TV2-EVD-310",
+      "implementation": "scripts/poppy_v2_validation/evidence.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-310-POS",
+      "negative_case": "CASE-TV2-EVD-310-NEG"
+    },
+    {
+      "id": "invariant.evidence.dependency-cycle-invalid",
+      "kind": "invariant",
+      "domain": "evidence",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-007",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-EVD-311",
+      "test_id": "TV2-EVD-311",
+      "implementation": "scripts/poppy_v2_validation/evidence.py",
+      "implementation_status": "implemented",
+      "positive_case": "CASE-TV2-EVD-311-POS",
+      "negative_case": "CASE-TV2-EVD-311-NEG"
+    },
+    {
+      "id": "schema.kernel.lifecycle-contract",
+      "kind": "schema",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-KRN-400",
+      "test_id": "TV2-KRN-400",
+      "implementation": "schemas/v2/kernel/lifecycle-contract.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-400-POS",
+      "negative_case": "CASE-TV2-KRN-400-NEG"
+    },
+    {
+      "id": "schema.kernel.event",
+      "kind": "schema",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-KRN-401",
+      "test_id": "TV2-KRN-401",
+      "implementation": "schemas/v2/kernel/event.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-401-POS",
+      "negative_case": "CASE-TV2-KRN-401-NEG"
+    },
+    {
+      "id": "schema.kernel.guard-result",
+      "kind": "schema",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-KRN-402",
+      "test_id": "TV2-KRN-402",
+      "implementation": "schemas/v2/kernel/guard-result.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-402-POS",
+      "negative_case": "CASE-TV2-KRN-402-NEG"
+    },
+    {
+      "id": "schema.kernel.transition-record",
+      "kind": "schema",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-KRN-403",
+      "test_id": "TV2-KRN-403",
+      "implementation": "schemas/v2/kernel/transition-record.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-403-POS",
+      "negative_case": "CASE-TV2-KRN-403-NEG"
+    },
+    {
+      "id": "schema.kernel.plan-revision-record",
+      "kind": "schema",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-KRN-404",
+      "test_id": "TV2-KRN-404",
+      "implementation": "schemas/v2/kernel/plan-revision-record.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-404-POS",
+      "negative_case": "CASE-TV2-KRN-404-NEG"
+    },
+    {
+      "id": "schema.kernel.run-outcome",
+      "kind": "schema",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-KRN-405",
+      "test_id": "TV2-KRN-405",
+      "implementation": "schemas/v2/kernel/run-outcome.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-405-POS",
+      "negative_case": "CASE-TV2-KRN-405-NEG"
+    },
+    {
+      "id": "invariant.kernel.legal-transition-only",
+      "kind": "invariant",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-KRN-406",
+      "test_id": "TV2-KRN-406",
+      "implementation": "scripts/poppy_v2_validation/kernel.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-406-POS",
+      "negative_case": "CASE-TV2-KRN-406-NEG"
+    },
+    {
+      "id": "invariant.kernel.terminal-singular-immutable",
+      "kind": "invariant",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-KRN-407",
+      "test_id": "TV2-KRN-407",
+      "implementation": "scripts/poppy_v2_validation/kernel.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-407-POS",
+      "negative_case": "CASE-TV2-KRN-407-NEG"
+    },
+    {
+      "id": "invariant.kernel.required-guards-pass",
+      "kind": "invariant",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-KRN-408",
+      "test_id": "TV2-KRN-408",
+      "implementation": "scripts/poppy_v2_validation/kernel.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-408-POS",
+      "negative_case": "CASE-TV2-KRN-408-NEG"
+    },
+    {
+      "id": "invariant.kernel.transition-digest-chain",
+      "kind": "invariant",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-KRN-409",
+      "test_id": "TV2-KRN-409",
+      "implementation": "scripts/poppy_v2_validation/kernel.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-409-POS",
+      "negative_case": "CASE-TV2-KRN-409-NEG"
+    },
+    {
+      "id": "invariant.kernel.plan-revision-invalidates-old-bindings",
+      "kind": "invariant",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-KRN-410",
+      "test_id": "TV2-KRN-410",
+      "implementation": "scripts/poppy_v2_validation/kernel.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-410-POS",
+      "negative_case": "CASE-TV2-KRN-410-NEG"
+    },
+    {
+      "id": "invariant.kernel.authority-denial-is-no-effect-terminal",
+      "kind": "invariant",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-KRN-411",
+      "test_id": "TV2-KRN-411",
+      "implementation": "scripts/poppy_v2_validation/kernel.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-411-POS",
+      "negative_case": "CASE-TV2-KRN-411-NEG"
+    },
+    {
+      "id": "invariant.kernel.persistence-gated",
+      "kind": "invariant",
+      "domain": "kernel",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-003",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-KRN-412",
+      "test_id": "TV2-KRN-412",
+      "implementation": "scripts/poppy_v2_validation/kernel.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-KRN-412-POS",
+      "negative_case": "CASE-TV2-KRN-412-NEG"
+    },
+    {
+      "id": "schema.capability.registry-snapshot",
+      "kind": "schema",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CAP-500",
+      "test_id": "TV2-CAP-500",
+      "implementation": "schemas/v2/capability/registry-snapshot.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-500-POS",
+      "negative_case": "CASE-TV2-CAP-500-NEG"
+    },
+    {
+      "id": "schema.capability.contract",
+      "kind": "schema",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CAP-501",
+      "test_id": "TV2-CAP-501",
+      "implementation": "schemas/v2/capability/contract.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-501-POS",
+      "negative_case": "CASE-TV2-CAP-501-NEG"
+    },
+    {
+      "id": "schema.capability.contract-binding",
+      "kind": "schema",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CAP-502",
+      "test_id": "TV2-CAP-502",
+      "implementation": "schemas/v2/capability/contract-binding.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-502-POS",
+      "negative_case": "CASE-TV2-CAP-502-NEG"
+    },
+    {
+      "id": "schema.capability.claim-requirement",
+      "kind": "schema",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CAP-503",
+      "test_id": "TV2-CAP-503",
+      "implementation": "schemas/v2/capability/claim-requirement.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-503-POS",
+      "negative_case": "CASE-TV2-CAP-503-NEG"
+    },
+    {
+      "id": "schema.capability.authority-requirement-binding",
+      "kind": "schema",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CAP-504",
+      "test_id": "TV2-CAP-504",
+      "implementation": "schemas/v2/capability/authority-requirement-binding.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-504-POS",
+      "negative_case": "CASE-TV2-CAP-504-NEG"
+    },
+    {
+      "id": "schema.capability.compatibility-declaration",
+      "kind": "schema",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CAP-505",
+      "test_id": "TV2-CAP-505",
+      "implementation": "schemas/v2/capability/compatibility-declaration.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-505-POS",
+      "negative_case": "CASE-TV2-CAP-505-NEG"
+    },
+    {
+      "id": "schema.capability.executor-role-catalog",
+      "kind": "schema",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CAP-506",
+      "test_id": "TV2-CAP-506",
+      "implementation": "schemas/v2/capability/executor-role-catalog.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-506-POS",
+      "negative_case": "CASE-TV2-CAP-506-NEG"
+    },
+    {
+      "id": "invariant.capability.registry-snapshot-immutable",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CAP-507",
+      "test_id": "TV2-CAP-507",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-507-POS",
+      "negative_case": "CASE-TV2-CAP-507-NEG"
+    },
+    {
+      "id": "invariant.capability.contract-identity-immutable",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CAP-508",
+      "test_id": "TV2-CAP-508",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-508-POS",
+      "negative_case": "CASE-TV2-CAP-508-NEG"
+    },
+    {
+      "id": "invariant.capability.references-resolve-exactly",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CAP-509",
+      "test_id": "TV2-CAP-509",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-509-POS",
+      "negative_case": "CASE-TV2-CAP-509-NEG"
+    },
+    {
+      "id": "invariant.capability.effect-ceiling-not-exceeded",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CAP-510",
+      "test_id": "TV2-CAP-510",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-510-POS",
+      "negative_case": "CASE-TV2-CAP-510-NEG"
+    },
+    {
+      "id": "invariant.capability.claim-gate-satisfied",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CAP-511",
+      "test_id": "TV2-CAP-511",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-511-POS",
+      "negative_case": "CASE-TV2-CAP-511-NEG"
+    },
+    {
+      "id": "invariant.capability.executor-role-permitted",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CAP-512",
+      "test_id": "TV2-CAP-512",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-512-POS",
+      "negative_case": "CASE-TV2-CAP-512-NEG"
+    },
+    {
+      "id": "invariant.capability.run-binding-exact",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CAP-513",
+      "test_id": "TV2-CAP-513",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-513-POS",
+      "negative_case": "CASE-TV2-CAP-513-NEG"
+    },
+    {
+      "id": "invariant.capability.kernel-compatible",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INT-CAP-514",
+      "test_id": "TV2-CAP-514",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-514-POS",
+      "negative_case": "CASE-TV2-CAP-514-NEG"
+    },
+    {
+      "id": "invariant.capability.implementation-matches-contract",
+      "kind": "invariant",
+      "domain": "capability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-004",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INT-CAP-515",
+      "test_id": "TV2-CAP-515",
+      "implementation": "scripts/poppy_v2_validation/capability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CAP-515-POS",
+      "negative_case": "CASE-TV2-CAP-515-NEG"
+    },
+    {
+      "id": "schema.dag.revision",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-600",
+      "test_id": "TV2-DAG-600",
+      "implementation": "schemas/v2/dag/revision.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-600-POS",
+      "negative_case": "CASE-TV2-DAG-600-NEG"
+    },
+    {
+      "id": "schema.dag.objective-binding",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-601",
+      "test_id": "TV2-DAG-601",
+      "implementation": "schemas/v2/dag/objective-binding.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-601-POS",
+      "negative_case": "CASE-TV2-DAG-601-NEG"
+    },
+    {
+      "id": "invariant.dag.nodes-necessary-and-connected",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-DAG-602",
+      "test_id": "TV2-DAG-602",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-602-POS",
+      "negative_case": "CASE-TV2-DAG-602-NEG"
+    },
+    {
+      "id": "schema.dag.node",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-603",
+      "test_id": "TV2-DAG-603",
+      "implementation": "schemas/v2/dag/node.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-603-POS",
+      "negative_case": "CASE-TV2-DAG-603-NEG"
+    },
+    {
+      "id": "schema.dag.edge",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-604",
+      "test_id": "TV2-DAG-604",
+      "implementation": "schemas/v2/dag/edge.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-604-POS",
+      "negative_case": "CASE-TV2-DAG-604-NEG"
+    },
+    {
+      "id": "schema.dag.executor-assignment",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-605",
+      "test_id": "TV2-DAG-605",
+      "implementation": "schemas/v2/dag/executor-assignment.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-605-POS",
+      "negative_case": "CASE-TV2-DAG-605-NEG"
+    },
+    {
+      "id": "schema.dag.node-status-record",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-606",
+      "test_id": "TV2-DAG-606",
+      "implementation": "schemas/v2/dag/node-status-record.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-606-POS",
+      "negative_case": "CASE-TV2-DAG-606-NEG"
+    },
+    {
+      "id": "schema.dag.node-attempt",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-607",
+      "test_id": "TV2-DAG-607",
+      "implementation": "schemas/v2/dag/node-attempt.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-607-POS",
+      "negative_case": "CASE-TV2-DAG-607-NEG"
+    },
+    {
+      "id": "schema.dag.node-outcome",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-608",
+      "test_id": "TV2-DAG-608",
+      "implementation": "schemas/v2/dag/node-outcome.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-608-POS",
+      "negative_case": "CASE-TV2-DAG-608-NEG"
+    },
+    {
+      "id": "schema.dag.artifact-reference",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-609",
+      "test_id": "TV2-DAG-609",
+      "implementation": "schemas/v2/dag/artifact-reference.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-609-POS",
+      "negative_case": "CASE-TV2-DAG-609-NEG"
+    },
+    {
+      "id": "schema.dag.artifact-binding",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-610",
+      "test_id": "TV2-DAG-610",
+      "implementation": "schemas/v2/dag/artifact-binding.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-610-POS",
+      "negative_case": "CASE-TV2-DAG-610-NEG"
+    },
+    {
+      "id": "schema.dag.minimized-receipt",
+      "kind": "schema",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-DAG-611",
+      "test_id": "TV2-DAG-611",
+      "implementation": "schemas/v2/dag/minimized-receipt.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-611-POS",
+      "negative_case": "CASE-TV2-DAG-611-NEG"
+    },
+    {
+      "id": "invariant.dag.acyclic",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-DAG-612",
+      "test_id": "TV2-DAG-612",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-612-POS",
+      "negative_case": "CASE-TV2-DAG-612-NEG"
+    },
+    {
+      "id": "invariant.dag.capability-binding-exact",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-DAG-613",
+      "test_id": "TV2-DAG-613",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-613-POS",
+      "negative_case": "CASE-TV2-DAG-613-NEG"
+    },
+    {
+      "id": "invariant.dag.edge-schema-match",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-DAG-614",
+      "test_id": "TV2-DAG-614",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-614-POS",
+      "negative_case": "CASE-TV2-DAG-614-NEG"
+    },
+    {
+      "id": "invariant.dag.dependencies-before-ready",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-DAG-615",
+      "test_id": "TV2-DAG-615",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-615-POS",
+      "negative_case": "CASE-TV2-DAG-615-NEG"
+    },
+    {
+      "id": "invariant.dag.attempt-sequence",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-DAG-616",
+      "test_id": "TV2-DAG-616",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-616-POS",
+      "negative_case": "CASE-TV2-DAG-616-NEG"
+    },
+    {
+      "id": "invariant.dag.node-status-legal",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-DAG-617",
+      "test_id": "TV2-DAG-617",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-617-POS",
+      "negative_case": "CASE-TV2-DAG-617-NEG"
+    },
+    {
+      "id": "invariant.dag.join-complete",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-BEH-DAG-618",
+      "test_id": "TV2-DAG-618",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-618-POS",
+      "negative_case": "CASE-TV2-DAG-618-NEG"
+    },
+    {
+      "id": "invariant.dag.effect-exactly-bound",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-DAG-619",
+      "test_id": "TV2-DAG-619",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-619-POS",
+      "negative_case": "CASE-TV2-DAG-619-NEG"
+    },
+    {
+      "id": "invariant.dag.registry-binding-immutable",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-DAG-620",
+      "test_id": "TV2-DAG-620",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-620-POS",
+      "negative_case": "CASE-TV2-DAG-620-NEG"
+    },
+    {
+      "id": "invariant.dag.receipt-eligible-and-minimized",
+      "kind": "invariant",
+      "domain": "dag",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-005",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-DAG-621",
+      "test_id": "TV2-DAG-621",
+      "implementation": "scripts/poppy_v2_validation/dag.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-DAG-621-POS",
+      "negative_case": "CASE-TV2-DAG-621-NEG"
+    },
+    {
+      "id": "schema.configuration.project-profile",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-700",
+      "test_id": "TV2-CFG-700",
+      "implementation": "schemas/v2/configuration/project-profile.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-700-POS",
+      "negative_case": "CASE-TV2-CFG-700-NEG"
+    },
+    {
+      "id": "schema.configuration.repository-adapter",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-701",
+      "test_id": "TV2-CFG-701",
+      "implementation": "schemas/v2/configuration/repository-adapter.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-701-POS",
+      "negative_case": "CASE-TV2-CFG-701-NEG"
+    },
+    {
+      "id": "schema.configuration.repository-command",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-702",
+      "test_id": "TV2-CFG-702",
+      "implementation": "schemas/v2/configuration/repository-command.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-702-POS",
+      "negative_case": "CASE-TV2-CFG-702-NEG"
+    },
+    {
+      "id": "schema.configuration.local-resolver",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-703",
+      "test_id": "TV2-CFG-703",
+      "implementation": "schemas/v2/configuration/local-resolver.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-703-POS",
+      "negative_case": "CASE-TV2-CFG-703-NEG"
+    },
+    {
+      "id": "schema.configuration.local-path",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-704",
+      "test_id": "TV2-CFG-704",
+      "implementation": "schemas/v2/configuration/local-path.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-704-POS",
+      "negative_case": "CASE-TV2-CFG-704-NEG"
+    },
+    {
+      "id": "schema.configuration.credential-reference",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-705",
+      "test_id": "TV2-CFG-705",
+      "implementation": "schemas/v2/configuration/credential-reference.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-705-POS",
+      "negative_case": "CASE-TV2-CFG-705-NEG"
+    },
+    {
+      "id": "schema.configuration.operator-preferences",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-706",
+      "test_id": "TV2-CFG-706",
+      "implementation": "schemas/v2/configuration/operator-preferences.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-706-POS",
+      "negative_case": "CASE-TV2-CFG-706-NEG"
+    },
+    {
+      "id": "schema.configuration.preference-catalog",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-707",
+      "test_id": "TV2-CFG-707",
+      "implementation": "schemas/v2/configuration/preference-catalog.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-707-POS",
+      "negative_case": "CASE-TV2-CFG-707-NEG"
+    },
+    {
+      "id": "schema.configuration.runtime-store-descriptor",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-708",
+      "test_id": "TV2-CFG-708",
+      "implementation": "schemas/v2/configuration/runtime-store-descriptor.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-708-POS",
+      "negative_case": "CASE-TV2-CFG-708-NEG"
+    },
+    {
+      "id": "schema.configuration.runtime-record",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-709",
+      "test_id": "TV2-CFG-709",
+      "implementation": "schemas/v2/configuration/runtime-record.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-709-POS",
+      "negative_case": "CASE-TV2-CFG-709-NEG"
+    },
+    {
+      "id": "schema.configuration.vault-boundary-descriptor",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-710",
+      "test_id": "TV2-CFG-710",
+      "implementation": "schemas/v2/configuration/vault-boundary-descriptor.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-710-POS",
+      "negative_case": "CASE-TV2-CFG-710-NEG"
+    },
+    {
+      "id": "schema.configuration.effective-snapshot",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-711",
+      "test_id": "TV2-CFG-711",
+      "implementation": "schemas/v2/configuration/effective-snapshot.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-711-POS",
+      "negative_case": "CASE-TV2-CFG-711-NEG"
+    },
+    {
+      "id": "schema.configuration.ownership-boundary",
+      "kind": "schema",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-CFG-712",
+      "test_id": "TV2-CFG-712",
+      "implementation": "schemas/v2/configuration/ownership-boundary.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-712-POS",
+      "negative_case": "CASE-TV2-CFG-712-NEG"
+    },
+    {
+      "id": "invariant.configuration.exact-field-owner",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-713",
+      "test_id": "TV2-CFG-713",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-713-POS",
+      "negative_case": "CASE-TV2-CFG-713-NEG"
+    },
+    {
+      "id": "invariant.configuration.portable-artifacts-have-no-machine-identity",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-714",
+      "test_id": "TV2-CFG-714",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-714-POS",
+      "negative_case": "CASE-TV2-CFG-714-NEG"
+    },
+    {
+      "id": "invariant.configuration.no-generic-merge",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-715",
+      "test_id": "TV2-CFG-715",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-715-POS",
+      "negative_case": "CASE-TV2-CFG-715-NEG"
+    },
+    {
+      "id": "invariant.configuration.configuration-never-grants-authority",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-716",
+      "test_id": "TV2-CFG-716",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-716-POS",
+      "negative_case": "CASE-TV2-CFG-716-NEG"
+    },
+    {
+      "id": "invariant.configuration.empty-provider-omitted",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-717",
+      "test_id": "TV2-CFG-717",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-717-POS",
+      "negative_case": "CASE-TV2-CFG-717-NEG"
+    },
+    {
+      "id": "invariant.configuration.credential-placement",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-718",
+      "test_id": "TV2-CFG-718",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-718-POS",
+      "negative_case": "CASE-TV2-CFG-718-NEG"
+    },
+    {
+      "id": "invariant.configuration.merge-is-narrowing-only",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-719",
+      "test_id": "TV2-CFG-719",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-719-POS",
+      "negative_case": "CASE-TV2-CFG-719-NEG"
+    },
+    {
+      "id": "invariant.configuration.runtime-excludes-canonical-state",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-720",
+      "test_id": "TV2-CFG-720",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-720-POS",
+      "negative_case": "CASE-TV2-CFG-720-NEG"
+    },
+    {
+      "id": "invariant.configuration.upgrade-preserves-project-sidecars",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-CFG-721",
+      "test_id": "TV2-CFG-721",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-721-POS",
+      "negative_case": "CASE-TV2-CFG-721-NEG"
+    },
+    {
+      "id": "invariant.configuration.bindings-exactly-compatible",
+      "kind": "invariant",
+      "domain": "configuration",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-008",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INT-CFG-722",
+      "test_id": "TV2-CFG-722",
+      "implementation": "scripts/poppy_v2_validation/configuration.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-CFG-722-POS",
+      "negative_case": "CASE-TV2-CFG-722-NEG"
+    },
+    {
+      "id": "schema.observability.event-envelope",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-800",
+      "test_id": "TV2-OBS-800",
+      "implementation": "schemas/v2/observability/event-envelope.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-800-POS",
+      "negative_case": "CASE-TV2-OBS-800-NEG"
+    },
+    {
+      "id": "schema.observability.event-catalog",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-801",
+      "test_id": "TV2-OBS-801",
+      "implementation": "schemas/v2/observability/event-catalog.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-801-POS",
+      "negative_case": "CASE-TV2-OBS-801-NEG"
+    },
+    {
+      "id": "schema.observability.lifecycle-event",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-802",
+      "test_id": "TV2-OBS-802",
+      "implementation": "schemas/v2/observability/lifecycle-event.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-802-POS",
+      "negative_case": "CASE-TV2-OBS-802-NEG"
+    },
+    {
+      "id": "schema.observability.node-event",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-803",
+      "test_id": "TV2-OBS-803",
+      "implementation": "schemas/v2/observability/node-event.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-803-POS",
+      "negative_case": "CASE-TV2-OBS-803-NEG"
+    },
+    {
+      "id": "schema.observability.artifact-event",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-804",
+      "test_id": "TV2-OBS-804",
+      "implementation": "schemas/v2/observability/artifact-event.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-804-POS",
+      "negative_case": "CASE-TV2-OBS-804-NEG"
+    },
+    {
+      "id": "schema.observability.authority-event",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-805",
+      "test_id": "TV2-OBS-805",
+      "implementation": "schemas/v2/observability/authority-event.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-805-POS",
+      "negative_case": "CASE-TV2-OBS-805-NEG"
+    },
+    {
+      "id": "schema.observability.effect-verification-event",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-806",
+      "test_id": "TV2-OBS-806",
+      "implementation": "schemas/v2/observability/effect-verification-event.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-806-POS",
+      "negative_case": "CASE-TV2-OBS-806-NEG"
+    },
+    {
+      "id": "schema.observability.timing-point",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-807",
+      "test_id": "TV2-OBS-807",
+      "implementation": "schemas/v2/observability/timing-point.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-807-POS",
+      "negative_case": "CASE-TV2-OBS-807-NEG"
+    },
+    {
+      "id": "schema.observability.projection-cursor",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-808",
+      "test_id": "TV2-OBS-808",
+      "implementation": "schemas/v2/observability/projection-cursor.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-808-POS",
+      "negative_case": "CASE-TV2-OBS-808-NEG"
+    },
+    {
+      "id": "schema.observability.projection-assessment",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-809",
+      "test_id": "TV2-OBS-809",
+      "implementation": "schemas/v2/observability/projection-assessment.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-809-POS",
+      "negative_case": "CASE-TV2-OBS-809-NEG"
+    },
+    {
+      "id": "invariant.observability.missing-or-unusable-is-gray",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-810",
+      "test_id": "TV2-OBS-810",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-810-POS",
+      "negative_case": "CASE-TV2-OBS-810-NEG"
+    },
+    {
+      "id": "schema.observability.cockpit-read-model",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-811",
+      "test_id": "TV2-OBS-811",
+      "implementation": "schemas/v2/observability/cockpit-read-model.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-811-POS",
+      "negative_case": "CASE-TV2-OBS-811-NEG"
+    },
+    {
+      "id": "schema.observability.run-summary",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-812",
+      "test_id": "TV2-OBS-812",
+      "implementation": "schemas/v2/observability/run-summary.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-812-POS",
+      "negative_case": "CASE-TV2-OBS-812-NEG"
+    },
+    {
+      "id": "schema.observability.cockpit-compatibility",
+      "kind": "schema",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-OBS-813",
+      "test_id": "TV2-OBS-813",
+      "implementation": "schemas/v2/observability/cockpit-compatibility.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-813-POS",
+      "negative_case": "CASE-TV2-OBS-813-NEG"
+    },
+    {
+      "id": "invariant.observability.idempotent-append",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-814",
+      "test_id": "TV2-OBS-814",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-814-POS",
+      "negative_case": "CASE-TV2-OBS-814-NEG"
+    },
+    {
+      "id": "invariant.observability.sequence-and-digest-chain",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-815",
+      "test_id": "TV2-OBS-815",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-815-POS",
+      "negative_case": "CASE-TV2-OBS-815-NEG"
+    },
+    {
+      "id": "invariant.observability.typed-correlation",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-816",
+      "test_id": "TV2-OBS-816",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-816-POS",
+      "negative_case": "CASE-TV2-OBS-816-NEG"
+    },
+    {
+      "id": "invariant.observability.payload-privacy-safe",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-817",
+      "test_id": "TV2-OBS-817",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-817-POS",
+      "negative_case": "CASE-TV2-OBS-817-NEG"
+    },
+    {
+      "id": "invariant.observability.telemetry-never-grants-authority",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-818",
+      "test_id": "TV2-OBS-818",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-818-POS",
+      "negative_case": "CASE-TV2-OBS-818-NEG"
+    },
+    {
+      "id": "invariant.observability.projection-deterministic",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-819",
+      "test_id": "TV2-OBS-819",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-819-POS",
+      "negative_case": "CASE-TV2-OBS-819-NEG"
+    },
+    {
+      "id": "invariant.observability.success-never-inferred",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-820",
+      "test_id": "TV2-OBS-820",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-820-POS",
+      "negative_case": "CASE-TV2-OBS-820-NEG"
+    },
+    {
+      "id": "invariant.observability.timing-measured-only",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-OBS-821",
+      "test_id": "TV2-OBS-821",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-821-POS",
+      "negative_case": "CASE-TV2-OBS-821-NEG"
+    },
+    {
+      "id": "invariant.observability.cockpit-read-only",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INT-OBS-822",
+      "test_id": "TV2-OBS-822",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-822-POS",
+      "negative_case": "CASE-TV2-OBS-822-NEG"
+    },
+    {
+      "id": "invariant.observability.project-health-independent",
+      "kind": "invariant",
+      "domain": "observability",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-009",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INT-OBS-823",
+      "test_id": "TV2-OBS-823",
+      "implementation": "scripts/poppy_v2_validation/observability.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-OBS-823-POS",
+      "negative_case": "CASE-TV2-OBS-823-NEG"
+    },
+    {
+      "id": "schema.memory.note-metadata",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-900",
+      "test_id": "TV2-MEM-900",
+      "implementation": "schemas/v2/memory/note-metadata.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-900-POS",
+      "negative_case": "CASE-TV2-MEM-900-NEG"
+    },
+    {
+      "id": "schema.memory.record-kind-catalog",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-901",
+      "test_id": "TV2-MEM-901",
+      "implementation": "schemas/v2/memory/record-kind-catalog.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-901-POS",
+      "negative_case": "CASE-TV2-MEM-901-NEG"
+    },
+    {
+      "id": "schema.memory.orientation-receipt",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-902",
+      "test_id": "TV2-MEM-902",
+      "implementation": "schemas/v2/memory/orientation-receipt.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-902-POS",
+      "negative_case": "CASE-TV2-MEM-902-NEG"
+    },
+    {
+      "id": "schema.memory.orientation-item",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-903",
+      "test_id": "TV2-MEM-903",
+      "implementation": "schemas/v2/memory/orientation-item.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-903-POS",
+      "negative_case": "CASE-TV2-MEM-903-NEG"
+    },
+    {
+      "id": "schema.memory.durable-delta",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-904",
+      "test_id": "TV2-MEM-904",
+      "implementation": "schemas/v2/memory/durable-delta.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-904-POS",
+      "negative_case": "CASE-TV2-MEM-904-NEG"
+    },
+    {
+      "id": "schema.memory.write-set",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-905",
+      "test_id": "TV2-MEM-905",
+      "implementation": "schemas/v2/memory/write-set.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-905-POS",
+      "negative_case": "CASE-TV2-MEM-905-NEG"
+    },
+    {
+      "id": "invariant.memory.raw-receipts-create-only",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-906",
+      "test_id": "TV2-MEM-906",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-906-POS",
+      "negative_case": "CASE-TV2-MEM-906-NEG"
+    },
+    {
+      "id": "schema.memory.write-operation",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-907",
+      "test_id": "TV2-MEM-907",
+      "implementation": "schemas/v2/memory/write-operation.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-907-POS",
+      "negative_case": "CASE-TV2-MEM-907-NEG"
+    },
+    {
+      "id": "schema.memory.knowledge-log-entry",
+      "kind": "schema",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-MEM-908",
+      "test_id": "TV2-MEM-908",
+      "implementation": "schemas/v2/memory/knowledge-log-entry.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-908-POS",
+      "negative_case": "CASE-TV2-MEM-908-NEG"
+    },
+    {
+      "id": "invariant.memory.knowledge-log-append-only",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-909",
+      "test_id": "TV2-MEM-909",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-909-POS",
+      "negative_case": "CASE-TV2-MEM-909-NEG"
+    },
+    {
+      "id": "invariant.memory.durable-change-required",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-910",
+      "test_id": "TV2-MEM-910",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-910-POS",
+      "negative_case": "CASE-TV2-MEM-910-NEG"
+    },
+    {
+      "id": "invariant.memory.exact-write-authority-required",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-911",
+      "test_id": "TV2-MEM-911",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-911-POS",
+      "negative_case": "CASE-TV2-MEM-911-NEG"
+    },
+    {
+      "id": "invariant.memory.read-only-suppresses-write",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-912",
+      "test_id": "TV2-MEM-912",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-912-POS",
+      "negative_case": "CASE-TV2-MEM-912-NEG"
+    },
+    {
+      "id": "invariant.memory.replace-binds-before-digest",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-913",
+      "test_id": "TV2-MEM-913",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-913-POS",
+      "negative_case": "CASE-TV2-MEM-913-NEG"
+    },
+    {
+      "id": "invariant.memory.orientation-order-and-digest",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-914",
+      "test_id": "TV2-MEM-914",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-914-POS",
+      "negative_case": "CASE-TV2-MEM-914-NEG"
+    },
+    {
+      "id": "invariant.memory.current-and-dashboard-are-derived",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-915",
+      "test_id": "TV2-MEM-915",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-915-POS",
+      "negative_case": "CASE-TV2-MEM-915-NEG"
+    },
+    {
+      "id": "invariant.memory.runtime-state-and-backlog-prohibited",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-916",
+      "test_id": "TV2-MEM-916",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-916-POS",
+      "negative_case": "CASE-TV2-MEM-916-NEG"
+    },
+    {
+      "id": "invariant.memory.credentials-and-machine-paths-prohibited",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-917",
+      "test_id": "TV2-MEM-917",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-917-POS",
+      "negative_case": "CASE-TV2-MEM-917-NEG"
+    },
+    {
+      "id": "invariant.memory.project-owned-content-not-overwritten-by-upgrade",
+      "kind": "invariant",
+      "domain": "memory",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-010",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-INV-MEM-918",
+      "test_id": "TV2-MEM-918",
+      "implementation": "scripts/poppy_v2_validation/memory.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-MEM-918-POS",
+      "negative_case": "CASE-TV2-MEM-918-NEG"
+    },
+    {
+      "id": "schema.release.build-manifest",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-950",
+      "test_id": "TV2-REL-950",
+      "implementation": "schemas/v2/release/build-manifest.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-950-POS",
+      "negative_case": "CASE-TV2-REL-950-NEG"
+    },
+    {
+      "id": "schema.release.source-identity",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-951",
+      "test_id": "TV2-REL-951",
+      "implementation": "schemas/v2/release/source-identity.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-951-POS",
+      "negative_case": "CASE-TV2-REL-951-NEG"
+    },
+    {
+      "id": "schema.release.payload-entry",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-952",
+      "test_id": "TV2-REL-952",
+      "implementation": "schemas/v2/release/payload-entry.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-952-POS",
+      "negative_case": "CASE-TV2-REL-952-NEG"
+    },
+    {
+      "id": "schema.release.compatibility-matrix",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-953",
+      "test_id": "TV2-REL-953",
+      "implementation": "schemas/v2/release/compatibility-matrix.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-953-POS",
+      "negative_case": "CASE-TV2-REL-953-NEG"
+    },
+    {
+      "id": "schema.release.detached-release-record",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-954",
+      "test_id": "TV2-REL-954",
+      "implementation": "schemas/v2/release/detached-release-record.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-954-POS",
+      "negative_case": "CASE-TV2-REL-954-NEG"
+    },
+    {
+      "id": "schema.release.detached-signature",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-955",
+      "test_id": "TV2-REL-955",
+      "implementation": "schemas/v2/release/detached-signature.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-955-POS",
+      "negative_case": "CASE-TV2-REL-955-NEG"
+    },
+    {
+      "id": "schema.release.installation-receipt",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-956",
+      "test_id": "TV2-REL-956",
+      "implementation": "schemas/v2/release/installation-receipt.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-956-POS",
+      "negative_case": "CASE-TV2-REL-956-NEG"
+    },
+    {
+      "id": "schema.release.runtime-identity",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-957",
+      "test_id": "TV2-REL-957",
+      "implementation": "schemas/v2/release/runtime-identity.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-957-POS",
+      "negative_case": "CASE-TV2-REL-957-NEG"
+    },
+    {
+      "id": "schema.release.self-check-result",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-958",
+      "test_id": "TV2-REL-958",
+      "implementation": "schemas/v2/release/self-check-result.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-958-POS",
+      "negative_case": "CASE-TV2-REL-958-NEG"
+    },
+    {
+      "id": "schema.release.rollback-selection",
+      "kind": "schema",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-SHP-REL-959",
+      "test_id": "TV2-REL-959",
+      "implementation": "schemas/v2/release/rollback-selection.schema.json",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-959-POS",
+      "negative_case": "CASE-TV2-REL-959-NEG"
+    },
+    {
+      "id": "invariant.release.payload-path-canonical",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-960",
+      "test_id": "TV2-REL-960",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-960-POS",
+      "negative_case": "CASE-TV2-REL-960-NEG"
+    },
+    {
+      "id": "invariant.release.payload-merkle-root-valid",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-961",
+      "test_id": "TV2-REL-961",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-961-POS",
+      "negative_case": "CASE-TV2-REL-961-NEG"
+    },
+    {
+      "id": "invariant.release.archive-digest-detached",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-962",
+      "test_id": "TV2-REL-962",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-962-POS",
+      "negative_case": "CASE-TV2-REL-962-NEG"
+    },
+    {
+      "id": "invariant.release.packaged-file-hashes-valid",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-963",
+      "test_id": "TV2-REL-963",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-963-POS",
+      "negative_case": "CASE-TV2-REL-963-NEG"
+    },
+    {
+      "id": "invariant.release.source-clean-assertion-evidenced",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-964",
+      "test_id": "TV2-REL-964",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-964-POS",
+      "negative_case": "CASE-TV2-REL-964-NEG"
+    },
+    {
+      "id": "invariant.release.schema-and-registry-digests-exact",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-965",
+      "test_id": "TV2-REL-965",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-965-POS",
+      "negative_case": "CASE-TV2-REL-965-NEG"
+    },
+    {
+      "id": "invariant.release.compatibility-satisfied",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-966",
+      "test_id": "TV2-REL-966",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-966-POS",
+      "negative_case": "CASE-TV2-REL-966-NEG"
+    },
+    {
+      "id": "invariant.release.verify-before-and-after-extraction",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-967",
+      "test_id": "TV2-REL-967",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-967-POS",
+      "negative_case": "CASE-TV2-REL-967-NEG"
+    },
+    {
+      "id": "invariant.release.runtime-self-check-gates-affected-behavior",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-968",
+      "test_id": "TV2-REL-968",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-968-POS",
+      "negative_case": "CASE-TV2-REL-968-NEG"
+    },
+    {
+      "id": "invariant.release.rollback-selects-verified-digest",
+      "kind": "invariant",
+      "domain": "release",
+      "status": "ratified",
+      "owner_decision_id": "POP-V2-012",
+      "version": "1.0.0",
+      "compatibility": {
+        "minimum": "1.0.0",
+        "maximum_exclusive": "2.0.0"
+      },
+      "stable_code": "POP2-REL-REL-969",
+      "test_id": "TV2-REL-969",
+      "implementation": "scripts/poppy_v2_validation/release.py",
+      "implementation_status": "planned",
+      "positive_case": "CASE-TV2-REL-969-POS",
+      "negative_case": "CASE-TV2-REL-969-NEG"
+    }
+  ]
+}

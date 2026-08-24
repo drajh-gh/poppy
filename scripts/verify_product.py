@@ -92,6 +92,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--require-clean", action="store_true", help="Require a committed, clean candidate.")
     args = parser.parse_args(argv)
     checks: list[dict] = [
+        run([sys.executable, "scripts/test_v2_schemas.py"], "Poppy v2 schema-foundation suite"),
         run([sys.executable, "scripts/test_project_operations.py"], "Project Operations deterministic suite"),
         run([sys.executable, "scripts/test_owned_process_supervisor.py"], "owned-process supervisor suite"),
         run([sys.executable, "-m", "compileall", "-q", "scripts", "apps/obsidian-cockpit/bridge", "apps/obsidian-cockpit/scripts", "apps/obsidian-cockpit/tests"], "Python compilation"),

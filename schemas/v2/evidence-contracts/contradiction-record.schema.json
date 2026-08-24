@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/evidence/contradiction-record/v1",
+  "title": "Poppy v2 contradiction record",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.evidence.contradiction-record",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "contradiction_id", "claim_id", "left_observation_id", "right_observation_id", "opened_at", "status", "material"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/evidence/contradiction-record/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "contradiction_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "claim_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "left_observation_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "right_observation_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "opened_at": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/timestamp"},
+    "status": {"enum": ["open", "resolved"]},
+    "material": {"type": "boolean"},
+    "explanation": {"type": "string", "minLength": 1}
+  },
+  "unevaluatedProperties": false
+}
