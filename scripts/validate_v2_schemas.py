@@ -67,7 +67,7 @@ def resolve_fixture_ref(reference: str) -> Any:
     if reference.startswith("manifest-mutation:POP2-INV-GOV-"):
         return {"operation": reference}
     path_text, separator, fragment = reference.partition("#")
-    if path_text not in {"schema-instances.json", "authority-bundles.json", "effect-bundles.json", "evidence-bundles.json", "kernel-bundles.json"} or not separator or not fragment.startswith("/"):
+    if path_text not in {"schema-instances.json", "authority-bundles.json", "effect-bundles.json", "evidence-bundles.json", "kernel-bundles.json", "capability-bundles.json"} or not separator or not fragment.startswith("/"):
         raise ValueError(f"unsupported synthetic fixture reference: {reference}")
     value = read_json(FIXTURE_ROOT / path_text)
     for token in fragment[1:].split("/"):
