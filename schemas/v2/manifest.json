@@ -4,12 +4,12 @@
   "schema_set": {
     "id": "poppy.v2.foundation",
     "version": "0.1.0",
-    "digest": "sha256:75b85cdedfc16a35572ef87d993b0c5e99b922c65eb23f2f320543fd662df001",
+    "digest": "sha256:3225b05897de799e6431a1226302c795670799f8fcd38d88e00722e494dc7d79",
     "digest_basis": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)",
     "complete": false,
-    "implemented_entry_count": 25,
+    "implemented_entry_count": 47,
     "coverage_state": "gray",
-    "coverage_reason": "Foundation tranche implements governance plus evidence/Gray only; all other ratified entries remain planned."
+    "coverage_reason": "Implemented tranches cover governance, authority/effect, and evidence/Gray; all other ratified entries remain planned."
   },
   "accepted_decisions": [
     "POP-V2-001",
@@ -472,7 +472,7 @@
       "stable_code": "POP2-SHP-AUT-100",
       "test_id": "TV2-AUT-100",
       "implementation": "schemas/v2/authority/source-reference.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-100-POS",
       "negative_case": "CASE-TV2-AUT-100-NEG"
     },
@@ -490,7 +490,7 @@
       "stable_code": "POP2-SHP-AUT-101",
       "test_id": "TV2-AUT-101",
       "implementation": "schemas/v2/authority/source-kind-registry.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-101-POS",
       "negative_case": "CASE-TV2-AUT-101-NEG"
     },
@@ -508,7 +508,7 @@
       "stable_code": "POP2-SHP-AUT-102",
       "test_id": "TV2-AUT-102",
       "implementation": "schemas/v2/authority/claim-scope.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-102-POS",
       "negative_case": "CASE-TV2-AUT-102-NEG"
     },
@@ -526,7 +526,7 @@
       "stable_code": "POP2-SHP-AUT-103",
       "test_id": "TV2-AUT-103",
       "implementation": "schemas/v2/authority/authority-query.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-103-POS",
       "negative_case": "CASE-TV2-AUT-103-NEG"
     },
@@ -544,7 +544,7 @@
       "stable_code": "POP2-SHP-AUT-104",
       "test_id": "TV2-AUT-104",
       "implementation": "schemas/v2/authority/candidate-authority.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-104-POS",
       "negative_case": "CASE-TV2-AUT-104-NEG"
     },
@@ -562,7 +562,7 @@
       "stable_code": "POP2-SHP-AUT-105",
       "test_id": "TV2-AUT-105",
       "implementation": "schemas/v2/authority/authority-resolution.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-105-POS",
       "negative_case": "CASE-TV2-AUT-105-NEG"
     },
@@ -580,7 +580,7 @@
       "stable_code": "POP2-INV-AUT-106",
       "test_id": "TV2-AUT-106",
       "implementation": "scripts/poppy_v2_validation/authority.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-106-POS",
       "negative_case": "CASE-TV2-AUT-106-NEG"
     },
@@ -598,7 +598,7 @@
       "stable_code": "POP2-INV-AUT-107",
       "test_id": "TV2-AUT-107",
       "implementation": "scripts/poppy_v2_validation/authority.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-107-POS",
       "negative_case": "CASE-TV2-AUT-107-NEG"
     },
@@ -616,7 +616,7 @@
       "stable_code": "POP2-INV-AUT-108",
       "test_id": "TV2-AUT-108",
       "implementation": "scripts/poppy_v2_validation/authority.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-108-POS",
       "negative_case": "CASE-TV2-AUT-108-NEG"
     },
@@ -634,7 +634,7 @@
       "stable_code": "POP2-INV-AUT-109",
       "test_id": "TV2-AUT-109",
       "implementation": "scripts/poppy_v2_validation/authority.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-109-POS",
       "negative_case": "CASE-TV2-AUT-109-NEG"
     },
@@ -652,7 +652,7 @@
       "stable_code": "POP2-INV-AUT-110",
       "test_id": "TV2-AUT-110",
       "implementation": "scripts/poppy_v2_validation/authority.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-110-POS",
       "negative_case": "CASE-TV2-AUT-110-NEG"
     },
@@ -670,7 +670,7 @@
       "stable_code": "POP2-INV-AUT-111",
       "test_id": "TV2-AUT-111",
       "implementation": "scripts/poppy_v2_validation/authority.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-AUT-111-POS",
       "negative_case": "CASE-TV2-AUT-111-NEG"
     },
@@ -688,7 +688,7 @@
       "stable_code": "POP2-SHP-EFF-200",
       "test_id": "TV2-EFF-200",
       "implementation": "schemas/v2/effect/proposal.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-200-POS",
       "negative_case": "CASE-TV2-EFF-200-NEG"
     },
@@ -706,7 +706,7 @@
       "stable_code": "POP2-SHP-EFF-201",
       "test_id": "TV2-EFF-201",
       "implementation": "schemas/v2/effect/target.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-201-POS",
       "negative_case": "CASE-TV2-EFF-201-NEG"
     },
@@ -724,7 +724,7 @@
       "stable_code": "POP2-SHP-EFF-202",
       "test_id": "TV2-EFF-202",
       "implementation": "schemas/v2/effect/rollback-plan.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-202-POS",
       "negative_case": "CASE-TV2-EFF-202-NEG"
     },
@@ -742,7 +742,7 @@
       "stable_code": "POP2-SHP-EFF-203",
       "test_id": "TV2-EFF-203",
       "implementation": "schemas/v2/effect/verification-plan.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-203-POS",
       "negative_case": "CASE-TV2-EFF-203-NEG"
     },
@@ -760,7 +760,7 @@
       "stable_code": "POP2-SHP-EFF-204",
       "test_id": "TV2-EFF-204",
       "implementation": "schemas/v2/effect/execution-receipt.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-204-POS",
       "negative_case": "CASE-TV2-EFF-204-NEG"
     },
@@ -778,7 +778,7 @@
       "stable_code": "POP2-INV-EFF-205",
       "test_id": "TV2-EFF-205",
       "implementation": "scripts/poppy_v2_validation/effect.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-205-POS",
       "negative_case": "CASE-TV2-EFF-205-NEG"
     },
@@ -796,7 +796,7 @@
       "stable_code": "POP2-INV-EFF-206",
       "test_id": "TV2-EFF-206",
       "implementation": "scripts/poppy_v2_validation/effect.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-206-POS",
       "negative_case": "CASE-TV2-EFF-206-NEG"
     },
@@ -814,7 +814,7 @@
       "stable_code": "POP2-INV-EFF-207",
       "test_id": "TV2-EFF-207",
       "implementation": "scripts/poppy_v2_validation/effect.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-207-POS",
       "negative_case": "CASE-TV2-EFF-207-NEG"
     },
@@ -832,7 +832,7 @@
       "stable_code": "POP2-INV-EFF-208",
       "test_id": "TV2-EFF-208",
       "implementation": "scripts/poppy_v2_validation/effect.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-208-POS",
       "negative_case": "CASE-TV2-EFF-208-NEG"
     },
@@ -850,7 +850,7 @@
       "stable_code": "POP2-INV-EFF-209",
       "test_id": "TV2-EFF-209",
       "implementation": "scripts/poppy_v2_validation/effect.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-EFF-209-POS",
       "negative_case": "CASE-TV2-EFF-209-NEG"
     },

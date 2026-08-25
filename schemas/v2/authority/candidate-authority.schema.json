@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/authority/candidate-authority/v1",
+  "title": "Poppy v2 candidate authority evaluation",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.authority.candidate-authority",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "candidate_id", "source_ref_id", "scope_digest", "subject_id", "subject_digest", "data_class", "plan_revision", "principal_kind", "principal_ref", "authority_kind", "applicability", "specificity", "freshness", "safety", "position_digest", "authority_ref", "task_scope_ref"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/authority/candidate-authority/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "candidate_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "source_ref_id": {"type": "string", "minLength": 1},
+    "scope_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "subject_id": {"type": "string", "minLength": 1},
+    "subject_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "data_class": {"enum": ["external_constraint", "instruction", "decision", "configuration", "preference", "evidence", "derived_state", "telemetry", "enforcement", "documentation", "artifact"]},
+    "plan_revision": {"type": "integer", "minimum": 1},
+    "principal_kind": {"enum": ["platform", "human", "internal_worker", "user_owned_task", "system"]},
+    "principal_ref": {"type": "string", "minLength": 1},
+    "authority_kind": {"enum": ["grant", "constrain", "evidence", "none"]},
+    "applicability": {"enum": ["applicable", "inapplicable", "gray"]},
+    "specificity": {"enum": ["exact_scope", "data_class_scope", "broader_scope"]},
+    "freshness": {"enum": ["current", "expired", "superseded", "gray"]},
+    "safety": {"enum": ["allows", "narrows", "denies", "not_applicable"]},
+    "position_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "authority_ref": {"type": ["string", "null"]},
+    "task_scope_ref": {"type": ["string", "null"]}
+  },
+  "unevaluatedProperties": false
+}

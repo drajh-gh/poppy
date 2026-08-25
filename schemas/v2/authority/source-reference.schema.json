@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/authority/source-reference/v1",
+  "title": "Poppy v2 classified source reference",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.authority.source-reference",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "source_ref_id", "source_kind_id", "registry_digest", "data_class", "owner_kind", "owner_ref", "authority_semantics", "scope_digest", "observed_at", "fresh_until", "superseded_by"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/authority/source-reference/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "source_ref_id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"},
+    "source_kind_id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"},
+    "registry_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "data_class": {"enum": ["external_constraint", "instruction", "decision", "configuration", "preference", "evidence", "derived_state", "telemetry", "enforcement", "documentation", "artifact"]},
+    "owner_kind": {"enum": ["platform", "human", "operator", "engineering", "provider", "kernel", "runtime", "release"]},
+    "owner_ref": {"type": "string", "minLength": 1},
+    "authority_semantics": {"enum": ["grant", "constrain", "reference_only", "none"]},
+    "scope_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "observed_at": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/timestamp"},
+    "fresh_until": {"type": ["string", "null"], "format": "date-time"},
+    "superseded_by": {"type": ["string", "null"]}
+  },
+  "unevaluatedProperties": false
+}

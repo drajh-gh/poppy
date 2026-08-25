@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/effect/target/v1",
+  "title": "Poppy v2 exact effect target",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.effect.target",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "adapter_id", "target_kind", "locator", "target_digest"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/effect/target/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "adapter_id": {"type": "string", "pattern": "^synthetic[.-][a-z0-9.-]+$"},
+    "target_kind": {"enum": ["artifact", "record", "configuration", "message", "deployment", "computer_surface"]},
+    "locator": {"type": "string", "pattern": "^synthetic:[^\\u0000]+$"},
+    "target_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"}
+  },
+  "unevaluatedProperties": false
+}

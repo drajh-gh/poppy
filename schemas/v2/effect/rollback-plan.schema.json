@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/effect/rollback-plan/v1",
+  "title": "Poppy v2 rollback or compensation plan",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.effect.rollback-plan",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "rollback_plan_id", "kind", "before_digest", "steps", "plan_digest"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/effect/rollback-plan/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "rollback_plan_id": {"type": "string", "pattern": "^rollback[.-][a-z0-9.-]+$"},
+    "kind": {"enum": ["none_required", "restore_before_digest", "compensate", "manual"]},
+    "before_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+    "steps": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "plan_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"}
+  },
+  "unevaluatedProperties": false
+}

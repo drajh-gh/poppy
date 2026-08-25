@@ -450,6 +450,138 @@
         "POP2-INV-EVD-311"
       ],
       "fixture_ref": "evidence-bundles.json#/negative_by_code/POP2-INV-EVD-311"
+    },
+    {
+      "id": "CASE-TV2-AUT-100-POS", "entry_id": "schema.authority.source-reference", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.authority.source-reference/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-100-NEG", "entry_id": "schema.authority.source-reference", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-SHP-AUT-100"], "fixture_ref": "schema-instances.json#/schema.authority.source-reference/negative"
+    },
+    {
+      "id": "CASE-TV2-AUT-101-POS", "entry_id": "schema.authority.source-kind-registry", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.authority.source-kind-registry/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-101-NEG", "entry_id": "schema.authority.source-kind-registry", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-SHP-AUT-101"], "fixture_ref": "schema-instances.json#/schema.authority.source-kind-registry/negative"
+    },
+    {
+      "id": "CASE-TV2-AUT-102-POS", "entry_id": "schema.authority.claim-scope", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.authority.claim-scope/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-102-NEG", "entry_id": "schema.authority.claim-scope", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-SHP-AUT-102"], "fixture_ref": "schema-instances.json#/schema.authority.claim-scope/negative"
+    },
+    {
+      "id": "CASE-TV2-AUT-103-POS", "entry_id": "schema.authority.authority-query", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.authority.authority-query/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-103-NEG", "entry_id": "schema.authority.authority-query", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-SHP-AUT-103"], "fixture_ref": "schema-instances.json#/schema.authority.authority-query/negative"
+    },
+    {
+      "id": "CASE-TV2-AUT-104-POS", "entry_id": "schema.authority.candidate-authority", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.authority.candidate-authority/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-104-NEG", "entry_id": "schema.authority.candidate-authority", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-SHP-AUT-104"], "fixture_ref": "schema-instances.json#/schema.authority.candidate-authority/negative"
+    },
+    {
+      "id": "CASE-TV2-AUT-105-POS", "entry_id": "schema.authority.authority-resolution", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.authority.authority-resolution/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-105-NEG", "entry_id": "schema.authority.authority-resolution", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-SHP-AUT-105"], "fixture_ref": "schema-instances.json#/schema.authority.authority-resolution/negative"
+    },
+    {
+      "id": "CASE-TV2-AUT-106-POS", "entry_id": "invariant.authority.source-classification-registry-owned", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "authority-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-106-NEG", "entry_id": "invariant.authority.source-classification-registry-owned", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-INV-AUT-106"], "fixture_ref": "authority-bundles.json#/negative_by_code/POP2-INV-AUT-106"
+    },
+    {
+      "id": "CASE-TV2-AUT-107-POS", "entry_id": "invariant.authority.no-precedence-number-or-last-wins", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "authority-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-107-NEG", "entry_id": "invariant.authority.no-precedence-number-or-last-wins", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-INV-AUT-107"], "fixture_ref": "authority-bundles.json#/negative_by_code/POP2-INV-AUT-107"
+    },
+    {
+      "id": "CASE-TV2-AUT-108-POS", "entry_id": "invariant.authority.resolution-checks-ordered", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "authority-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-108-NEG", "entry_id": "invariant.authority.resolution-checks-ordered", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-INV-AUT-108"], "fixture_ref": "authority-bundles.json#/negative_by_code/POP2-INV-AUT-108"
+    },
+    {
+      "id": "CASE-TV2-AUT-109-POS", "entry_id": "invariant.authority.resolution-exactly-bound", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "authority-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-109-NEG", "entry_id": "invariant.authority.resolution-exactly-bound", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-INV-AUT-109"], "fixture_ref": "authority-bundles.json#/negative_by_code/POP2-INV-AUT-109"
+    },
+    {
+      "id": "CASE-TV2-AUT-110-POS", "entry_id": "invariant.authority.conflict-never-inferred-away", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "authority-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-110-NEG", "entry_id": "invariant.authority.conflict-never-inferred-away", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-INV-AUT-110"], "fixture_ref": "authority-bundles.json#/negative_by_code/POP2-INV-AUT-110"
+    },
+    {
+      "id": "CASE-TV2-AUT-111-POS", "entry_id": "invariant.authority.approval-is-not-boolean", "owner_decision_id": "POP-V2-002", "polarity": "positive", "expected_codes": [], "fixture_ref": "authority-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-AUT-111-NEG", "entry_id": "invariant.authority.approval-is-not-boolean", "owner_decision_id": "POP-V2-002", "polarity": "negative", "expected_codes": ["POP2-INV-AUT-111"], "fixture_ref": "authority-bundles.json#/negative_by_code/POP2-INV-AUT-111"
+    },
+    {
+      "id": "CASE-TV2-EFF-200-POS", "entry_id": "schema.effect.proposal", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.effect.proposal/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-200-NEG", "entry_id": "schema.effect.proposal", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-SHP-EFF-200"], "fixture_ref": "schema-instances.json#/schema.effect.proposal/negative"
+    },
+    {
+      "id": "CASE-TV2-EFF-201-POS", "entry_id": "schema.effect.target", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.effect.target/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-201-NEG", "entry_id": "schema.effect.target", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-SHP-EFF-201"], "fixture_ref": "schema-instances.json#/schema.effect.target/negative"
+    },
+    {
+      "id": "CASE-TV2-EFF-202-POS", "entry_id": "schema.effect.rollback-plan", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.effect.rollback-plan/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-202-NEG", "entry_id": "schema.effect.rollback-plan", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-SHP-EFF-202"], "fixture_ref": "schema-instances.json#/schema.effect.rollback-plan/negative"
+    },
+    {
+      "id": "CASE-TV2-EFF-203-POS", "entry_id": "schema.effect.verification-plan", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.effect.verification-plan/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-203-NEG", "entry_id": "schema.effect.verification-plan", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-SHP-EFF-203"], "fixture_ref": "schema-instances.json#/schema.effect.verification-plan/negative"
+    },
+    {
+      "id": "CASE-TV2-EFF-204-POS", "entry_id": "schema.effect.execution-receipt", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "schema-instances.json#/schema.effect.execution-receipt/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-204-NEG", "entry_id": "schema.effect.execution-receipt", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-SHP-EFF-204"], "fixture_ref": "schema-instances.json#/schema.effect.execution-receipt/negative"
+    },
+    {
+      "id": "CASE-TV2-EFF-205-POS", "entry_id": "invariant.effect.proposal-exactly-bound", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "effect-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-205-NEG", "entry_id": "invariant.effect.proposal-exactly-bound", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-INV-EFF-205"], "fixture_ref": "effect-bundles.json#/negative_by_code/POP2-INV-EFF-205"
+    },
+    {
+      "id": "CASE-TV2-EFF-206-POS", "entry_id": "invariant.effect.change-invalidates-authority", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "effect-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-206-NEG", "entry_id": "invariant.effect.change-invalidates-authority", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-INV-EFF-206"], "fixture_ref": "effect-bundles.json#/negative_by_code/POP2-INV-EFF-206"
+    },
+    {
+      "id": "CASE-TV2-EFF-207-POS", "entry_id": "invariant.effect.high-risk-approval-distinct", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "effect-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-207-NEG", "entry_id": "invariant.effect.high-risk-approval-distinct", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-INV-EFF-207"], "fixture_ref": "effect-bundles.json#/negative_by_code/POP2-INV-EFF-207"
+    },
+    {
+      "id": "CASE-TV2-EFF-208-POS", "entry_id": "invariant.effect.attempt-is-not-verification", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "effect-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-208-NEG", "entry_id": "invariant.effect.attempt-is-not-verification", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-INV-EFF-208"], "fixture_ref": "effect-bundles.json#/negative_by_code/POP2-INV-EFF-208"
+    },
+    {
+      "id": "CASE-TV2-EFF-209-POS", "entry_id": "invariant.effect.receipt-follows-authorized-attempt", "owner_decision_id": "POP-V2-006", "polarity": "positive", "expected_codes": [], "fixture_ref": "effect-bundles.json#/positive"
+    },
+    {
+      "id": "CASE-TV2-EFF-209-NEG", "entry_id": "invariant.effect.receipt-follows-authorized-attempt", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-INV-EFF-209"], "fixture_ref": "effect-bundles.json#/negative_by_code/POP2-INV-EFF-209"
     }
   ]
 }
