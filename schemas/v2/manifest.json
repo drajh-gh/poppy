@@ -4,7 +4,7 @@
   "schema_set": {
     "id": "poppy.v2.foundation",
     "version": "0.1.0",
-    "digest": "sha256:72e2f0fcdaee425727519152b93247ce5533cfd3c9e19da76affc39f645e6d52",
+    "digest": "sha256:f8ff2f6ac59b8d455b8cb70622ece8ee585f6c6588f89fa2ffaf959288c7355c",
     "digest_basis": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)",
     "complete": false,
     "implemented_entry_count": 76,
