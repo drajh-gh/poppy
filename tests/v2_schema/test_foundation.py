@@ -13,14 +13,18 @@ sys.path.insert(0, str(SCRIPTS))
 
 from poppy_v2_validation import (  # noqa: E402
     authority_resolution_digest,
+    capability_binding_digest,
+    capability_contract_digest,
     candidate_set_digest,
     canonical_digest,
     effect_authority_subject_digest,
     effect_binding_digest,
     outcome_record_digest,
     receipt_digest,
+    registry_snapshot_digest,
     transition_record_digest,
     validate_authority_invariants,
+    validate_capability_invariants,
     validate_case_catalog,
     validate_effect_invariants,
     validate_evidence_invariants,
@@ -58,14 +62,16 @@ class FoundationSchemaTests(unittest.TestCase):
         cls.evidence = read_json(FIXTURES / "evidence-bundles.json")
         cls.kernel = read_json(FIXTURES / "kernel-bundles.json")
         cls.kernel_anchors = read_json(FIXTURES / "kernel-trust-anchors.json")["kernel_bundle"]
+        cls.capability = read_json(FIXTURES / "capability-bundles.json")
+        cls.capability_anchors = read_json(FIXTURES / "capability-trust-anchors.json")["capability_bundle"]
 
     def test_repository_contract(self) -> None:
         result = validate_repository()
         self.assertEqual(result["status"], "pass", result["errors"])
         self.assertEqual(result["manifest_entries"], 195)
-        self.assertEqual(result["implemented_entries"], 60)
-        self.assertEqual(result["schemas"], 28)
-        self.assertEqual(result["synthetic_cases"], 120)
+        self.assertEqual(result["implemented_entries"], 76)
+        self.assertEqual(result["schemas"], 35)
+        self.assertEqual(result["synthetic_cases"], 152)
 
     def test_every_implemented_schema_has_executable_positive_and_negative_case(self) -> None:
         implemented = [entry for entry in self.manifest["entries"] if entry["kind"] == "schema" and entry["implementation_status"] == "implemented"]
@@ -83,7 +89,7 @@ class FoundationSchemaTests(unittest.TestCase):
                     negative = copy.deepcopy(self.manifest)
                     negative["accepted_decisions"] = negative["accepted_decisions"][:-1]
                     negative_findings = self.store.validate_artifact(negative, schema, entry, locator=entry["negative_case"])
-                elif entry["domain"] == "kernel":
+                elif entry["domain"] in {"kernel", "capability"}:
                     positive_case = next(case for case in self.cases["cases"] if case["id"] == entry["positive_case"])
                     negative_case_fixture = next(case for case in self.cases["cases"] if case["id"] == entry["negative_case"])
                     positive = resolve_fixture_ref(positive_case["fixture_ref"])
@@ -234,6 +240,143 @@ class FoundationSchemaTests(unittest.TestCase):
             with self.subTest(code=expected):
                 bundle = self._mutated_kernel_bundle(fixture["mutation"])
                 self.assertEqual({finding["code"] for finding in validate_kernel_invariants(bundle, self.kernel_anchors)}, {expected})
+
+    def test_capability_invariant_cases(self) -> None:
+        base = self.capability["positive"]
+        self.assertEqual(validate_capability_invariants(base, self.capability_anchors), [])
+        contract = base["registry"]["contracts"][0]
+        self.assertEqual(registry_snapshot_digest(base["registry"]), base["registry"]["registry_digest"])
+        self.assertEqual(capability_contract_digest(contract), contract["contract_digest"])
+        self.assertEqual(capability_binding_digest(base["run_binding"]), base["run_binding"]["binding_digest"])
+        for expected, fixture in self.capability["negative_by_code"].items():
+            with self.subTest(code=expected):
+                bundle = self._mutated_capability_bundle(fixture["mutation"])
+                self.assertIn(expected, {finding["code"] for finding in validate_capability_invariants(bundle, self.capability_anchors)})
+
+    def test_capability_registry_is_catalog_not_authority_or_runtime_state(self) -> None:
+        registry = self.capability["positive"]["registry"]
+        serialized = json.dumps(registry, sort_keys=True)
+        for forbidden in ("run_id", "project_id", "task_prompt", "runtime_attempt", "provider_account_id", "machine_path"):
+            self.assertNotIn(forbidden, serialized)
+        self.assertIs(registry["executor_role_catalog"]["registration_grants_authority"], False)
+        self.assertTrue(all(role["authority_capability"] is False for role in registry["executor_role_catalog"]["roles"]))
+        authority_requirements = registry["contracts"][0]["authority_requirements"]
+        self.assertTrue(all(item["registration_grants_authority"] is False for item in authority_requirements))
+
+    def test_capability_trusted_anchors_fail_closed_and_reject_coordinated_rewrites(self) -> None:
+        base = self.capability["positive"]
+        self.assertEqual(
+            {item["code"] for item in validate_capability_invariants(base, {})},
+            {
+                "POP2-INV-CAP-507", "POP2-INV-CAP-508", "POP2-INV-CAP-509",
+                "POP2-INV-CAP-510", "POP2-INV-CAP-511", "POP2-INV-CAP-512",
+                "POP2-INV-CAP-513", "POP2-INT-CAP-514", "POP2-INT-CAP-515",
+            },
+        )
+        with self.assertRaises(TypeError):
+            validate_capability_invariants(base)  # type: ignore[call-arg]
+
+        corruptions = (
+            ("registry_snapshot_digest", "POP2-INV-CAP-507"),
+            ("contract_record_digests", "POP2-INV-CAP-508"),
+            ("schema_bindings", "POP2-INV-CAP-509"),
+            ("claim_state_digests", "POP2-INV-CAP-511"),
+            ("role_catalog_digest", "POP2-INV-CAP-512"),
+            ("run_binding_digest", "POP2-INV-CAP-513"),
+            ("implementation_identity_digest", "POP2-INT-CAP-515"),
+        )
+        for field, expected in corruptions:
+            with self.subTest(anchor=field):
+                anchors = copy.deepcopy(self.capability_anchors)
+                value = anchors["capability"][field]
+                if isinstance(value, dict):
+                    key = next(iter(value))
+                    value[key] = "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+                else:
+                    anchors["capability"][field] = "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+                self.assertIn(expected, {item["code"] for item in validate_capability_invariants(base, anchors)})
+
+        for mutation, expected in (
+            ("coordinated-registry-rewrite", "POP2-INV-CAP-507"),
+            ("coordinated-contract-rewrite", "POP2-INV-CAP-508"),
+            ("coordinated-schema-reference-rewrite", "POP2-INV-CAP-509"),
+            ("claim-becomes-gray", "POP2-INV-CAP-511"),
+            ("substitute-implementation", "POP2-INT-CAP-515"),
+        ):
+            with self.subTest(bypass=mutation):
+                candidate = self._mutated_capability_bundle(mutation)
+                self.assertIn(expected, {item["code"] for item in validate_capability_invariants(candidate, self.capability_anchors)})
+
+    def test_capability_runtime_claim_and_authority_identity_sets_are_exact(self) -> None:
+        phantom_claim = copy.deepcopy(self.capability["positive"])
+        phantom_claim["claim_states"].append({
+            "requirement_id": "claim-requirement.synthetic.phantom",
+            "claim_class": "synthetic.phantom.ready",
+            "claim_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8af3",
+            "state": "supported",
+            "revision_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        })
+        self.assertEqual(
+            {item["code"] for item in validate_capability_invariants(phantom_claim, self.capability_anchors)},
+            {"POP2-INV-CAP-511"},
+        )
+
+        phantom_authority = copy.deepcopy(self.capability["positive"])
+        phantom_authority["authority_resolutions"].append({
+            "requirement_id": "authority-requirement.synthetic.phantom",
+            "resolution_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8af4",
+            "outcome": "authorized",
+            "resolution_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        })
+        self.assertEqual(
+            {item["code"] for item in validate_capability_invariants(phantom_authority, self.capability_anchors)},
+            {"POP2-INV-CAP-511"},
+        )
+
+        for field in ("claim_states", "authority_resolutions"):
+            duplicate = copy.deepcopy(self.capability["positive"])
+            duplicate[field].append(copy.deepcopy(duplicate[field][0]))
+            with self.subTest(duplicate=field):
+                self.assertEqual(
+                    {item["code"] for item in validate_capability_invariants(duplicate, self.capability_anchors)},
+                    {"POP2-INV-CAP-511"},
+                )
+
+    def test_capability_semver_20_precedence_and_half_open_endpoints(self) -> None:
+        below_minimum = copy.deepcopy(self.capability["positive"])
+        below_minimum["run_context"]["kernel_version"] = "1.0.0-alpha"
+        self.assertEqual(
+            {item["code"] for item in validate_capability_invariants(below_minimum, self.capability_anchors)},
+            {"POP2-INT-CAP-514"},
+        )
+
+        below_exclusive_maximum = copy.deepcopy(self.capability["positive"])
+        below_exclusive_maximum["run_context"]["kernel_version"] = "2.0.0-alpha"
+        self.assertEqual(validate_capability_invariants(below_exclusive_maximum, self.capability_anchors), [])
+
+        numeric_below_nonnumeric, numeric_anchors = self._capability_with_compatibility(
+            kernel_minimum="1.0.0-alpha.beta",
+            kernel_maximum="2.0.0",
+            kernel_version="1.0.0-alpha.1",
+        )
+        self.assertEqual(
+            {item["code"] for item in validate_capability_invariants(numeric_below_nonnumeric, numeric_anchors)},
+            {"POP2-INT-CAP-514"},
+        )
+
+        nonnumeric_above_numeric, nonnumeric_anchors = self._capability_with_compatibility(
+            kernel_minimum="1.0.0-alpha.1",
+            kernel_maximum="2.0.0",
+            kernel_version="1.0.0-alpha.beta",
+        )
+        self.assertEqual(validate_capability_invariants(nonnumeric_above_numeric, nonnumeric_anchors), [])
+
+        build_metadata = copy.deepcopy(self.capability["positive"])
+        build_metadata["run_context"].update({
+            "kernel_version": "1.4.0+synthetic.7",
+            "run_contract_version": "1.2.0+synthetic.99",
+        })
+        self.assertEqual(validate_capability_invariants(build_metadata, self.capability_anchors), [])
 
     def test_kernel_contract_preserves_ratified_state_and_gray_semantics(self) -> None:
         value = self.kernel["positive"]
@@ -1066,6 +1209,9 @@ class FoundationSchemaTests(unittest.TestCase):
                 elif entry["domain"] == "kernel":
                     bundle = copy.deepcopy(fixture) if case["polarity"] == "positive" else self._mutated_kernel_bundle(fixture["mutation"])
                     findings = validate_kernel_invariants(bundle, self.kernel_anchors)
+                elif entry["domain"] == "capability":
+                    bundle = copy.deepcopy(fixture) if case["polarity"] == "positive" else self._mutated_capability_bundle(fixture["mutation"])
+                    findings = validate_capability_invariants(bundle, self.capability_anchors)
                 else:
                     findings = self._governance_case_findings(entry["stable_code"], case["polarity"])
                 actual_codes = {finding["code"] for finding in findings}
@@ -1075,6 +1221,79 @@ class FoundationSchemaTests(unittest.TestCase):
                     self.assertEqual(actual_codes, set(case["expected_codes"]), findings)
                 else:
                     self.assertIn(entry["stable_code"], actual_codes, findings)
+
+    def _mutated_capability_bundle(self, mutation: str) -> dict:
+        value = copy.deepcopy(self.capability["positive"])
+        registry = value["registry"]
+        contract = registry["contracts"][0]
+        if mutation == "coordinated-registry-rewrite":
+            registry["created_at"] = "2026-08-24T12:30:01Z"
+            registry["registry_digest"] = registry_snapshot_digest(registry)
+        elif mutation == "coordinated-contract-rewrite":
+            contract["published_at"] = "2026-08-24T12:29:01Z"
+            contract["contract_digest"] = capability_contract_digest(contract)
+            registry["registry_digest"] = registry_snapshot_digest(registry)
+        elif mutation == "coordinated-schema-reference-rewrite":
+            contract["schema_bindings"]["input"]["schema_digest"] = "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+            contract["contract_digest"] = capability_contract_digest(contract)
+            registry["registry_digest"] = registry_snapshot_digest(registry)
+        elif mutation == "exceed-effect-ceiling":
+            value["requested_effect_classes"] = ["deployment"]
+        elif mutation == "claim-becomes-gray":
+            value["claim_states"][0]["state"] = "gray"
+        elif mutation == "use-unpermitted-role":
+            value["executor"]["role_id"] = "executor.user.task"
+        elif mutation == "change-run-binding":
+            value["run_binding"]["bound_at"] = "2026-08-24T12:31:01Z"
+            value["run_binding"]["binding_digest"] = capability_binding_digest(value["run_binding"])
+        elif mutation == "kernel-outside-half-open-range":
+            value["run_context"]["kernel_version"] = "2.0.0"
+        elif mutation == "substitute-implementation":
+            value["executor"].update({
+                "implementation_uri": "poppy://implementation/synthetic/substitute/v1",
+                "implementation_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+            })
+        else:
+            self.fail(f"unknown capability mutation: {mutation}")
+        return value
+
+    def _capability_with_compatibility(
+        self,
+        *,
+        kernel_minimum: str,
+        kernel_maximum: str,
+        kernel_version: str,
+    ) -> tuple[dict, dict]:
+        value = copy.deepcopy(self.capability["positive"])
+        anchors = copy.deepcopy(self.capability_anchors)
+        registry = value["registry"]
+        contract = registry["contracts"][0]
+        compatibility = contract["compatibility"]
+        compatibility.update({
+            "kernel_minimum": kernel_minimum,
+            "kernel_maximum_exclusive": kernel_maximum,
+        })
+        compatibility["declaration_digest"] = canonical_digest({
+            key: item for key, item in compatibility.items() if key != "declaration_digest"
+        })
+        contract["contract_digest"] = capability_contract_digest(contract)
+        registry["registry_digest"] = registry_snapshot_digest(registry)
+        binding = value["run_binding"]
+        binding.update({
+            "registry_digest": registry["registry_digest"],
+            "contract_digest": contract["contract_digest"],
+        })
+        binding["binding_digest"] = capability_binding_digest(binding)
+        value["run_context"]["kernel_version"] = kernel_version
+
+        capability_anchor = anchors["capability"]
+        capability_anchor["registry_identity"]["registry_digest"] = registry["registry_digest"]
+        capability_anchor["registry_snapshot_digest"] = canonical_digest(registry)
+        capability_anchor["contract_record_digests"] = {
+            f"{contract['contract_id']}@{contract['contract_version']}": canonical_digest(contract)
+        }
+        capability_anchor["run_binding_digest"] = canonical_digest(binding)
+        return value, anchors
 
     def _mutated_authority_bundle(self, mutation: str) -> dict:
         value = copy.deepcopy(self.authority["positive"])

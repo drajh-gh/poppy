@@ -1,0 +1,31 @@
+{
+  "capability_bundle": {
+    "capability": {
+      "registry_identity": {
+        "registry_id": "poppy.synthetic.capabilities",
+        "registry_version": "1.0.0",
+        "registry_digest": "sha256:144f57ac1ac46043c61f630598afe3e4f601d9dcae64a77762f7aa0377826570"
+      },
+      "registry_snapshot_digest": "sha256:13def68392e9646affb88fc1127e445b2d0ee9bc9ada51e6e596fe59cc1c0c17",
+      "contract_record_digests": {
+        "capability.synthetic.summarize@1.0.0": "sha256:6882327516d5f34fcaf1cacd33f4c80aff81a964b7085ed97b5f7ec2f877824e"
+      },
+      "schema_bindings": {
+        "poppy://schema/synthetic/summarize-input/v1@1.0.0": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "poppy://schema/synthetic/summarize-output/v1@1.0.0": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "poppy://schema/synthetic/summarize-verification/v1@1.0.0": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "poppy://schema/evidence/claim-revision/v1@1.0.0": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "poppy://schema/authority/authority-resolution/v1@1.0.0": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+      },
+      "role_catalog_digest": "sha256:b3e9027828e0f7d4a8ac2942e9a3bcf4fdffefd0e0b684bdcc77b453c94a83e7",
+      "run_binding_digest": "sha256:15ffdcfb300dc74ce63039671c1cb00b21498d4d4f0f083ddea24201d119a5ed",
+      "claim_state_digests": {
+        "claim-requirement.synthetic.source-ready": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+      },
+      "authority_resolution_digests": {
+        "authority-requirement.synthetic.local-write": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "implementation_identity_digest": "sha256:7c6b0b9ed4041519a33b537ea59404cd8816926448f2bee502dfd8ad55124064"
+    }
+  }
+}

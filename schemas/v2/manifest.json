@@ -4,12 +4,12 @@
   "schema_set": {
     "id": "poppy.v2.foundation",
     "version": "0.1.0",
-    "digest": "sha256:a7fc3e9199753c3ce74cf3985afe73a2555fa45e1f841606db4b74324043a3bd",
+    "digest": "sha256:72e2f0fcdaee425727519152b93247ce5533cfd3c9e19da76affc39f645e6d52",
     "digest_basis": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)",
     "complete": false,
-    "implemented_entry_count": 60,
+    "implemented_entry_count": 76,
     "coverage_state": "gray",
-    "coverage_reason": "Implemented tranches cover governance, kernel lifecycle, authority/effect, and evidence/Gray; all other ratified entries remain planned."
+    "coverage_reason": "Implemented tranches cover governance, kernel lifecycle, capability registry, authority/effect, and evidence/Gray; all other ratified entries remain planned."
   },
   "accepted_decisions": [
     "POP-V2-001",
@@ -1318,7 +1318,7 @@
       "stable_code": "POP2-SHP-CAP-500",
       "test_id": "TV2-CAP-500",
       "implementation": "schemas/v2/capability/registry-snapshot.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-500-POS",
       "negative_case": "CASE-TV2-CAP-500-NEG"
     },
@@ -1336,7 +1336,7 @@
       "stable_code": "POP2-SHP-CAP-501",
       "test_id": "TV2-CAP-501",
       "implementation": "schemas/v2/capability/contract.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-501-POS",
       "negative_case": "CASE-TV2-CAP-501-NEG"
     },
@@ -1354,7 +1354,7 @@
       "stable_code": "POP2-SHP-CAP-502",
       "test_id": "TV2-CAP-502",
       "implementation": "schemas/v2/capability/contract-binding.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-502-POS",
       "negative_case": "CASE-TV2-CAP-502-NEG"
     },
@@ -1372,7 +1372,7 @@
       "stable_code": "POP2-SHP-CAP-503",
       "test_id": "TV2-CAP-503",
       "implementation": "schemas/v2/capability/claim-requirement.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-503-POS",
       "negative_case": "CASE-TV2-CAP-503-NEG"
     },
@@ -1390,7 +1390,7 @@
       "stable_code": "POP2-SHP-CAP-504",
       "test_id": "TV2-CAP-504",
       "implementation": "schemas/v2/capability/authority-requirement-binding.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-504-POS",
       "negative_case": "CASE-TV2-CAP-504-NEG"
     },
@@ -1408,7 +1408,7 @@
       "stable_code": "POP2-SHP-CAP-505",
       "test_id": "TV2-CAP-505",
       "implementation": "schemas/v2/capability/compatibility-declaration.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-505-POS",
       "negative_case": "CASE-TV2-CAP-505-NEG"
     },
@@ -1426,7 +1426,7 @@
       "stable_code": "POP2-SHP-CAP-506",
       "test_id": "TV2-CAP-506",
       "implementation": "schemas/v2/capability/executor-role-catalog.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-506-POS",
       "negative_case": "CASE-TV2-CAP-506-NEG"
     },
@@ -1444,7 +1444,7 @@
       "stable_code": "POP2-INV-CAP-507",
       "test_id": "TV2-CAP-507",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-507-POS",
       "negative_case": "CASE-TV2-CAP-507-NEG"
     },
@@ -1462,7 +1462,7 @@
       "stable_code": "POP2-INV-CAP-508",
       "test_id": "TV2-CAP-508",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-508-POS",
       "negative_case": "CASE-TV2-CAP-508-NEG"
     },
@@ -1480,7 +1480,7 @@
       "stable_code": "POP2-INV-CAP-509",
       "test_id": "TV2-CAP-509",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-509-POS",
       "negative_case": "CASE-TV2-CAP-509-NEG"
     },
@@ -1498,7 +1498,7 @@
       "stable_code": "POP2-INV-CAP-510",
       "test_id": "TV2-CAP-510",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-510-POS",
       "negative_case": "CASE-TV2-CAP-510-NEG"
     },
@@ -1516,7 +1516,7 @@
       "stable_code": "POP2-INV-CAP-511",
       "test_id": "TV2-CAP-511",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-511-POS",
       "negative_case": "CASE-TV2-CAP-511-NEG"
     },
@@ -1534,7 +1534,7 @@
       "stable_code": "POP2-INV-CAP-512",
       "test_id": "TV2-CAP-512",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-512-POS",
       "negative_case": "CASE-TV2-CAP-512-NEG"
     },
@@ -1552,7 +1552,7 @@
       "stable_code": "POP2-INV-CAP-513",
       "test_id": "TV2-CAP-513",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-513-POS",
       "negative_case": "CASE-TV2-CAP-513-NEG"
     },
@@ -1570,7 +1570,7 @@
       "stable_code": "POP2-INT-CAP-514",
       "test_id": "TV2-CAP-514",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-514-POS",
       "negative_case": "CASE-TV2-CAP-514-NEG"
     },
@@ -1588,7 +1588,7 @@
       "stable_code": "POP2-INT-CAP-515",
       "test_id": "TV2-CAP-515",
       "implementation": "scripts/poppy_v2_validation/capability.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-CAP-515-POS",
       "negative_case": "CASE-TV2-CAP-515-NEG"
     },
