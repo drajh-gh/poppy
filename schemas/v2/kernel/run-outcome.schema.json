@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/kernel/run-outcome/v1",
+  "title": "Poppy v2 singular terminal run outcome",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.kernel.run-outcome",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "outcome_id", "run_id", "terminal_state", "plan_revision", "authority_outcome", "attempted_effect_count", "durable_delta", "reason_codes", "terminal_at", "outcome_digest"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/kernel/run-outcome/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "outcome_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "run_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "terminal_state": {"enum": ["SUCCEEDED", "LIMITED", "BLOCKED", "CANCELLED", "FAILED"]},
+    "plan_revision": {"type": "integer", "minimum": 1},
+    "authority_outcome": {"enum": ["not_required", "authorized", "denied", "missing", "unresolved_conflict"]},
+    "attempted_effect_count": {"type": "integer", "minimum": 0},
+    "durable_delta": {"type": "boolean"},
+    "reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"}},
+    "terminal_at": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/timestamp"},
+    "outcome_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"}
+  },
+  "unevaluatedProperties": false
+}

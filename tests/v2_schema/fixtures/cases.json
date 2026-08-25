@@ -582,6 +582,32 @@
     },
     {
       "id": "CASE-TV2-EFF-209-NEG", "entry_id": "invariant.effect.receipt-follows-authorized-attempt", "owner_decision_id": "POP-V2-006", "polarity": "negative", "expected_codes": ["POP2-INV-EFF-209"], "fixture_ref": "effect-bundles.json#/negative_by_code/POP2-INV-EFF-209"
-    }
+    },
+    {"id": "CASE-TV2-KRN-400-POS", "entry_id": "schema.kernel.lifecycle-contract", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-400-NEG", "entry_id": "schema.kernel.lifecycle-contract", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-SHP-KRN-400"], "fixture_ref": "kernel-bundles.json#/schema_negative_by_entry/schema.kernel.lifecycle-contract"},
+    {"id": "CASE-TV2-KRN-401-POS", "entry_id": "schema.kernel.event", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive/transitions/0/event"},
+    {"id": "CASE-TV2-KRN-401-NEG", "entry_id": "schema.kernel.event", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-SHP-KRN-401"], "fixture_ref": "kernel-bundles.json#/schema_negative_by_entry/schema.kernel.event"},
+    {"id": "CASE-TV2-KRN-402-POS", "entry_id": "schema.kernel.guard-result", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive/transitions/0/guard_results/0"},
+    {"id": "CASE-TV2-KRN-402-NEG", "entry_id": "schema.kernel.guard-result", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-SHP-KRN-402"], "fixture_ref": "kernel-bundles.json#/schema_negative_by_entry/schema.kernel.guard-result"},
+    {"id": "CASE-TV2-KRN-403-POS", "entry_id": "schema.kernel.transition-record", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive/transitions/0"},
+    {"id": "CASE-TV2-KRN-403-NEG", "entry_id": "schema.kernel.transition-record", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-SHP-KRN-403"], "fixture_ref": "kernel-bundles.json#/schema_negative_by_entry/schema.kernel.transition-record"},
+    {"id": "CASE-TV2-KRN-404-POS", "entry_id": "schema.kernel.plan-revision-record", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive/plan_revisions/0"},
+    {"id": "CASE-TV2-KRN-404-NEG", "entry_id": "schema.kernel.plan-revision-record", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-SHP-KRN-404"], "fixture_ref": "kernel-bundles.json#/schema_negative_by_entry/schema.kernel.plan-revision-record"},
+    {"id": "CASE-TV2-KRN-405-POS", "entry_id": "schema.kernel.run-outcome", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive/outcome"},
+    {"id": "CASE-TV2-KRN-405-NEG", "entry_id": "schema.kernel.run-outcome", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-SHP-KRN-405"], "fixture_ref": "kernel-bundles.json#/schema_negative_by_entry/schema.kernel.run-outcome"},
+    {"id": "CASE-TV2-KRN-406-POS", "entry_id": "invariant.kernel.legal-transition-only", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-406-NEG", "entry_id": "invariant.kernel.legal-transition-only", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-BEH-KRN-406"], "fixture_ref": "kernel-bundles.json#/negative_by_code/POP2-BEH-KRN-406"},
+    {"id": "CASE-TV2-KRN-407-POS", "entry_id": "invariant.kernel.terminal-singular-immutable", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-407-NEG", "entry_id": "invariant.kernel.terminal-singular-immutable", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-BEH-KRN-407"], "fixture_ref": "kernel-bundles.json#/negative_by_code/POP2-BEH-KRN-407"},
+    {"id": "CASE-TV2-KRN-408-POS", "entry_id": "invariant.kernel.required-guards-pass", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-408-NEG", "entry_id": "invariant.kernel.required-guards-pass", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-BEH-KRN-408"], "fixture_ref": "kernel-bundles.json#/negative_by_code/POP2-BEH-KRN-408"},
+    {"id": "CASE-TV2-KRN-409-POS", "entry_id": "invariant.kernel.transition-digest-chain", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-409-NEG", "entry_id": "invariant.kernel.transition-digest-chain", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-INV-KRN-409"], "fixture_ref": "kernel-bundles.json#/negative_by_code/POP2-INV-KRN-409"},
+    {"id": "CASE-TV2-KRN-410-POS", "entry_id": "invariant.kernel.plan-revision-invalidates-old-bindings", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-410-NEG", "entry_id": "invariant.kernel.plan-revision-invalidates-old-bindings", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-BEH-KRN-410"], "fixture_ref": "kernel-bundles.json#/negative_by_code/POP2-BEH-KRN-410"},
+    {"id": "CASE-TV2-KRN-411-POS", "entry_id": "invariant.kernel.authority-denial-is-no-effect-terminal", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-411-NEG", "entry_id": "invariant.kernel.authority-denial-is-no-effect-terminal", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-BEH-KRN-411"], "fixture_ref": "kernel-bundles.json#/negative_by_code/POP2-BEH-KRN-411"},
+    {"id": "CASE-TV2-KRN-412-POS", "entry_id": "invariant.kernel.persistence-gated", "owner_decision_id": "POP-V2-003", "polarity": "positive", "expected_codes": [], "fixture_ref": "kernel-bundles.json#/positive"},
+    {"id": "CASE-TV2-KRN-412-NEG", "entry_id": "invariant.kernel.persistence-gated", "owner_decision_id": "POP-V2-003", "polarity": "negative", "expected_codes": ["POP2-BEH-KRN-412"], "fixture_ref": "kernel-bundles.json#/negative_by_code/POP2-BEH-KRN-412"}
   ]
 }

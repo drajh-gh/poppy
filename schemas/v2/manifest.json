@@ -4,12 +4,12 @@
   "schema_set": {
     "id": "poppy.v2.foundation",
     "version": "0.1.0",
-    "digest": "sha256:3225b05897de799e6431a1226302c795670799f8fcd38d88e00722e494dc7d79",
+    "digest": "sha256:a7fc3e9199753c3ce74cf3985afe73a2555fa45e1f841606db4b74324043a3bd",
     "digest_basis": "sha256(canonical-manifest-with-empty-digest || ordered-implemented-schema-path-and-bytes)",
     "complete": false,
-    "implemented_entry_count": 47,
+    "implemented_entry_count": 60,
     "coverage_state": "gray",
-    "coverage_reason": "Implemented tranches cover governance, authority/effect, and evidence/Gray; all other ratified entries remain planned."
+    "coverage_reason": "Implemented tranches cover governance, kernel lifecycle, authority/effect, and evidence/Gray; all other ratified entries remain planned."
   },
   "accepted_decisions": [
     "POP-V2-001",
@@ -1084,7 +1084,7 @@
       "stable_code": "POP2-SHP-KRN-400",
       "test_id": "TV2-KRN-400",
       "implementation": "schemas/v2/kernel/lifecycle-contract.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-400-POS",
       "negative_case": "CASE-TV2-KRN-400-NEG"
     },
@@ -1102,7 +1102,7 @@
       "stable_code": "POP2-SHP-KRN-401",
       "test_id": "TV2-KRN-401",
       "implementation": "schemas/v2/kernel/event.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-401-POS",
       "negative_case": "CASE-TV2-KRN-401-NEG"
     },
@@ -1120,7 +1120,7 @@
       "stable_code": "POP2-SHP-KRN-402",
       "test_id": "TV2-KRN-402",
       "implementation": "schemas/v2/kernel/guard-result.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-402-POS",
       "negative_case": "CASE-TV2-KRN-402-NEG"
     },
@@ -1138,7 +1138,7 @@
       "stable_code": "POP2-SHP-KRN-403",
       "test_id": "TV2-KRN-403",
       "implementation": "schemas/v2/kernel/transition-record.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-403-POS",
       "negative_case": "CASE-TV2-KRN-403-NEG"
     },
@@ -1156,7 +1156,7 @@
       "stable_code": "POP2-SHP-KRN-404",
       "test_id": "TV2-KRN-404",
       "implementation": "schemas/v2/kernel/plan-revision-record.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-404-POS",
       "negative_case": "CASE-TV2-KRN-404-NEG"
     },
@@ -1174,7 +1174,7 @@
       "stable_code": "POP2-SHP-KRN-405",
       "test_id": "TV2-KRN-405",
       "implementation": "schemas/v2/kernel/run-outcome.schema.json",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-405-POS",
       "negative_case": "CASE-TV2-KRN-405-NEG"
     },
@@ -1192,7 +1192,7 @@
       "stable_code": "POP2-BEH-KRN-406",
       "test_id": "TV2-KRN-406",
       "implementation": "scripts/poppy_v2_validation/kernel.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-406-POS",
       "negative_case": "CASE-TV2-KRN-406-NEG"
     },
@@ -1210,7 +1210,7 @@
       "stable_code": "POP2-BEH-KRN-407",
       "test_id": "TV2-KRN-407",
       "implementation": "scripts/poppy_v2_validation/kernel.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-407-POS",
       "negative_case": "CASE-TV2-KRN-407-NEG"
     },
@@ -1228,7 +1228,7 @@
       "stable_code": "POP2-BEH-KRN-408",
       "test_id": "TV2-KRN-408",
       "implementation": "scripts/poppy_v2_validation/kernel.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-408-POS",
       "negative_case": "CASE-TV2-KRN-408-NEG"
     },
@@ -1246,7 +1246,7 @@
       "stable_code": "POP2-INV-KRN-409",
       "test_id": "TV2-KRN-409",
       "implementation": "scripts/poppy_v2_validation/kernel.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-409-POS",
       "negative_case": "CASE-TV2-KRN-409-NEG"
     },
@@ -1264,7 +1264,7 @@
       "stable_code": "POP2-BEH-KRN-410",
       "test_id": "TV2-KRN-410",
       "implementation": "scripts/poppy_v2_validation/kernel.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-410-POS",
       "negative_case": "CASE-TV2-KRN-410-NEG"
     },
@@ -1282,7 +1282,7 @@
       "stable_code": "POP2-BEH-KRN-411",
       "test_id": "TV2-KRN-411",
       "implementation": "scripts/poppy_v2_validation/kernel.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-411-POS",
       "negative_case": "CASE-TV2-KRN-411-NEG"
     },
@@ -1300,7 +1300,7 @@
       "stable_code": "POP2-BEH-KRN-412",
       "test_id": "TV2-KRN-412",
       "implementation": "scripts/poppy_v2_validation/kernel.py",
-      "implementation_status": "planned",
+      "implementation_status": "implemented",
       "positive_case": "CASE-TV2-KRN-412-POS",
       "negative_case": "CASE-TV2-KRN-412-NEG"
     },
