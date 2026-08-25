@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/kernel/event/v1",
+  "title": "Poppy v2 typed kernel event",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.kernel.event",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "event_id", "event_type", "payload_digest", "occurred_at"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/kernel/event/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "event_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "event_type": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$"},
+    "payload_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "occurred_at": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/timestamp"}
+  },
+  "unevaluatedProperties": false
+}

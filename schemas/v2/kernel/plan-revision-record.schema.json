@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "poppy://schema/kernel/plan-revision-record/v1",
+  "title": "Poppy v2 material plan revision record",
+  "x-poppy-schema-version": "1.0.0",
+  "x-poppy-manifest-entry": "schema.kernel.plan-revision-record",
+  "type": "object",
+  "required": ["$schema", "x-poppy-schema-version", "revision_id", "run_id", "prior_revision", "plan_revision", "change_kind", "previous_digest", "current_digest", "authority_binding_valid", "evaluation_binding_valid", "recorded_at"],
+  "properties": {
+    "$schema": {"const": "poppy://schema/kernel/plan-revision-record/v1"},
+    "x-poppy-schema-version": {"const": "1.0.0"},
+    "revision_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "run_id": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/uuidV7"},
+    "prior_revision": {"type": "integer", "minimum": 1},
+    "plan_revision": {"type": "integer", "minimum": 2},
+    "change_kind": {"enum": ["objective", "plan", "effect", "candidate"]},
+    "previous_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "current_digest": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/digest"},
+    "authority_binding_valid": {"const": false},
+    "evaluation_binding_valid": {"const": false},
+    "recorded_at": {"$ref": "poppy://schema/governance/common-definitions/v1#/$defs/timestamp"}
+  },
+  "unevaluatedProperties": false
+}

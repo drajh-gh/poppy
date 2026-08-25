@@ -17,12 +17,15 @@ from poppy_v2_validation import (  # noqa: E402
     canonical_digest,
     effect_authority_subject_digest,
     effect_binding_digest,
+    outcome_record_digest,
     receipt_digest,
+    transition_record_digest,
     validate_authority_invariants,
     validate_case_catalog,
     validate_effect_invariants,
     validate_evidence_invariants,
     validate_manifest_invariants,
+    validate_kernel_invariants,
     validate_schema_references,
 )
 from validate_v2_schemas import (  # noqa: E402
@@ -53,14 +56,16 @@ class FoundationSchemaTests(unittest.TestCase):
         cls.authority_anchors = cls.trust_anchors["authority_bundle"]
         cls.effect_anchors = cls.trust_anchors["effect_bundle"]
         cls.evidence = read_json(FIXTURES / "evidence-bundles.json")
+        cls.kernel = read_json(FIXTURES / "kernel-bundles.json")
+        cls.kernel_anchors = read_json(FIXTURES / "kernel-trust-anchors.json")["kernel_bundle"]
 
     def test_repository_contract(self) -> None:
         result = validate_repository()
         self.assertEqual(result["status"], "pass", result["errors"])
         self.assertEqual(result["manifest_entries"], 195)
-        self.assertEqual(result["implemented_entries"], 47)
-        self.assertEqual(result["schemas"], 22)
-        self.assertEqual(result["synthetic_cases"], 94)
+        self.assertEqual(result["implemented_entries"], 60)
+        self.assertEqual(result["schemas"], 28)
+        self.assertEqual(result["synthetic_cases"], 120)
 
     def test_every_implemented_schema_has_executable_positive_and_negative_case(self) -> None:
         implemented = [entry for entry in self.manifest["entries"] if entry["kind"] == "schema" and entry["implementation_status"] == "implemented"]
@@ -77,6 +82,13 @@ class FoundationSchemaTests(unittest.TestCase):
                     positive_findings = self.store.validate_artifact(self.manifest, schema, entry, locator=entry["positive_case"])
                     negative = copy.deepcopy(self.manifest)
                     negative["accepted_decisions"] = negative["accepted_decisions"][:-1]
+                    negative_findings = self.store.validate_artifact(negative, schema, entry, locator=entry["negative_case"])
+                elif entry["domain"] == "kernel":
+                    positive_case = next(case for case in self.cases["cases"] if case["id"] == entry["positive_case"])
+                    negative_case_fixture = next(case for case in self.cases["cases"] if case["id"] == entry["negative_case"])
+                    positive = resolve_fixture_ref(positive_case["fixture_ref"])
+                    negative = resolve_fixture_ref(negative_case_fixture["fixture_ref"])
+                    positive_findings = self.store.validate_artifact(positive, schema, entry, locator=entry["positive_case"])
                     negative_findings = self.store.validate_artifact(negative, schema, entry, locator=entry["negative_case"])
                 else:
                     fixtures = self.instances[entry["id"]]
@@ -212,6 +224,202 @@ class FoundationSchemaTests(unittest.TestCase):
                 bundle = self._mutated_effect_bundle(fixture["mutation"])
                 anchors = self._anchors_for_effect_mutation(fixture["mutation"], bundle)
                 self.assertEqual({finding["code"] for finding in validate_effect_invariants(bundle, anchors)}, {expected})
+
+    def test_kernel_invariant_cases(self) -> None:
+        base = self.kernel["positive"]
+        self.assertEqual(validate_kernel_invariants(base, self.kernel_anchors), [])
+        self.assertEqual(transition_record_digest(base["transitions"][0]), base["transitions"][0]["transition_digest"])
+        self.assertEqual(outcome_record_digest(base["outcome"]), base["outcome"]["outcome_digest"])
+        for expected, fixture in self.kernel["negative_by_code"].items():
+            with self.subTest(code=expected):
+                bundle = self._mutated_kernel_bundle(fixture["mutation"])
+                self.assertEqual({finding["code"] for finding in validate_kernel_invariants(bundle, self.kernel_anchors)}, {expected})
+
+    def test_kernel_contract_preserves_ratified_state_and_gray_semantics(self) -> None:
+        value = self.kernel["positive"]
+        self.assertEqual(
+            value["states"],
+            ["RECEIVED", "TRIAGED", "CONTEXT_RESOLVED", "ORIENTED", "PLANNED", "AWAITING_AUTHORITY", "EXECUTING", "JOINING", "EVALUATING", "PERSISTING", "SUCCEEDED", "LIMITED", "BLOCKED", "CANCELLED", "FAILED"],
+        )
+        self.assertEqual(value["conditional_states"], ["ORIENTED", "AWAITING_AUTHORITY", "PERSISTING"])
+        self.assertIn(
+            ("TRIAGED", "SIMPLE_ANSWER_READY", "EVALUATING"),
+            {(item["source_state"], item["event_type"], item["destination_state"]) for item in value["allowed_transitions"]},
+        )
+        guard_schema = self.store.resolve("poppy://schema/kernel/guard-result/v1")
+        self.assertIn("gray", guard_schema["properties"]["outcome"]["enum"])
+
+    def test_kernel_trusted_anchors_fail_closed_and_reject_coordinated_bypasses(self) -> None:
+        base = self.kernel["positive"]
+        self.assertEqual(
+            {item["code"] for item in validate_kernel_invariants(base, {})},
+            {"POP2-BEH-KRN-406", "POP2-BEH-KRN-407", "POP2-BEH-KRN-408", "POP2-INV-KRN-409", "POP2-BEH-KRN-410", "POP2-BEH-KRN-411", "POP2-BEH-KRN-412"},
+        )
+        with self.assertRaises(TypeError):
+            validate_kernel_invariants(base)  # type: ignore[call-arg]
+
+        mutations: list[tuple[str, str, dict]] = []
+
+        value = copy.deepcopy(base)
+        value["allowed_transitions"] = [{
+            "source_state": "RECEIVED", "event_type": "REQUEST_RECEIVED", "destination_state": "SUCCEEDED",
+            "required_guard_codes": ["GRD-KRN-001"],
+        }]
+        value["transitions"] = value["transitions"][:1]
+        value["transitions"][0]["destination_state"] = "SUCCEEDED"
+        self._refresh_kernel_transition_digests(value)
+        mutations.append(("caller-controlled direct success with full rehash", "POP2-BEH-KRN-406", value))
+
+        value = copy.deepcopy(base)
+        duplicate = copy.deepcopy(value["allowed_transitions"][1])
+        duplicate["required_guard_codes"] = []
+        value["allowed_transitions"].append(duplicate)
+        mutations.append(("duplicate policy key erases guards", "POP2-BEH-KRN-406", value))
+
+        value = copy.deepcopy(base)
+        duplicate_guard = copy.deepcopy(value["transitions"][1]["guard_results"][0])
+        duplicate_guard.update({"outcome": "gray", "reason_codes": ["synthetic_duplicate_gray"]})
+        value["transitions"][1]["guard_results"].append(duplicate_guard)
+        self._refresh_kernel_transition_digests(value)
+        mutations.append(("duplicate guard code overwrites passed result", "POP2-BEH-KRN-408", value))
+
+        value = copy.deepcopy(base)
+        value["transitions"][1]["transition_id"] = value["transitions"][0]["transition_id"]
+        self._refresh_kernel_transition_digests(value)
+        mutations.append(("duplicate transition identity", "POP2-INV-KRN-409", value))
+
+        value = copy.deepcopy(base)
+        value["transitions"][1]["event"]["event_id"] = value["transitions"][0]["event"]["event_id"]
+        self._refresh_kernel_transition_digests(value)
+        mutations.append(("duplicate event identity", "POP2-INV-KRN-409", value))
+
+        value = copy.deepcopy(base)
+        value["transitions"][1]["event"]["occurred_at"] = "2026-08-24T12:00:01Z"
+        self._refresh_kernel_transition_digests(value)
+        mutations.append(("event backdated before prior transition", "POP2-INV-KRN-409", value))
+
+        value = copy.deepcopy(base)
+        value["transitions"][1]["guard_results"][0]["evaluated_at"] = "2026-08-24T12:00:01Z"
+        self._refresh_kernel_transition_digests(value)
+        mutations.append(("guard backdated before prior transition", "POP2-INV-KRN-409", value))
+
+        value = copy.deepcopy(base)
+        value["allowed_transitions"][-1]["destination_state"] = "BLOCKED"
+        value["transitions"][-1]["destination_state"] = "BLOCKED"
+        value["outcome"]["terminal_state"] = "BLOCKED"
+        self._refresh_kernel_transition_digests(value)
+        value["outcome"]["outcome_digest"] = outcome_record_digest(value["outcome"])
+        mutations.append(("coordinated terminal and digest rewrite", "POP2-BEH-KRN-407", value))
+
+        value = copy.deepcopy(base)
+        value["outcome"]["reason_codes"] = ["synthetic_rewritten_reason"]
+        mutations.append(("reason rewrite without outcome rehash", "POP2-BEH-KRN-407", value))
+
+        value = copy.deepcopy(base)
+        value["outcome"]["terminal_at"] = "2026-08-24T12:00:07Z"
+        value["outcome"]["outcome_digest"] = outcome_record_digest(value["outcome"])
+        mutations.append(("outcome backdated before terminal transition", "POP2-BEH-KRN-407", value))
+
+        value = copy.deepcopy(base)
+        value["plan_revisions"] = []
+        mutations.append(("revision history omitted", "POP2-BEH-KRN-410", value))
+
+        value = copy.deepcopy(base)
+        value["plan_revisions"][0].update({
+            "revision_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8ae7", "change_kind": "candidate",
+            "previous_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+            "current_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        })
+        mutations.append(("revision identity and material history replaced", "POP2-BEH-KRN-410", value))
+
+        value = copy.deepcopy(base)
+        value["plan_revisions"][0]["recorded_at"] = "2026-08-24T12:00:10Z"
+        mutations.append(("revision recorded after terminal outcome", "POP2-BEH-KRN-410", value))
+
+        value = copy.deepcopy(base)
+        value["outcome"].update({"authority_outcome": "denied", "attempted_effect_count": 1})
+        value["attempted_effects"] = ["effect.synthetic.denied-001"]
+        value["outcome"]["outcome_digest"] = outcome_record_digest(value["outcome"])
+        mutations.append(("authorized binding conflicts with denied outcome and attempted effect", "POP2-BEH-KRN-411", value))
+
+        for name, expected, candidate in mutations:
+            with self.subTest(bypass=name):
+                self.assertIn(expected, {item["code"] for item in validate_kernel_invariants(candidate, self.kernel_anchors)})
+
+        for anchor_field, expected in (
+            ("transition_record_digests", "POP2-INV-KRN-409"),
+            ("revision_record_digests", "POP2-BEH-KRN-410"),
+            ("authority_binding_digest", "POP2-BEH-KRN-411"),
+            ("evaluation_binding_digest", "POP2-BEH-KRN-412"),
+        ):
+            with self.subTest(corrupt_anchor=anchor_field):
+                anchors = copy.deepcopy(self.kernel_anchors)
+                if isinstance(anchors["kernel"][anchor_field], dict):
+                    key = next(iter(anchors["kernel"][anchor_field]))
+                    anchors["kernel"][anchor_field][key] = "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+                else:
+                    anchors["kernel"][anchor_field] = "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+                self.assertIn(expected, {item["code"] for item in validate_kernel_invariants(base, anchors)})
+
+    def test_kernel_persistence_requires_supported_independently_anchored_delta(self) -> None:
+        legitimate = self._kernel_persistence_bundle()
+        anchors = copy.deepcopy(self.kernel_anchors)
+        self._refresh_kernel_anchors(legitimate, anchors)
+        self.assertEqual(validate_kernel_invariants(legitimate, anchors), [])
+
+        gray = copy.deepcopy(legitimate)
+        gray["evaluation_binding"]["state"] = "gray"
+        gray["persistence"]["durable_delta_digest"] = "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+        self.assertEqual(
+            {item["code"] for item in validate_kernel_invariants(gray, anchors)},
+            {"POP2-BEH-KRN-412"},
+        )
+
+        limited = self._kernel_limited_persistence_bundle()
+        limited_entry = self.entries["schema.kernel.lifecycle-contract"]
+        lifecycle_schema = self.store.resolve("poppy://schema/kernel/lifecycle-contract/v1")
+        self.assertEqual(
+            self.store.validate_artifact(limited, lifecycle_schema, limited_entry, locator="synthetic:limited-persistence"),
+            [],
+        )
+        limited_anchors = copy.deepcopy(self.kernel_anchors)
+        self._refresh_kernel_anchors(limited, limited_anchors)
+        self.assertEqual(validate_kernel_invariants(limited, limited_anchors), [])
+
+        for state in ("gray", "contradicted"):
+            with self.subTest(entered_not_persisted_evaluation=state):
+                invalid = copy.deepcopy(limited)
+                invalid["evaluation_binding"].update({
+                    "state": state,
+                    "authorized_durable_delta": False,
+                })
+                invalid_anchors = copy.deepcopy(limited_anchors)
+                self._refresh_kernel_anchors(invalid, invalid_anchors)
+                self.assertEqual(
+                    self.store.validate_artifact(invalid, lifecycle_schema, limited_entry, locator=f"synthetic:{state}-entered-persistence"),
+                    [],
+                )
+                self.assertEqual(
+                    {item["code"] for item in validate_kernel_invariants(invalid, invalid_anchors)},
+                    {"POP2-BEH-KRN-412"},
+                )
+
+    def test_kernel_denied_and_missing_authority_have_anchored_no_effect_terminals(self) -> None:
+        for authority_outcome in ("denied", "missing"):
+            with self.subTest(authority_outcome=authority_outcome):
+                value = self._kernel_no_effect_bundle(authority_outcome)
+                anchors = copy.deepcopy(self.kernel_anchors)
+                self._refresh_kernel_anchors(value, anchors)
+                self.assertEqual(validate_kernel_invariants(value, anchors), [])
+
+                invalid = copy.deepcopy(value)
+                invalid["attempted_effects"] = [f"effect.synthetic.{authority_outcome}-001"]
+                invalid["outcome"]["attempted_effect_count"] = 1
+                invalid["outcome"]["outcome_digest"] = outcome_record_digest(invalid["outcome"])
+                self.assertIn(
+                    "POP2-BEH-KRN-411",
+                    {item["code"] for item in validate_kernel_invariants(invalid, anchors)},
+                )
 
     def test_canonical_authority_identity_helpers(self) -> None:
         left = {"z": "ž", "a": [1, {"β": True}]}
@@ -855,6 +1063,9 @@ class FoundationSchemaTests(unittest.TestCase):
                     else:
                         bundle = self._mutated_evidence_bundle(fixture["mutation"])
                     findings = validate_evidence_invariants(bundle)
+                elif entry["domain"] == "kernel":
+                    bundle = copy.deepcopy(fixture) if case["polarity"] == "positive" else self._mutated_kernel_bundle(fixture["mutation"])
+                    findings = validate_kernel_invariants(bundle, self.kernel_anchors)
                 else:
                     findings = self._governance_case_findings(entry["stable_code"], case["polarity"])
                 actual_codes = {finding["code"] for finding in findings}
@@ -896,6 +1107,144 @@ class FoundationSchemaTests(unittest.TestCase):
             self._refresh_authority_digests(value)
         else:
             self.fail(f"unknown authority mutation: {mutation}")
+        return value
+
+    def _refresh_kernel_transition_digests(self, value: dict) -> None:
+        previous = None
+        for transition in value["transitions"]:
+            transition["previous_transition_digest"] = previous
+            transition["transition_digest"] = transition_record_digest(transition)
+            previous = transition["transition_digest"]
+
+    def _refresh_kernel_anchors(self, value: dict, anchors: dict) -> None:
+        kernel = anchors.setdefault("kernel", {})
+        rule_key = lambda item: "|".join((item["source_state"], item["event_type"], item["destination_state"]))
+        kernel.update({
+            "run_id": value["run_id"],
+            "plan_revision": value["plan_revision"],
+            "states": copy.deepcopy(value["states"]),
+            "conditional_states": copy.deepcopy(value["conditional_states"]),
+            "terminal_states": copy.deepcopy(value["terminal_states"]),
+            "transition_rule_keys": sorted(rule_key(item) for item in value["allowed_transitions"]),
+            "required_guards_by_rule": {rule_key(item): copy.deepcopy(item["required_guard_codes"]) for item in value["allowed_transitions"]},
+            "transition_ids": [item["transition_id"] for item in value["transitions"]],
+            "event_ids": [item["event"]["event_id"] for item in value["transitions"]],
+            "transition_record_digests": {item["transition_id"]: transition_record_digest(item) for item in value["transitions"]},
+            "revision_ids": [item["revision_id"] for item in value["plan_revisions"]],
+            "revision_record_digests": {item["revision_id"]: canonical_digest(item) for item in value["plan_revisions"]},
+            "outcome_id": value["outcome"]["outcome_id"],
+            "outcome_record_digest": outcome_record_digest(value["outcome"]),
+            "authority_binding": copy.deepcopy(value["authority_binding"]),
+            "authority_binding_digest": canonical_digest(value["authority_binding"]),
+            "evaluation_binding": copy.deepcopy(value["evaluation_binding"]),
+            "evaluation_binding_digest": canonical_digest(value["evaluation_binding"]),
+            "attempted_effects_digest": canonical_digest(value["attempted_effects"]),
+            "persistence": copy.deepcopy(value["persistence"]),
+            "persistence_digest": canonical_digest(value["persistence"]),
+            "durable_delta_digest": value["persistence"]["durable_delta_digest"],
+        })
+
+    def _kernel_persistence_bundle(self) -> dict:
+        value = copy.deepcopy(self.kernel["positive"])
+        value["allowed_transitions"][-1].update({
+            "event_type": "DURABLE_DELTA_AUTHORIZED", "destination_state": "PERSISTING",
+        })
+        value["allowed_transitions"].append({
+            "source_state": "PERSISTING", "event_type": "PERSISTENCE_COMPLETED", "destination_state": "SUCCEEDED",
+            "required_guard_codes": ["GRD-KRN-004"],
+        })
+        value["transitions"][-1]["event"]["event_type"] = "DURABLE_DELTA_AUTHORIZED"
+        value["transitions"][-1]["destination_state"] = "PERSISTING"
+        value["transitions"].append({
+            "$schema": "poppy://schema/kernel/transition-record/v1", "x-poppy-schema-version": "1.0.0",
+            "transition_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8ae2", "run_id": value["run_id"], "sequence": 4,
+            "source_state": "PERSISTING",
+            "event": {
+                "$schema": "poppy://schema/kernel/event/v1", "x-poppy-schema-version": "1.0.0",
+                "event_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8ae1", "event_type": "PERSISTENCE_COMPLETED",
+                "payload_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+                "occurred_at": "2026-08-24T12:00:09Z",
+            },
+            "guard_results": [{
+                "$schema": "poppy://schema/kernel/guard-result/v1", "x-poppy-schema-version": "1.0.0",
+                "guard_code": "GRD-KRN-004", "outcome": "passed", "reason_codes": [],
+                "evaluated_at": "2026-08-24T12:00:10Z",
+            }],
+            "destination_state": "SUCCEEDED", "plan_revision": 2, "previous_transition_digest": None,
+            "transitioned_at": "2026-08-24T12:00:11Z",
+            "transition_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        })
+        value["evaluation_binding"].update({"authorized_durable_delta": True, "state": "supported"})
+        value["attempted_effects"] = ["effect.synthetic.persist-001"]
+        value["persistence"] = {
+            "entered": True, "persisted": True,
+            "durable_delta_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        }
+        value["outcome"].update({
+            "attempted_effect_count": 1, "durable_delta": True, "terminal_at": "2026-08-24T12:00:12Z",
+        })
+        self._refresh_kernel_transition_digests(value)
+        value["outcome"]["outcome_digest"] = outcome_record_digest(value["outcome"])
+        return value
+
+    def _kernel_no_effect_bundle(self, authority_outcome: str) -> dict:
+        value = copy.deepcopy(self.kernel["positive"])
+        event_type = f"AUTHORITY_{authority_outcome.upper()}"
+        value["allowed_transitions"][1].update({
+            "event_type": "EFFECT_AUTHORITY_REQUIRED", "destination_state": "AWAITING_AUTHORITY",
+        })
+        value["allowed_transitions"][2].update({
+            "source_state": "AWAITING_AUTHORITY", "event_type": event_type, "destination_state": "BLOCKED",
+        })
+        value["transitions"][1]["event"]["event_type"] = "EFFECT_AUTHORITY_REQUIRED"
+        value["transitions"][1]["destination_state"] = "AWAITING_AUTHORITY"
+        value["transitions"][2].update({"source_state": "AWAITING_AUTHORITY", "destination_state": "BLOCKED"})
+        value["transitions"][2]["event"]["event_type"] = event_type
+        value["authority_binding"]["outcome"] = authority_outcome
+        value["evaluation_binding"] = None
+        value["outcome"].update({
+            "terminal_state": "BLOCKED", "authority_outcome": authority_outcome,
+            "attempted_effect_count": 0, "durable_delta": False,
+            "reason_codes": [f"authority_{authority_outcome}"],
+        })
+        self._refresh_kernel_transition_digests(value)
+        value["outcome"]["outcome_digest"] = outcome_record_digest(value["outcome"])
+        return value
+
+    def _kernel_limited_persistence_bundle(self) -> dict:
+        value = self._kernel_persistence_bundle()
+        value["allowed_transitions"][-1].update({
+            "event_type": "PERSISTENCE_LIMITED", "destination_state": "LIMITED",
+        })
+        value["transitions"][-1]["event"]["event_type"] = "PERSISTENCE_LIMITED"
+        value["transitions"][-1]["destination_state"] = "LIMITED"
+        value["persistence"]["persisted"] = False
+        value["outcome"].update({
+            "terminal_state": "LIMITED", "durable_delta": False,
+            "reason_codes": ["persistence_not_completed"],
+        })
+        self._refresh_kernel_transition_digests(value)
+        value["outcome"]["outcome_digest"] = outcome_record_digest(value["outcome"])
+        return value
+
+    def _mutated_kernel_bundle(self, mutation: str) -> dict:
+        value = copy.deepcopy(self.kernel["positive"])
+        if mutation == "rewrite-caller-policy":
+            value["allowed_transitions"][1]["event_type"] = "CALLER_REWRITTEN_EVENT"
+        elif mutation == "mismatch-terminal-outcome":
+            value["outcome"]["terminal_state"] = "BLOCKED"
+        elif mutation == "rewrite-required-guards":
+            value["allowed_transitions"][1]["required_guard_codes"] = ["GRD-KRN-002", "GRD-KRN-099"]
+        elif mutation == "break-transition-digest":
+            value["transitions"][1]["transition_digest"] = "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+        elif mutation == "retain-binding-on-revision":
+            value["plan_revisions"][0]["authority_binding_valid"] = True
+        elif mutation == "conflict-authority-outcomes":
+            value["authority_binding"]["outcome"] = "denied"
+        elif mutation == "persist-without-anchored-delta":
+            value["persistence"].update({"entered": True, "persisted": True, "durable_delta_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"})
+        else:
+            self.fail(f"unknown kernel mutation: {mutation}")
         return value
 
     def _refresh_authority_digests(self, value: dict) -> None:
