@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote
 
-from poppy_v2_validation import validate_case_catalog, validate_manifest_invariants, validate_schema_references
+from poppy_v2_validation import finalize_dag_fixture, validate_case_catalog, validate_manifest_invariants, validate_schema_references
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -67,7 +67,7 @@ def resolve_fixture_ref(reference: str) -> Any:
     if reference.startswith("manifest-mutation:POP2-INV-GOV-"):
         return {"operation": reference}
     path_text, separator, fragment = reference.partition("#")
-    if path_text not in {"schema-instances.json", "authority-bundles.json", "effect-bundles.json", "evidence-bundles.json", "kernel-bundles.json", "capability-bundles.json"} or not separator or not fragment.startswith("/"):
+    if path_text not in {"schema-instances.json", "authority-bundles.json", "effect-bundles.json", "evidence-bundles.json", "kernel-bundles.json", "capability-bundles.json", "dag-bundles.json"} or not separator or not fragment.startswith("/"):
         raise ValueError(f"unsupported synthetic fixture reference: {reference}")
     value = read_json(FIXTURE_ROOT / path_text)
     for token in fragment[1:].split("/"):
@@ -78,6 +78,8 @@ def resolve_fixture_ref(reference: str) -> Any:
         if not isinstance(value, dict) or token not in value:
             raise ValueError(f"unresolved synthetic fixture reference: {reference}")
         value = value[token]
+    if path_text == "dag-bundles.json" and fragment == "/positive":
+        value = finalize_dag_fixture(value)
     return value
 
 

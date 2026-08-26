@@ -13,18 +13,23 @@ sys.path.insert(0, str(SCRIPTS))
 
 from poppy_v2_validation import (  # noqa: E402
     authority_resolution_digest,
+    build_dag_trust_anchor,
     capability_binding_digest,
     capability_contract_digest,
     candidate_set_digest,
     canonical_digest,
+    dag_record_digest,
+    dag_revision_digest,
     effect_authority_subject_digest,
     effect_binding_digest,
+    finalize_dag_fixture,
     outcome_record_digest,
     receipt_digest,
     registry_snapshot_digest,
     transition_record_digest,
     validate_authority_invariants,
     validate_capability_invariants,
+    validate_dag_invariants,
     validate_case_catalog,
     validate_effect_invariants,
     validate_evidence_invariants,
@@ -64,14 +69,17 @@ class FoundationSchemaTests(unittest.TestCase):
         cls.kernel_anchors = read_json(FIXTURES / "kernel-trust-anchors.json")["kernel_bundle"]
         cls.capability = read_json(FIXTURES / "capability-bundles.json")
         cls.capability_anchors = read_json(FIXTURES / "capability-trust-anchors.json")["capability_bundle"]
+        cls.dag = read_json(FIXTURES / "dag-bundles.json")
+        cls.dag["positive"] = finalize_dag_fixture(cls.dag["positive"])
+        cls.dag_anchors = read_json(FIXTURES / "dag-trust-anchors.json")["dag_bundle"]
 
     def test_repository_contract(self) -> None:
         result = validate_repository()
         self.assertEqual(result["status"], "pass", result["errors"])
         self.assertEqual(result["manifest_entries"], 195)
-        self.assertEqual(result["implemented_entries"], 76)
-        self.assertEqual(result["schemas"], 35)
-        self.assertEqual(result["synthetic_cases"], 152)
+        self.assertEqual(result["implemented_entries"], 98)
+        self.assertEqual(result["schemas"], 46)
+        self.assertEqual(result["synthetic_cases"], 196)
 
     def test_every_implemented_schema_has_executable_positive_and_negative_case(self) -> None:
         implemented = [entry for entry in self.manifest["entries"] if entry["kind"] == "schema" and entry["implementation_status"] == "implemented"]
@@ -89,7 +97,7 @@ class FoundationSchemaTests(unittest.TestCase):
                     negative = copy.deepcopy(self.manifest)
                     negative["accepted_decisions"] = negative["accepted_decisions"][:-1]
                     negative_findings = self.store.validate_artifact(negative, schema, entry, locator=entry["negative_case"])
-                elif entry["domain"] in {"kernel", "capability"}:
+                elif entry["domain"] in {"kernel", "capability", "dag"}:
                     positive_case = next(case for case in self.cases["cases"] if case["id"] == entry["positive_case"])
                     negative_case_fixture = next(case for case in self.cases["cases"] if case["id"] == entry["negative_case"])
                     positive = resolve_fixture_ref(positive_case["fixture_ref"])
@@ -252,6 +260,330 @@ class FoundationSchemaTests(unittest.TestCase):
             with self.subTest(code=expected):
                 bundle = self._mutated_capability_bundle(fixture["mutation"])
                 self.assertIn(expected, {finding["code"] for finding in validate_capability_invariants(bundle, self.capability_anchors)})
+
+    def test_dag_invariant_cases_are_exact_singletons(self) -> None:
+        base = self.dag["positive"]
+        self.assertEqual(validate_dag_invariants(base, self.dag_anchors), [])
+        self.assertEqual(dag_revision_digest(base["revision"]), base["revision"]["revision_digest"])
+        self.assertEqual(
+            dag_record_digest(base["objective_binding"], "binding_digest"),
+            base["objective_binding"]["binding_digest"],
+        )
+        for expected, fixture in self.dag["negative_by_code"].items():
+            with self.subTest(code=expected):
+                bundle = self._mutated_dag_bundle(fixture["mutation"])
+                self.assertEqual(
+                    {finding["code"] for finding in validate_dag_invariants(bundle, self.dag_anchors)},
+                    {expected},
+                )
+
+    def test_dag_complete_record_anchors_cover_every_schema_declared_field(self) -> None:
+        owner_by_surface = {
+            "revision": "POP2-INV-DAG-620",
+            "objective_binding": "POP2-INV-DAG-602",
+            "nodes": "POP2-INV-DAG-602",
+            "edges": "POP2-INV-DAG-614",
+            "assignments": "POP2-BEH-DAG-616",
+            "statuses": "POP2-BEH-DAG-617",
+            "attempts": "POP2-BEH-DAG-616",
+            "outcomes": "POP2-BEH-DAG-616",
+            "artifact_references": "POP2-INV-DAG-614",
+            "artifact_bindings": "POP2-INV-DAG-614",
+            "minimized_receipt": "POP2-INV-DAG-621",
+        }
+        field_owner_overrides = {
+            ("revision", "node_ids"): "POP2-INV-DAG-602",
+            ("revision", "edge_ids"): "POP2-INV-DAG-602",
+            ("revision", "entry_node_ids"): "POP2-INV-DAG-602",
+            ("revision", "terminal_node_ids"): "POP2-INV-DAG-602",
+            ("nodes", "capability_binding"): "POP2-INV-DAG-613",
+            ("nodes", "input_schema_ids"): "POP2-INV-DAG-614",
+            ("nodes", "output_schema_ids"): "POP2-INV-DAG-614",
+            ("nodes", "effect_binding"): "POP2-INV-DAG-619",
+            ("edges", "from_node_id"): "POP2-INV-DAG-612",
+            ("edges", "to_node_id"): "POP2-INV-DAG-612",
+            ("edges", "required"): "POP2-INV-DAG-612",
+            ("edges", "edge_id"): "POP2-INV-DAG-612",
+            ("outcomes", "effect_id"): "POP2-INV-DAG-619",
+            ("outcomes", "effect_digest"): "POP2-INV-DAG-619",
+            ("outcomes", "material_evidence"): "POP2-INV-DAG-621",
+        }
+        mutation_count = 0
+        for surface, default_owner in owner_by_surface.items():
+            surface_value = self.dag["positive"][surface]
+            records = surface_value if isinstance(surface_value, list) else [surface_value]
+            for record_index, record in enumerate(records):
+                for field in record:
+                    mutation_count += 1
+                    with self.subTest(surface=surface, record_index=record_index, field=field):
+                        candidate = copy.deepcopy(self.dag["positive"])
+                        candidate_surface = candidate[surface]
+                        target = candidate_surface[record_index] if isinstance(candidate_surface, list) else candidate_surface
+                        target[field] = self._different_dag_field_value(field, target[field])
+                        expected = field_owner_overrides.get((surface, field), default_owner)
+                        self.assertIn(
+                            expected,
+                            {item["code"] for item in validate_dag_invariants(candidate, self.dag_anchors)},
+                        )
+        self.assertEqual(mutation_count, 453)
+
+    def test_dag_reproduced_complete_record_bypasses_are_exact_singletons(self) -> None:
+        cases = []
+
+        acceptance = copy.deepcopy(self.dag["positive"])
+        acceptance["objective_binding"]["acceptance_contract_digest"] = "sha256:" + "9" * 64
+        cases.append(("acceptance-contract", finalize_dag_fixture(acceptance), "POP2-INV-DAG-602"))
+
+        output_schema = copy.deepcopy(self.dag["positive"])
+        output_schema["nodes"][0]["output_schema_ids"].append("poppy://schema/synthetic/extra/v1")
+        cases.append(("node-output-schema", finalize_dag_fixture(output_schema), "POP2-INV-DAG-614"))
+
+        status_reason = copy.deepcopy(self.dag["positive"])
+        status_reason["statuses"][0]["reason_codes"] = ["synthetic_rewrite"]
+        cases.append(("status-reason", finalize_dag_fixture(status_reason), "POP2-BEH-DAG-617"))
+
+        status_time = copy.deepcopy(self.dag["positive"])
+        status_time["statuses"][0]["recorded_at"] = "2026-08-24T12:00:03.050Z"
+        cases.append(("status-time", finalize_dag_fixture(status_time), "POP2-BEH-DAG-617"))
+
+        entries = copy.deepcopy(self.dag["positive"])
+        entries["revision"]["entry_node_ids"].append("node.synthetic.left")
+        cases.append(("revision-entry-set", finalize_dag_fixture(entries), "POP2-INV-DAG-602"))
+
+        for name, candidate, expected in cases:
+            with self.subTest(bypass=name):
+                self.assertEqual(
+                    {item["code"] for item in validate_dag_invariants(candidate, self.dag_anchors)},
+                    {expected},
+                )
+
+    def test_dag_trusted_anchors_fail_closed_and_reject_phantoms_or_coordinated_rewrites(self) -> None:
+        all_owners = set(self.dag["negative_by_code"])
+        self.assertEqual(
+            {item["code"] for item in validate_dag_invariants(self.dag["positive"], {})},
+            all_owners,
+        )
+
+        cases = []
+        orphan = copy.deepcopy(self.dag["positive"])
+        orphan["attempts"][0]["produced_artifact_refs"].append("artifact.synthetic.right")
+        orphan["outcomes"][0]["artifact_refs"].append("artifact.synthetic.right")
+        cases.append(("orphan-produced-artifact", finalize_dag_fixture(orphan), "POP2-BEH-DAG-616"))
+
+        phantom_node = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_node["nodes"][0])
+        record["node_id"] = "node.synthetic.phantom"
+        phantom_node["nodes"].append(record)
+        cases.append(("phantom-node", finalize_dag_fixture(phantom_node), "POP2-INV-DAG-602"))
+
+        phantom_edge = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_edge["edges"][0])
+        record["edge_id"] = "edge.synthetic.phantom"
+        phantom_edge["edges"].append(record)
+        cases.append(("phantom-edge", finalize_dag_fixture(phantom_edge), "POP2-INV-DAG-612"))
+
+        phantom_assignment = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_assignment["assignments"][0])
+        record["assignment_id"] = "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8bef"
+        phantom_assignment["assignments"].append(record)
+        cases.append(("phantom-assignment", finalize_dag_fixture(phantom_assignment), "POP2-BEH-DAG-616"))
+
+        phantom_status = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_status["statuses"][0])
+        record["status_record_id"] = "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8bf0"
+        phantom_status["statuses"].append(record)
+        cases.append(("phantom-status", finalize_dag_fixture(phantom_status), "POP2-BEH-DAG-617"))
+
+        phantom_attempt = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_attempt["attempts"][0])
+        record["attempt_id"] = "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8bee"
+        phantom_attempt["attempts"].append(record)
+        cases.append(("phantom-attempt", finalize_dag_fixture(phantom_attempt), "POP2-BEH-DAG-616"))
+
+        phantom_outcome = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_outcome["outcomes"][0])
+        record["outcome_id"] = "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8bed"
+        phantom_outcome["outcomes"].append(record)
+        cases.append(("phantom-outcome", finalize_dag_fixture(phantom_outcome), "POP2-BEH-DAG-616"))
+
+        phantom_artifact = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_artifact["artifact_references"][0])
+        record["artifact_id"] = "artifact.synthetic.phantom"
+        record["content_ref"] = "synthetic:artifact/phantom"
+        phantom_artifact["artifact_references"].append(record)
+        cases.append(("phantom-artifact", finalize_dag_fixture(phantom_artifact), "POP2-INV-DAG-614"))
+
+        phantom_binding = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_binding["artifact_bindings"][0])
+        record["binding_id"] = "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8bf1"
+        phantom_binding["artifact_bindings"].append(record)
+        cases.append(("phantom-binding", finalize_dag_fixture(phantom_binding), "POP2-INV-DAG-614"))
+
+        phantom_effect = copy.deepcopy(self.dag["positive"])
+        record = copy.deepcopy(phantom_effect["effect_proposals"][0])
+        record["effect_id"] = "effect.synthetic.phantom"
+        phantom_effect["effect_proposals"].append(record)
+        cases.append(("phantom-effect", finalize_dag_fixture(phantom_effect), "POP2-INV-DAG-619"))
+
+        duplicate_effect = copy.deepcopy(self.dag["positive"])
+        duplicate_effect["effect_proposals"].append(copy.deepcopy(duplicate_effect["effect_proposals"][0]))
+        cases.append(("duplicate-effect", finalize_dag_fixture(duplicate_effect), "POP2-INV-DAG-619"))
+
+        duplicate_outcome = copy.deepcopy(self.dag["positive"])
+        duplicate_outcome["outcomes"].append(copy.deepcopy(duplicate_outcome["outcomes"][0]))
+        cases.append(("duplicate-outcome", finalize_dag_fixture(duplicate_outcome), "POP2-BEH-DAG-616"))
+
+        for mutation, expected in (
+            ("rewrite-objective-acceptance", "POP2-INV-DAG-602"),
+            ("create-cycle", "POP2-INV-DAG-612"),
+            ("rebind-capability", "POP2-INV-DAG-613"),
+            ("rebind-edge-schema", "POP2-INV-DAG-614"),
+            ("rewrite-status-reason", "POP2-BEH-DAG-617"),
+            ("rebind-effect", "POP2-INV-DAG-619"),
+            ("rewrite-revision-history", "POP2-INV-DAG-620"),
+            ("retain-ineligible", "POP2-INV-DAG-621"),
+        ):
+            cases.append((f"coordinated-{mutation}", self._mutated_dag_bundle(mutation), expected))
+
+        redundant = copy.deepcopy(self.dag["positive"])
+        extra = copy.deepcopy(redundant["nodes"][0])
+        extra["node_id"] = "node.synthetic.redundant"
+        extra["selected_by_objective_clause_id"] = "objective-clause.synthetic.redundant"
+        extra["necessity_reason"] = "Synthetically redundant even though attached to the graph."
+        redundant["nodes"].append(extra)
+        redundant["objective_binding"]["clause_ids"].append(extra["selected_by_objective_clause_id"])
+        redundant["revision"]["node_ids"].append(extra["node_id"])
+        cases.append(("fully-integrated-redundant-node", finalize_dag_fixture(redundant), "POP2-INV-DAG-602"))
+
+        for name, candidate, expected in cases:
+            with self.subTest(bypass=name):
+                self.assertEqual(
+                    {item["code"] for item in validate_dag_invariants(candidate, self.dag_anchors)},
+                    {expected},
+                )
+
+    def test_dag_complete_nested_trust_anchor_corruption_matrix_fails_closed(self) -> None:
+        all_owners = set(self.dag["negative_by_code"])
+        dag_anchor = self.dag_anchors["dag"]
+
+        cases: list[tuple[str, dict]] = []
+        for key in dag_anchor:
+            missing = copy.deepcopy(self.dag_anchors)
+            missing["dag"].pop(key)
+            cases.append((f"missing/{key}", missing))
+
+        def visit(value: object, path: tuple[object, ...] = ()) -> None:
+            if path:
+                def add_case(kind: str, replacement: object) -> None:
+                    candidate = copy.deepcopy(self.dag_anchors)
+                    target: object = candidate["dag"]
+                    for token in path[:-1]:
+                        target = target[token]  # type: ignore[index]
+                    target[path[-1]] = replacement  # type: ignore[index]
+                    cases.append((kind + "/" + "/".join(map(str, path)), candidate))
+
+                add_case("type", None)
+                if isinstance(value, str):
+                    add_case("content", "sha256:INVALID" if value.startswith("sha256:") else "")
+                elif isinstance(value, int):
+                    add_case("content", 0)
+                elif isinstance(value, list):
+                    add_case("content", [None])
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    visit(child, (*path, key))
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    visit(child, (*path, index))
+
+        visit(dag_anchor)
+        for name, anchors in cases:
+            with self.subTest(anchor=name):
+                self.assertEqual(
+                    {item["code"] for item in validate_dag_invariants(self.dag["positive"], anchors)},
+                    all_owners,
+                )
+
+    def test_dag_authoritative_effect_schema_and_digest_contract_are_reused(self) -> None:
+        proposal = self.dag["positive"]["effect_proposals"][0]
+        schema = read_json(ROOT / "schemas" / "v2" / "effect" / "proposal.schema.json")
+        entry = self.entries["schema.effect.proposal"]
+        self.assertEqual(set(proposal), set(schema["required"]))
+        self.assertEqual(
+            self.store.validate_artifact(proposal, schema, entry, locator="synthetic:dag-effect-proposal"),
+            [],
+        )
+        self.assertEqual(proposal["effect_digest"], effect_binding_digest(proposal))
+        effect_mutation_count = 0
+        for field in proposal:
+            effect_mutation_count += 1
+            candidate = copy.deepcopy(self.dag["positive"])
+            effect = candidate["effect_proposals"][0]
+            effect[field] = self._different_dag_field_value(field, effect[field])
+            with self.subTest(effect_field=field):
+                self.assertIn(
+                    "POP2-INV-DAG-619",
+                    {item["code"] for item in validate_dag_invariants(candidate, self.dag_anchors)},
+                )
+        self.assertEqual(effect_mutation_count, len(schema["required"]))
+
+        surrogate = copy.deepcopy(self.dag["positive"])
+        effect = surrogate["effect_proposals"][0]
+        surrogate["effect_proposals"] = [{
+            "effect_id": effect["effect_id"],
+            "plan_revision": effect["plan_revision"],
+            "objective_digest": effect["objective_digest"],
+            "target_digest": effect["target"]["target_digest"],
+            "effect_digest": effect["effect_digest"],
+        }]
+        surrogate = finalize_dag_fixture(surrogate)
+        surrogate_anchors = {"dag": build_dag_trust_anchor(surrogate)}
+        self.assertEqual(
+            {item["code"] for item in validate_dag_invariants(surrogate, surrogate_anchors)},
+            {"POP2-INV-DAG-619"},
+        )
+
+    def test_dag_attempts_are_terminal_after_success(self) -> None:
+        candidate = copy.deepcopy(self.dag["positive"])
+        later = copy.deepcopy(candidate["attempts"][0])
+        later.update({
+            "attempt_id": "018f3f70-7b3a-7c12-8a2d-5f4e6c7b8bec",
+            "attempt_number": 2,
+            "started_at": "2026-08-24T12:00:09.510Z",
+            "completed_at": "2026-08-24T12:00:09.550Z",
+        })
+        candidate["attempts"].append(later)
+        candidate["outcomes"][0]["attempt_id"] = later["attempt_id"]
+        candidate = finalize_dag_fixture(candidate)
+        self.assertEqual(
+            {item["code"] for item in validate_dag_invariants(candidate, self.dag_anchors)},
+            {"POP2-BEH-DAG-616"},
+        )
+
+    def test_dag_all_five_retention_triggers_are_accepted_and_minimized(self) -> None:
+        receipt_field_by_trigger = {
+            "material_evidence": "evidence_refs",
+            "decision": "decision_refs",
+            "verified_effect": "effect_receipt_refs",
+            "safety_finding": "safety_finding_refs",
+            "reusable_learning": "reusable_learning_refs",
+        }
+        for trigger, receipt_field in receipt_field_by_trigger.items():
+            with self.subTest(trigger=trigger):
+                candidate = self._dag_retention_variant(trigger)
+                anchors = {"dag": build_dag_trust_anchor(candidate)}
+                self.assertEqual(validate_dag_invariants(candidate, anchors), [])
+                self.assertEqual(candidate["minimized_receipt"]["retention_reasons"], [trigger])
+                self.assertEqual(len(candidate["minimized_receipt"][receipt_field]), 1)
+
+    def test_dag_gray_status_is_not_inferred_healthy(self) -> None:
+        candidate = copy.deepcopy(self.dag["positive"])
+        candidate["statuses"][1]["status"] = "Gray"
+        candidate = finalize_dag_fixture(candidate)
+        self.assertEqual(
+            {item["code"] for item in validate_dag_invariants(candidate, self.dag_anchors)},
+            {"POP2-BEH-DAG-617"},
+        )
 
     def test_capability_registry_is_catalog_not_authority_or_runtime_state(self) -> None:
         registry = self.capability["positive"]["registry"]
@@ -1212,6 +1544,9 @@ class FoundationSchemaTests(unittest.TestCase):
                 elif entry["domain"] == "capability":
                     bundle = copy.deepcopy(fixture) if case["polarity"] == "positive" else self._mutated_capability_bundle(fixture["mutation"])
                     findings = validate_capability_invariants(bundle, self.capability_anchors)
+                elif entry["domain"] == "dag":
+                    bundle = copy.deepcopy(fixture) if case["polarity"] == "positive" else self._mutated_dag_bundle(fixture["mutation"])
+                    findings = validate_dag_invariants(bundle, self.dag_anchors)
                 else:
                     findings = self._governance_case_findings(entry["stable_code"], case["polarity"])
                 actual_codes = {finding["code"] for finding in findings}
@@ -1221,6 +1556,104 @@ class FoundationSchemaTests(unittest.TestCase):
                     self.assertEqual(actual_codes, set(case["expected_codes"]), findings)
                 else:
                     self.assertIn(entry["stable_code"], actual_codes, findings)
+
+    def _different_dag_field_value(self, field: str, value: object) -> object:
+        if field == "effect_binding":
+            return {
+                "effect_id": "effect.synthetic.rewritten",
+                "effect_digest": "sha256:" + "9" * 64,
+            }
+        if isinstance(value, bool):
+            return not value
+        if isinstance(value, int):
+            return value + 1
+        if isinstance(value, list):
+            return [*value, "synthetic.matrix"]
+        if isinstance(value, dict):
+            changed = copy.deepcopy(value)
+            changed["bound_at"] = "2026-08-24T12:00:01.750Z"
+            return changed
+        if value is None:
+            return "sha256:" + "9" * 64 if field.endswith("digest") else "synthetic.matrix"
+        if isinstance(value, str):
+            if value.startswith("sha256:"):
+                return "sha256:" + "9" * 64
+            if "T" in value and value.endswith("Z"):
+                return "2026-08-24T12:00:01.750Z"
+            return value + ".rewritten"
+        self.fail(f"unsupported DAG matrix field {field}: {type(value).__name__}")
+
+    def _mutated_dag_bundle(self, mutation: str) -> dict:
+        value = copy.deepcopy(self.dag["positive"])
+        if mutation == "rewrite-objective-acceptance":
+            value["objective_binding"]["acceptance_contract_digest"] = "sha256:" + "9" * 64
+        elif mutation == "create-cycle":
+            value["edges"][0]["to_node_id"] = "node.synthetic.right"
+            value["artifact_bindings"][0]["consumer_node_id"] = "node.synthetic.right"
+        elif mutation == "rebind-capability":
+            value["nodes"][0]["capability_binding"]["contract_version"] = "1.0.1"
+            value["nodes"][0]["capability_binding"]["contract_digest"] = "sha256:" + "9" * 64
+        elif mutation == "rebind-edge-schema":
+            digest = "sha256:" + "9" * 64
+            value["edges"][0]["artifact_schema_digest"] = digest
+            value["artifact_references"][0]["schema_digest"] = digest
+            value["artifact_bindings"][0]["expected_schema_digest"] = digest
+        elif mutation == "ready-before-dependency":
+            value["statuses"][1]["recorded_at"] = "2026-08-24T12:00:08.050Z"
+        elif mutation == "skip-attempt":
+            value["attempts"][0]["attempt_number"] = 2
+        elif mutation == "rewrite-status-reason":
+            value["statuses"][0]["reason_codes"] = ["synthetic_rewrite"]
+        elif mutation == "join-before-branches":
+            value["statuses"][9]["recorded_at"] = "2026-08-24T12:00:07.900Z"
+            value["statuses"][10]["recorded_at"] = "2026-08-24T12:00:08.000Z"
+        elif mutation == "rebind-effect":
+            value["effect_proposals"][0]["target"]["target_digest"] = "sha256:" + "9" * 64
+        elif mutation == "rewrite-revision-history":
+            value["revision"]["compiled_at"] = "2026-08-24T12:00:01.250Z"
+        elif mutation == "retain-ineligible":
+            value["outcomes"][2]["material_evidence"] = False
+        else:
+            self.fail(f"unknown DAG mutation: {mutation}")
+        return finalize_dag_fixture(value)
+
+    def _dag_retention_variant(self, trigger: str) -> dict:
+        value = copy.deepcopy(self.dag["positive"])
+        for outcome in value["outcomes"]:
+            outcome["material_evidence"] = False
+        value["retention_sources"] = {
+            "decision_refs": [],
+            "verified_effect_receipt_refs": [],
+            "safety_finding_refs": [],
+            "reusable_learning_refs": [],
+        }
+        receipt = value["minimized_receipt"]
+        receipt.update({
+            "retention_reasons": [trigger],
+            "evidence_refs": [],
+            "effect_receipt_refs": [],
+            "decision_refs": [],
+            "safety_finding_refs": [],
+            "reusable_learning_refs": [],
+        })
+        if trigger == "material_evidence":
+            value["outcomes"][2]["material_evidence"] = True
+            receipt["evidence_refs"] = ["synthetic:evidence/final-summary"]
+        elif trigger == "decision":
+            value["retention_sources"]["decision_refs"] = ["synthetic:decision/final"]
+            receipt["decision_refs"] = ["synthetic:decision/final"]
+        elif trigger == "verified_effect":
+            value["retention_sources"]["verified_effect_receipt_refs"] = ["synthetic:effect-receipt/final"]
+            receipt["effect_receipt_refs"] = ["synthetic:effect-receipt/final"]
+        elif trigger == "safety_finding":
+            value["retention_sources"]["safety_finding_refs"] = ["synthetic:safety/final"]
+            receipt["safety_finding_refs"] = ["synthetic:safety/final"]
+        elif trigger == "reusable_learning":
+            value["retention_sources"]["reusable_learning_refs"] = ["synthetic:learning/final"]
+            receipt["reusable_learning_refs"] = ["synthetic:learning/final"]
+        else:
+            self.fail(f"unknown retention trigger: {trigger}")
+        return finalize_dag_fixture(value)
 
     def _mutated_capability_bundle(self, mutation: str) -> dict:
         value = copy.deepcopy(self.capability["positive"])
