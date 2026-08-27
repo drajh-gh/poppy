@@ -6,6 +6,8 @@ Use this playbook for incoming issues, requests, incidents, proposals, or pull r
 
 Resolve the project's authoritative tracker, categories, workflow, and labels. Read the complete available item history, prior triage notes, links, decisions, and current state. Do not repeat answered questions.
 
+At intake, record the source's exact question or requested action, affected party, urgency, and requested output. Separate that anchor from the reporter's proposed cause. When later evidence contradicts a proposed cause, continue until the original question is answered or its decisive evidence is explicitly unavailable.
+
 Search the tracker, repository, and authoritative decision sources by domain concept rather than title alone. Report where and how the search was performed. Distinguish semantic outcomes without imposing labels:
 
 - duplicate or already delivered;
@@ -17,6 +19,10 @@ Search the tracker, repository, and authoritative decision sources by domain con
 - security escalation.
 
 Recommend before mutation. Preserve unreproduced or static-only claims as unverified. A clarification note retains established facts and asks only specific remaining questions.
+
+For lifecycle or migration-related work, compare record creation and transition history with the introduction dates of current gates and invariants before classifying the behavior as expected. A record accepted under earlier rules and later blocked by a new invariant is a compatibility or remediation candidate; identify the bounded affected cohort instead of instructing the stakeholder to retry the normal workflow.
+
+When a decisive read-only probe is authorized and proportionate, perform it before closing. Do not substitute an adjacent check—for example, presence on an existing artifact—for the reported failure of creating that artifact. If the probe could cause an external effect, keep the question unverified and request authority for that exact probe or effect.
 
 ## Readiness and behavioral brief
 

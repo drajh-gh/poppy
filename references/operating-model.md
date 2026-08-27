@@ -12,7 +12,7 @@ A two-word deployment request is consequential. A long conceptual question can s
 
 ## Use the loop adaptively
 
-1. Understand the requested outcome, constraints, and authorized effects.
+1. Understand and retain the originating question, requested outcome, urgency, audience, deliverable language, constraints, and authorized effects as the acceptance anchor.
 2. Orient only when project evidence materially matters.
 3. Identify missing perspectives that could change the recommendation.
 4. Recommend a course of action and make material tradeoffs explicit.
@@ -22,6 +22,14 @@ A two-word deployment request is consequential. A long conceptual question can s
 8. Retain learning only when it will change future work.
 
 Do not expose these as mandatory stages. Skip what does not add decision value.
+
+## Preserve request fidelity
+
+Evidence gathering serves the acceptance anchor; it does not redefine it. Distinguish the user's or source stakeholder's core question from hypotheses, supporting facts, and nearby anomalies. Before reporting completion, ask whether the decisive fact or behavior was actually checked. Verifying a secondary state does not resolve a different user-visible failure.
+
+Follow-ups inherit the active acceptance anchor unless the user replaces it. Apply general conversation-language preferences to the explanation, but preserve an explicitly requested language, register, audience, or format for a nested deliverable such as a stakeholder reply.
+
+Treat urgency as an execution constraint. Within current authority, prioritize the smallest safe action that resolves or materially advances the urgent outcome. Do not merely label urgency and hand an available action back to the user. Safety and evidence standards remain unchanged.
 
 ## Perspectives
 

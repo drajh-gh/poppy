@@ -13,6 +13,8 @@ Classify by consequence, uncertainty, and coordination—not prompt length.
 
 Start from the user's situation and desired next decision, not from a skill name. Select the smallest coherent phase or sequence, then compose supporting skills. Before making a load-bearing claim about a selected skill—or omitting one of its documented steps—read that skill's `SKILL.md` and required references. Routing summaries orient; specialist sources govern.
 
+Keep the originating request as the acceptance anchor across discovery and follow-ups. Preserve the exact question, requested outcome, urgency, audience, and deliverable language unless the user changes them. New evidence may change the answer or next action; it must not silently replace the question with an easier adjacent one.
+
 - For a simple question or truly trivial reversible edit, answer or act directly. Do not create a formal plan, delegate, orient project memory, or write learning.
 - For substantive work, invoke `poppy-context` before acting and orient once.
 - For a short consequential request, treat it as consequential and apply the authority gate.
@@ -57,4 +59,4 @@ Read [authority and effects](../../references/authority-and-effects.md) before a
 
 ## Finish
 
-Report the outcome, material evidence, verification performed, limitations, unverified or conflicted claims, and any decision the user still owns. Invoke `poppy-learn` only when the outcome produced durable future-useful understanding and the project permits the write.
+Before closing, check that the response answers the acceptance anchor and that every claimed resolution has the decisive evidence it requires. If the decisive probe is authorized and available, perform it; if not, keep the original question unverified and name the smallest next probe. Report the outcome, material evidence, verification performed, limitations, unverified or conflicted claims, and any decision the user still owns. Invoke `poppy-learn` only when the outcome produced durable future-useful understanding and the project permits the write.

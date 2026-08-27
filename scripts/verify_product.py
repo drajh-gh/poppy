@@ -67,6 +67,8 @@ REQUIRED_SCENARIOS = {
     "S16_GIT_CONFLICT_RESOLUTION",
     "S17_WORK_INTAKE_TRIAGE",
     "S18_HUMAN_GUIDED_PROCEDURE",
+    "S19_REQUEST_FIDELITY_AND_LANGUAGE",
+    "S20_LEGACY_GATE_CHRONOLOGY",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -428,6 +430,7 @@ def policy_check() -> dict:
         "leaves the affected claim unverified",
         "leaves it conflicted",
         "standing personal preference for adaptive sub-agent use",
+        "keep the originating request as the acceptance anchor",
     )
     required_combined = (
         "one writer per target",
@@ -447,6 +450,9 @@ def policy_check() -> dict:
         "never automatically applies `ready-for-agent`",
         "never use `git add .`",
         "a skipped or failed stage is not success",
+        "evidence gathering serves the acceptance anchor",
+        "compare record creation and transition history",
+        "working response language distinct from the language and register",
     )
     missing = [phrase for phrase in required_root if phrase not in root]
     missing += [phrase for phrase in required_combined if phrase not in combined]

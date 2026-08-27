@@ -21,6 +21,8 @@ Keep estimate, contracted scope, budget, actuals, invoicing, capacity, and forec
 
 Convert meeting evidence into explicit decisions, commitments, owners, dates, risks, open questions, and an audience-appropriate draft. Preserve uncertainty in poor transcripts. Drafting is not sending. Do not send or schedule without exact effect approval and read-back verification.
 
+Keep the working response language distinct from the language and register of a requested stakeholder artifact. A general instruction such as "reply in English" governs the analysis unless it explicitly replaces an earlier request for a Slovenian, formal, or otherwise audience-specific draft.
+
 ## Source boundaries
 
 Trackers remain authoritative for item state; repositories for code; approved commercial sources for financial facts; and meeting artifacts for what was discussed. Durable memory synthesizes context and rationale without duplicating the tracker.
