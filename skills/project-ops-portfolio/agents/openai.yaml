@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Operations Portfolio"
-  short_description: "Review projects across the portfolio"
-  default_prompt: "Use $project-ops-portfolio to prepare a cross-project portfolio review from sanitized summaries."

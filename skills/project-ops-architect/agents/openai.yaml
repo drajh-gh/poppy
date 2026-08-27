@@ -1,4 +1,0 @@
-interface:
-  display_name: "Poppy / Architecture"
-  short_description: "Design the project operating system"
-  default_prompt: "Poppy, use $project-ops-architect as the architecture node and reconcile the operating design."

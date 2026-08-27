@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Operations Health"
-  short_description: "Prepare health and weekly planning"
-  default_prompt: "Use $project-ops-health to prepare an evidence-backed weekly project health update."

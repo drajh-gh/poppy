@@ -1,4 +1,0 @@
-interface:
-  display_name: "Poppy / Improvement"
-  short_description: "Improve operations from real work evidence"
-  default_prompt: "Poppy, use $project-ops-upgrader to govern this evidence-backed improvement and reconcile the outcome."

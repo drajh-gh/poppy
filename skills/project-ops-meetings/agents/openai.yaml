@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Operations Meetings"
-  short_description: "Prepare and process project meetings"
-  default_prompt: "Use $project-ops-meetings to prepare this meeting and turn its evidence into confirmed follow-ups."

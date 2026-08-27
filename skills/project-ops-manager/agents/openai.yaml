@@ -1,4 +1,0 @@
-interface:
-  display_name: "Poppy / Operations Control"
-  short_description: "Run the project operating control loop"
-  default_prompt: "Poppy, use $project-ops-manager as the operations-control node and reconcile the next PM actions."

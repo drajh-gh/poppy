@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Operations Onboarding"
-  short_description: "Guided project setup and recommendations"
-  default_prompt: "Use $project-ops-onboard to guide me through onboarding a project into Project Operations."

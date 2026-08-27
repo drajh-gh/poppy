@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Operations Delivery"
-  short_description: "Orchestrate approved delivery work"
-  default_prompt: "Use $project-ops-delivery to run an approved delivery manifest through implementation and handoff."

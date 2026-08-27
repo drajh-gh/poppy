@@ -1,37 +1,12 @@
 # Development
 
-## Prerequisites
+Poppy v3 is a documentation-and-skills product. Python is needed only for deterministic verification.
 
-- Git
-- Python 3.11 or newer
-- Node.js for JavaScript syntax and the dependency-free Obsidian smoke harness
+1. Work from an exact base in an isolated branch or worktree.
+2. Keep one writer per target and preserve pre-existing changes.
+3. Keep product content project-agnostic and machine-path-free.
+4. Validate every skill changed in the candidate.
+5. Run `python scripts/verify_product.py`.
+6. Run impact-based scenario checks for a leaf-only change; rerun the complete suite for root, authority, context/profile, delegation, or assurance changes.
 
-No package installation is required for the deterministic suite.
-
-## Workflow
-
-1. Work on an isolated branch with one writer.
-2. Keep project-specific adapters and live configuration outside tracked product source.
-3. Edit the canonical capability graph only at `references/poppy-capability-graph.json`.
-4. Run `python scripts/verify_product.py`.
-5. Commit reviewable changes, then run `python scripts/verify_product.py --require-clean`.
-
-Cockpit-only verification is available with:
-
-```powershell
-python apps/obsidian-cockpit/scripts/verify.py --check
-```
-
-It creates synthetic Atlas Demo and Beacon Demo vaults in a temporary directory, validates server-enforced project isolation, builds the six-file plugin package, and hash-checks two temporary installations. It never reads or writes a real vault.
-
-## Local configuration
-
-`apps/obsidian-cockpit/config/bridge.local.json` is ignored. Begin with `bridge.example.json`, then add local project paths. Do not commit the resulting file. Build output and runtime state are ignored as well.
-
-To create a reviewed local installation candidate without changing the inert default package, use the ignored local configuration and an output below the ignored product runtime:
-
-```powershell
-python apps/obsidian-cockpit/scripts/build.py --config apps/obsidian-cockpit/config/bridge.local.json --output runtime/installation-candidate/poppy-ops-cockpit
-```
-
-The builder refuses custom output outside `runtime/` and always emits the exact six-file inventory.
+The scenario catalog is acceptance material, not a runtime contract or execution ledger. Evidence captured while dogfooding belongs outside the repository.

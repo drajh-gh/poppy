@@ -1,14 +1,11 @@
+.venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-apps/obsidian-cockpit/config/bridge.local.json
-apps/obsidian-cockpit/dist/
-apps/obsidian-cockpit/runtime/
+dist/
 runtime/
 *.sqlite
 *.sqlite3
 *.db
-*.jsonl.local
-
