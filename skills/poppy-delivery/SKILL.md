@@ -31,9 +31,11 @@ Load detailed guidance only when the situation calls for it:
 3. Preserve existing changes. Stop if the intended edit overlaps them.
 4. Implement in the authorized working tree. Use an ephemeral native plan only when dependencies matter.
 5. Run targeted checks first, then broader checks sequentially when risk warrants them.
-6. Use `poppy-assure` for a fresh read-only pass when uncertainty, blast radius, or release consequence warrants independence.
-7. Report the behavior changed, exact verification, limitations, and unverified or conflicted evidence.
+6. For a user-visible change that needs the user's judgment before PR preparation, create the smallest faithful visual-evidence packet described in [evidence and assurance](../../references/evidence-and-assurance.md). Use screenshots for static states and short video for interaction or motion when supported; do not install tooling merely to obtain a preferred medium.
+7. Present the candidate-bound evidence and pause PR preparation for the user's explicit `ACCEPT`, `REJECT`, or `REQUEST_CHANGES` decision. Route rejection or requested changes back through the authorized implementation path, and recapture after any relevant candidate change. Missing or unfaithful capture remains unverified rather than being substituted with a claim.
+8. Use `poppy-assure` for a fresh read-only pass when uncertainty, blast radius, or release consequence warrants independence.
+9. Report the behavior changed, exact verification, visual-acceptance decision when applicable, limitations, and unverified or conflicted evidence.
 
 The owner prefers adaptive delegation when useful. Keep one writer per target. Give any delegated writer an isolated worktree and explicit file boundary; all other delegates remain read-only. Root integrates and verifies the candidate.
 
-Do not commit, push, open or merge a pull request, add a dependency, install software, deploy, or alter an external system unless the user authorizes that exact effect.
+Visual acceptance qualifies only the displayed candidate. It does not authorize a commit, push, pull request, merge, publication, deployment, dependency addition, installation, or other external effect. Obtain the authority required for each exact effect separately.

@@ -69,6 +69,7 @@ REQUIRED_SCENARIOS = {
     "S18_HUMAN_GUIDED_PROCEDURE",
     "S19_REQUEST_FIDELITY_AND_LANGUAGE",
     "S20_LEGACY_GATE_CHRONOLOGY",
+    "S21_PRE_PR_VISUAL_ACCEPTANCE",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -106,6 +107,7 @@ REQUIRED_NEGATIVE_CASES = {
     "N32_GIT_NO_AUTOMATIC_COMPLETION",
     "N33_HUMAN_PROCEDURE_EFFECT_SAFETY",
     "N34_OBSIDIAN_MEMORY_BOUNDARY",
+    "N35_VISUAL_ACCEPTANCE_NOT_PR_AUTHORITY",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -453,6 +455,9 @@ def policy_check() -> dict:
         "evidence gathering serves the acceptance anchor",
         "compare record creation and transition history",
         "working response language distinct from the language and register",
+        "pause before pull-request preparation",
+        "a relevant candidate change invalidates visual acceptance",
+        "user acceptance never supplies git or release authority",
     )
     missing = [phrase for phrase in required_root if phrase not in root]
     missing += [phrase for phrase in required_combined if phrase not in combined]

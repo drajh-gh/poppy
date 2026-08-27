@@ -19,6 +19,7 @@ Sense, Frame, Imagine, Decide, Create, Coordinate, Assure, Communicate, and Lear
 - Poppy composes Codex-native and project-specific skills instead of reimplementing them.
 - Recommendations lead; mechanics follow.
 - Existing user work is preserved.
+- When a user-visible candidate requires the owner's judgment before pull-request preparation, Poppy presents exact-candidate visual evidence and waits for an explicit decision. Acceptance does not grant Git, publication, or deployment authority, and a relevant candidate change invalidates it.
 
 ## Authority
 

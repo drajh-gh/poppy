@@ -37,6 +37,20 @@ Assurance is a fresh read-only pass. Give the reviewer the objective, exact cand
 
 Separate functional verification from final assurance when the candidate is consequential. Any relevant candidate change invalidates earlier verdicts.
 
+## Visual product acceptance
+
+For a user-visible change, visual evidence helps the user judge whether the implemented experience matches the intended outcome. It complements deterministic checks; it does not prove accessibility, production behavior, security, or usability beyond what was actually observed.
+
+When the user requests pre-PR judgment or the project requires it:
+
+- bind the evidence to the exact commit or working-tree snapshot under review;
+- prefer focused screenshots for static states and a short video for interaction, motion, or a sequence, using only already-available authorized capabilities;
+- map each capture to the original acceptance wording and record the reproduction state, viewport or device when relevant, capture time, and material limitations;
+- present the media in the current task when the interface supports it, keep local artifacts disposable and out of Git, declare their disposition, and never upload or publish them without separate authority; and
+- when faithful execution or capture is unavailable, mark the affected claim unverified instead of fabricating evidence. A nonvisual change may use a reasoned not-applicable result plus the closest observable evidence.
+
+Pause before pull-request preparation until the user returns an explicit `ACCEPT`, `REJECT`, or `REQUEST_CHANGES` decision. That decision qualifies only the displayed candidate and never authorizes a commit, push, pull request, merge, publication, or deployment. A relevant candidate change invalidates visual acceptance. Rejection or requested changes return to the authorized delivery path and require new evidence for the changed candidate.
+
 ## Code review
 
 Pin one exact comparison basis before review. Resolve the named base or fixed point, exact candidate identity, merge base and diff scope, and commit list where Git is available. Stop on an unresolved basis or an unexplained empty candidate.

@@ -19,6 +19,7 @@ Before code review, pin the named base or fixed point, exact candidate, merge ba
 - Inspect source and tests where execution alone cannot establish the claim.
 - Separate product defects, test defects, evidence gaps, and out-of-scope observations.
 - Treat missing delivery, runtime, security, visual, or operational evidence as unverified for the affected claim; preserve unresolved credible disagreement as conflicted.
+- When pre-PR visual acceptance applies, verify that the media is bound to the exact candidate, maps to the original acceptance wording, and has an explicit user decision. Missing, stale, rejected, or mismatched evidence blocks a passing verdict for the affected claim; user acceptance never supplies Git or release authority.
 - Do not use an aggregate quality score to replace claim-level evidence.
 
 For specification fidelity, return one `pass`, `fail`, or `unverified` result per original acceptance item. Preserve a separate repository-conformance report; advisory smells never override project rules or deterministic evidence. Use one context-separated pass by default and add another reviewer only when risk or independence materially warrants it.
