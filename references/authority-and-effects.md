@@ -35,4 +35,16 @@ Resolve exact absolute targets before a destructive action. Prefer recoverable o
 
 ## Honest outcomes
 
-Report only observed effects. A command exit is not enough when the destination can be read back. If verification is missing or contradictory, the effect is Gray or failed—not successful by assumption.
+Report only observed effects. A command exit is not enough when the destination can be read back. If verification is missing, the effect is unverified; if authoritative evidence contradicts the claimed result, it failed.
+
+## Deferred effects and partial failure
+
+Treat tracker publication, Git history changes, provider mutations, and effectful generated procedures as distinct effect bundles. Preview exact targets, content, ordering, idempotency or repeat behavior, verification, recovery, and rollback before approval. Approval to author an effectful helper does not authorize running it.
+
+After every external mutation, read back the authoritative destination. Stop immediately on partial failure, inventory observed effects, and reconcile before retrying. Never silently continue, duplicate an effect, or report aggregate success.
+
+Staging and Git operation completion are separate from resolving working-tree content. Never use broad staging such as `git add .`, `git add -A`, or `git commit -a`; stage only reviewed exact paths with applicable authority. Continuing, committing, aborting, skipping, quitting, changing branches, and publishing each retain separate authority.
+
+Production instrumentation is never authorized by a diagnosis playbook. Repository instrumentation, local harnesses, regression tests, and artifact deletion are writes and require the task's applicable authority. Inventory temporary artifacts and follow a declared disposition rather than deleting them automatically.
+
+Keep secrets out of prompts, logs, command arguments, public artifacts, and unnecessary retention. Before a local secret write, validate the exact confined path, Git tracking and ignore state, links or junctions, permissions, encoding, format, backup, and retention requirements.

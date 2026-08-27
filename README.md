@@ -15,6 +15,10 @@ Poppy is deliberately small. There is no cockpit, telemetry service, automation,
 
 Poppy consumes project instructions, project-specific skills, and configured connectors as evidence and capability. It never generates or injects personal policy into shared project files.
 
+Poppy starts from the user's situation and progressively loads only the specialist guidance needed for the next coherent phase. Decision maps, review structures, diagnosis evidence, specifications, and ticket previews are informational task aids—not a workflow runtime or persistent graph.
+
+When a project is mapped to an external Obsidian vault, Poppy can use it as evidence-backed project memory through the nominated profile. The vault remains outside the repository, raw receipts remain immutable, compiled pages retain provenance and freshness, and tracker state is never mirrored into memory. No Obsidian bridge or cockpit is required.
+
 ## Verify
 
 ```powershell

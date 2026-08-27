@@ -14,6 +14,7 @@ Read [project context and memory](../../references/project-context.md) and [evid
 3. Validate the recognized identity, repository, vault, source-authority, sensitivity, and memory-write fields. Leave unknown legacy fields inert and unchanged.
 4. For substantive work, read configured `current.md` and the project `index.md` once, then follow only task-relevant routes.
 5. Treat project sources as authority for current facts and memory as compiled context with provenance.
+6. When the nominated memory is an Obsidian vault, read its applicable instructions and source map only as needed. Preserve immutable raw receipts, compiled-page freshness, aliases, translations, and human-owned inbox or daily notes.
 
 Tiny work skips orientation.
 
@@ -25,4 +26,6 @@ If identity is missing or malformed, permit read-only repository work only. Repo
 
 Write only when evidence changed durable future understanding, the profile permits the exact write, the destination is confined to the configured project memory root, and the request is not trivial, read-only, diagnosis-only, or review-only. Preserve provenance. Do not mirror tracker items into memory.
 
-Report what context was used, any stale or contradictory source, and every claim that remains Gray.
+For domain work, read only explicitly nominated glossaries, context maps, decisions, or architecture records; do not infer boundaries from folders or code layout. Read [domain modeling](../../references/domain-modeling.md) when terminology or current-versus-intended behavior matters.
+
+Report what context was used, any stale or contradictory source, and every claim that remains unverified or conflicted.

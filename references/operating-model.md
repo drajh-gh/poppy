@@ -40,3 +40,17 @@ Use only the perspectives that matter:
 ## Native plans
 
 Use a native task plan only when ordering, parallel lanes, or joins materially affect execution. Keep it ephemeral. Do not create a graph, receipt, quality score, or persistent run record.
+
+## Route from situations, not catalogs
+
+Start from the user's situation and desired next decision. Select the smallest coherent phase or sequence, then compose the supporting skills. These are conditional examples, not a mandatory workflow or exhaustive catalog:
+
+- rough idea or unclear scope: frame and recommend before creating;
+- uncertainty needing runnable or visual evidence: use a bounded prototype only when authorized, then return findings to the decision;
+- defect: reproduce and diagnose before correcting and verifying;
+- incoming work: reconcile history, intent, and readiness before delivery;
+- large foggy effort: map the decision frontier ephemerally, then collapse it into an actionable recommendation;
+- external evidence gap: research for the named decision, then return to the main work; and
+- completed phase: decide explicitly how to carry context into the next phase.
+
+Before making a load-bearing process claim about a selected specialist, or omitting one of its documented steps, read that specialist's `SKILL.md` and required references. Routing summaries orient; specialist and project sources govern.

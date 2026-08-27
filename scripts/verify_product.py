@@ -30,13 +30,80 @@ EXPECTED_SKILLS = {
 }
 
 EXPECTED_REFERENCES = {
+    "architecture-and-design.md",
     "authority-and-effects.md",
+    "decision-discovery.md",
     "delegation-and-delivery.md",
+    "diagnosis-and-test-first-delivery.md",
+    "domain-modeling.md",
     "evidence-and-assurance.md",
+    "git-conflict-resolution.md",
+    "human-guided-procedures.md",
     "operating-model.md",
     "operations.md",
     "project-context.md",
+    "prototype-to-learn.md",
     "research-and-learning.md",
+    "specification-and-tickets.md",
+    "work-intake.md",
+}
+
+REQUIRED_SCENARIOS = {
+    "S1_DIRECT_TINY_EDIT",
+    "S2_ROUGH_FEATURE",
+    "S3_DEFECT_FIX",
+    "S4_UX_IMPROVEMENT",
+    "S5_RESEARCH_DECISION",
+    "S6_RELEASE_READINESS",
+    "S7_MEETING_TO_ACTIONS",
+    "S8_DURABLE_LESSON",
+    "S9_PHASE_BOUNDARY_CONTINUE",
+    "S10_DECISION_DISCOVERY_AND_WAYFINDING",
+    "S11_ARCHITECTURE_ASSESSMENT_AND_DESIGN",
+    "S12_PROTOTYPE_TO_LEARN",
+    "S13_DIAGNOSIS_ONLY",
+    "S14_LEGACY_CHARACTERIZATION",
+    "S15_SPECIFICATION_TO_TICKET_PREVIEW",
+    "S16_GIT_CONFLICT_RESOLUTION",
+    "S17_WORK_INTAKE_TRIAGE",
+    "S18_HUMAN_GUIDED_PROCEDURE",
+}
+
+REQUIRED_NEGATIVE_CASES = {
+    "N1_PROFILE_NEVER_WIDENS_AUTHORITY",
+    "N2_MISSING_MEMORY_CONTROL",
+    "N3_NO_FALSE_HEALTH",
+    "N4_SHORT_CONSEQUENTIAL_REQUEST",
+    "N5_NO_UNAPPROVED_THIRD_PARTY_ACTION",
+    "N6_PRESERVE_USER_CHANGES",
+    "N7_ONE_WRITER",
+    "N8_NON_POPPY_SESSION_UNCHANGED",
+    "N9_SHARED_SURFACE_INTEGRITY",
+    "N10_MALFORMED_PROJECT_IDENTITY",
+    "N11_MALFORMED_MEMORY_POLICY",
+    "N12_UNKNOWN_LEGACY_FIELDS",
+    "N13_PROJECT_INDEX_EXACT_MATCH_CONTROL",
+    "N14_PROJECT_INDEX_DUPLICATE_MATCH",
+    "N15_PROJECT_INDEX_MALFORMED",
+    "N16_ROUTING_SUMMARY_NOT_AUTHORITY",
+    "N17_HANDOFF_PORTABILITY_ONLY",
+    "N18_REVIEW_ACCEPTANCE_INTEGRITY",
+    "N19_REVIEW_EVIDENCE_NOT_SCORE_OR_RUNTIME",
+    "N20_DIAGNOSIS_WITHOUT_LOOP_OR_AUTHORITY",
+    "N21_ARTIFACT_DISPOSITION_REQUIRES_AUTHORITY",
+    "N22_DISCOVERY_DOMAIN_AND_CAPTURE_BOUNDARY",
+    "N23_ARCHITECTURE_SELECTION_AND_NO_CHANGE",
+    "N24_DESIGN_HEURISTICS_NOT_LAWS",
+    "N25_PROTOTYPE_EXECUTION_OR_PROMOTION",
+    "N26_NO_TEST_FIRST_DOGMA",
+    "N27_SPEC_READINESS_AND_PUBLICATION_GATE",
+    "N28_TICKET_PUBLICATION_AND_RECOVERY",
+    "N29_UNTRUSTED_PR_BOUNDARY",
+    "N30_TRACKER_EFFECT_NO_SHADOW_STATE",
+    "N31_DECISION_MAP_NEVER_GRANTS_AUTHORITY",
+    "N32_GIT_NO_AUTOMATIC_COMPLETION",
+    "N33_HUMAN_PROCEDURE_EFFECT_SAFETY",
+    "N34_OBSIDIAN_MEMORY_BOUNDARY",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -48,12 +115,21 @@ EXPECTED_SOURCE_FILES = {
     "docs/development.md",
     "docs/release.md",
     "references/authority-and-effects.md",
+    "references/architecture-and-design.md",
+    "references/decision-discovery.md",
     "references/delegation-and-delivery.md",
+    "references/diagnosis-and-test-first-delivery.md",
+    "references/domain-modeling.md",
     "references/evidence-and-assurance.md",
+    "references/git-conflict-resolution.md",
+    "references/human-guided-procedures.md",
     "references/operating-model.md",
     "references/operations.md",
     "references/project-context.md",
+    "references/prototype-to-learn.md",
     "references/research-and-learning.md",
+    "references/specification-and-tickets.md",
+    "references/work-intake.md",
     "scripts/materialize_scenario.py",
     "scripts/verify_product.py",
     "skills/poppy/SKILL.md",
@@ -270,6 +346,9 @@ def linked_reference_check(paths: list[Path]) -> dict:
 
 def boundary_check(paths: list[Path]) -> dict:
     forbidden_identities = ("slo" + "ski", "ever" + "away", "orod" + "jarna")
+    deprecated_evidence_label = "gr" + "ay"
+    retired_project_identity = "project" + " os"
+    retired_project_slug = "project" + "-os"
     slash = "/"
     backslash = chr(92)
     forbidden_machine_paths = (
@@ -318,6 +397,10 @@ def boundary_check(paths: list[Path]) -> dict:
                 violations.append(f"forbidden identity or machine path in {relative}: {token}")
         if any(pattern.search(text) for pattern in absolute_paths):
             violations.append(f"generic absolute machine path in {relative}")
+        if re.search(rf"\b{deprecated_evidence_label}\b", text):
+            violations.append(f"deprecated evidence label in {relative}")
+        if retired_project_identity in text or retired_project_slug in text:
+            violations.append(f"retired project identity in {relative}")
         if credential.search(text):
             violations.append(f"credential-shaped assignment in {relative}")
         if any(pattern.search(text) for pattern in secret_shapes):
@@ -331,16 +414,19 @@ def policy_check() -> dict:
     root = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8").casefold()
     combined = "\n".join(
         path.read_text(encoding="utf-8").casefold()
-        for path in sorted((ROOT / "skills").glob("*/SKILL.md"))
+        for path in sorted([*(ROOT / "skills").glob("*/SKILL.md"), *(ROOT / "references").glob("*.md")])
     )
     required_root = (
         "simple question or truly trivial reversible edit",
         "short consequential request",
+        "start from the user's situation and desired next decision",
+        "routing summaries orient; specialist sources govern",
         "native ephemeral task plan",
         "profiles and confidence can narrow authority but never expand it",
         "named target and effect, preview, exact approval, read-back verification, and rollback path",
         "preserve existing user changes",
-        "gray at claim level",
+        "leaves the affected claim unverified",
+        "leaves it conflicted",
         "standing personal preference for adaptive sub-agent use",
     )
     required_combined = (
@@ -350,6 +436,17 @@ def policy_check() -> dict:
         "tracker state in the tracker",
         "diagnosis-only",
         "writes remain blocked",
+        "specification fidelity",
+        "repository conformance",
+        "handoff only when work must travel",
+        "production instrumentation is prohibited",
+        "raw receipts are immutable",
+        "never mandate `context.md`",
+        "a justified no-change outcome",
+        "execution alone is not validation",
+        "never automatically applies `ready-for-agent`",
+        "never use `git add .`",
+        "a skipped or failed stage is not success",
     )
     missing = [phrase for phrase in required_root if phrase not in root]
     missing += [phrase for phrase in required_combined if phrase not in combined]
@@ -363,42 +460,15 @@ def scenario_check() -> dict:
     fixtures = json.loads((ROOT / "tests" / "fixtures.json").read_text(encoding="utf-8"))
     scenarios = catalog.get("scenarios", [])
     negative = catalog.get("negative_cases", [])
-    required_scenarios = {
-        "S1_DIRECT_TINY_EDIT",
-        "S2_ROUGH_FEATURE",
-        "S3_DEFECT_FIX",
-        "S4_UX_IMPROVEMENT",
-        "S5_RESEARCH_DECISION",
-        "S6_RELEASE_READINESS",
-        "S7_MEETING_TO_ACTIONS",
-        "S8_DURABLE_LESSON",
-    }
-    required_negative = {
-        "N1_PROFILE_NEVER_WIDENS_AUTHORITY",
-        "N2_MISSING_MEMORY_CONTROL",
-        "N3_NO_FALSE_HEALTH",
-        "N4_SHORT_CONSEQUENTIAL_REQUEST",
-        "N5_NO_UNAPPROVED_THIRD_PARTY_ACTION",
-        "N6_PRESERVE_USER_CHANGES",
-        "N7_ONE_WRITER",
-        "N8_NON_POPPY_SESSION_UNCHANGED",
-        "N9_SHARED_SURFACE_INTEGRITY",
-        "N10_MALFORMED_PROJECT_IDENTITY",
-        "N11_MALFORMED_MEMORY_POLICY",
-        "N12_UNKNOWN_LEGACY_FIELDS",
-        "N13_PROJECT_INDEX_EXACT_MATCH_CONTROL",
-        "N14_PROJECT_INDEX_DUPLICATE_MATCH",
-        "N15_PROJECT_INDEX_MALFORMED",
-    }
-    if {item.get("id") for item in scenarios} != required_scenarios:
-        raise VerificationError("The eight mixed scenarios are incomplete or renamed")
-    if {item.get("id") for item in negative} != required_negative:
-        raise VerificationError("Negative control catalog is incomplete or renamed")
+    if {item.get("id") for item in scenarios} != REQUIRED_SCENARIOS:
+        raise VerificationError("Required mixed-scenario identifiers are incomplete or renamed")
+    if {item.get("id") for item in negative} != REQUIRED_NEGATIVE_CASES:
+        raise VerificationError("Required negative-control identifiers are incomplete or renamed")
     required_fields = {
         "id",
         "prompt",
         "permitted_effects",
-        "expected_gray_behavior",
+        "expected_evidence_limits",
         "observable_assertions",
     }
     for item in [*scenarios, *negative]:
@@ -406,8 +476,8 @@ def scenario_check() -> dict:
             raise VerificationError(f"Scenario fields invalid for {item.get('id')}")
         if not item["prompt"].strip() or not item["permitted_effects"] or not item["observable_assertions"]:
             raise VerificationError(f"Scenario content incomplete for {item['id']}")
-        if "gray" not in item["expected_gray_behavior"].casefold():
-            raise VerificationError(f"Scenario lacks explicit Gray behavior: {item['id']}")
+        if not item["expected_evidence_limits"].strip():
+            raise VerificationError(f"Scenario lacks explicit evidence limits: {item['id']}")
     template = catalog.get("execution", {}).get("evidence_capture_template", {})
     required_template = {
         "scenario_id",
@@ -426,7 +496,7 @@ def scenario_check() -> dict:
         raise VerificationError("Evidence-capture template is incomplete")
     if catalog.get("execution", {}).get("fresh_task_required") is not True:
         raise VerificationError("Scenario catalog must require fresh tasks")
-    all_ids = required_scenarios | required_negative
+    all_ids = REQUIRED_SCENARIOS | REQUIRED_NEGATIVE_CASES
     if set(fixtures) != {"fixture_version", "purpose", "fixtures"}:
         raise VerificationError("Fixture catalog top-level fields are invalid")
     if set(fixtures.get("fixtures", {})) != all_ids:

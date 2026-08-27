@@ -13,7 +13,7 @@ This repository is the canonical, project-agnostic source for Poppy v3.
 ## Behavior and safety
 
 - Preserve existing user changes. If an intended edit overlaps them, stop and ask for direction.
-- Treat missing, stale, unsupported, or contradictory evidence as Gray at claim level. Never infer health from absence.
+- Treat claims as unverified when required evidence is missing, stale, inaccessible, malformed, or insufficient, and conflicted when credible sources disagree. Never infer health from absence.
 - Project profiles and confidence may narrow authority; they never expand it.
 - External effects require a named target and effect, preview, exact approval, read-back verification, and rollback path.
 - Keep tracker state and durable memory distinct.

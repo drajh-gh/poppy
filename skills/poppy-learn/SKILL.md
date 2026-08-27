@@ -17,4 +17,6 @@ Do nothing for trivial, read-only, diagnosis-only, or review-only work. Do not c
 
 Invoke `poppy-context` to confirm project identity, the configured memory root, and exact memory-write policy. If any is missing, keep the proposed lesson in the response only; do not write.
 
-When authorized, make the smallest confined update, preserve provenance, and read it back. Keep tracker state in the tracker. Never silently modify installed Poppy skills or shared project policy; recurring, supported improvements become proposals for separate review.
+When authorized, make the smallest confined update, preserve provenance, and read it back. When the nominated memory is an Obsidian vault, preserve its canonical pages, immutable raw receipts, freshness metadata, links, and human-owned notes; append its knowledge log when required. Keep tracker state in the tracker. Never silently modify installed Poppy skills or shared project policy; recurring, supported improvements become proposals for separate review.
+
+Read [domain modeling](../../references/domain-modeling.md) before retaining a terminology, boundary, or rationale change. Retain only confirmed, source-backed, future-useful understanding; proposed, conflicted, review-only, or diagnosis-only material stays in the response.

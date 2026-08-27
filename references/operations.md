@@ -2,7 +2,7 @@
 
 ## Operational view
 
-Build project health from authoritative evidence about outcomes, scope, schedule, budget, capacity, quality, risks, decisions, and commitments. Missing evidence remains Gray; it never becomes a healthy default.
+Build project health from authoritative evidence about outcomes, scope, schedule, budget, capacity, quality, risks, decisions, and commitments. Missing evidence leaves the affected claim unverified; it never becomes a healthy default.
 
 Lead with the decision or action the user needs. Separate:
 
@@ -24,3 +24,9 @@ Convert meeting evidence into explicit decisions, commitments, owners, dates, ri
 ## Source boundaries
 
 Trackers remain authoritative for item state; repositories for code; approved commercial sources for financial facts; and meeting artifacts for what was discussed. Durable memory synthesizes context and rationale without duplicating the tracker.
+
+## Decisions and incoming work
+
+For a decision interview or a large uncertain effort, read [decision discovery](decision-discovery.md). For terminology or boundary ambiguity, read [domain modeling](domain-modeling.md). For issue, request, or pull-request intake, read [work intake](work-intake.md). For a procedure that depends on human-only values or provider steps, read [human-guided procedures](human-guided-procedures.md).
+
+Use the project's own workflow vocabulary. Read available history before asking questions, recommend before mutation, and distinguish needs-evidence, needs-decision, ready-for-specification, and ready-for-implementation outcomes without inventing tracker labels or a universal state machine.

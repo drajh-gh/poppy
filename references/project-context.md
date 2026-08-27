@@ -11,7 +11,7 @@ For substantive work, resolve the project using only bounded, already-nominated 
 
 When a project instruction nominates one exact external project-memory or vault root, treat a `project-ops.json` at that exact root as nominated too. Do not probe sibling vaults or infer a different project from directory names.
 
-The optional personal index lives at `poppy/projects.json` under the user's Codex home, outside repositories and plugin packages. It contains `version: 1` and a `projects` list. Each entry has `match.git_remote` or `match.repository_root` plus `profile`; every value is an exact string. Select only one exact match. Treat duplicate matches, malformed entries, or a missing file as Gray; never choose by a fuzzy directory-name match. The index nominates a profile but grants no effect authority. Do not create an `AGENTS.override.md` or copy the personal mapping into shared project files.
+The optional personal index lives at `poppy/projects.json` under the user's Codex home, outside repositories and plugin packages. It contains `version: 1` and a `projects` list. Each entry has `match.git_remote` or `match.repository_root` plus `profile`; every value is an exact string. Select only one exact match. Treat duplicate matches, malformed entries, or a missing file as unverified; never choose by a fuzzy directory-name match. The index nominates a profile but grants no effect authority. Do not create an `AGENTS.override.md` or copy the personal mapping into shared project files.
 
 Do not search an entire user profile, vault collection, or drive for a project. Do not create repository-local overrides or generated policy.
 
@@ -35,6 +35,10 @@ For substantive work, read the configured `current.md` and project `index.md` on
 
 Use source systems for current facts. Treat memory as compiled understanding with provenance, not as automatically current.
 
+When the nominated project memory is an Obsidian vault, it is still simply Poppy's external project memory. Read its applicable `AGENTS.md`, then the configured current and index pages once. Follow a source map or other linked page only when the task requires it. Respect freshness, sensitivity, aliases, translations, and source ownership. Raw receipts are immutable evidence; compiled wiki pages may be refreshed from stronger sources. Do not create a bridge, scan the vault broadly, infer domain boundaries from folders, or touch human-owned inbox or daily notes unless explicitly asked.
+
+Read only explicitly nominated domain glossaries, context maps, decisions, or architecture records. Code is authoritative for current implementation, not automatically for intended behavior or domain meaning.
+
 ## Memory writes
 
 Write durable memory only when all are true:
@@ -46,3 +50,5 @@ Write durable memory only when all are true:
 - the request is not read-only, diagnosis-only, review-only, or trivial.
 
 Keep tracker state in the tracker. Memory may summarize a decision, rationale, risk, or lesson and link to authoritative sources; it must not become a second backlog.
+
+For an authorized Obsidian write, prefer the existing canonical compiled page, preserve its frontmatter and links, cite the source evidence, append the vault's knowledge log when its rules require that, and read back the changed surface. Never invent `CONTEXT.md`, an ADR directory, a glossary, or a new memory silo merely because a session produced useful reasoning.
