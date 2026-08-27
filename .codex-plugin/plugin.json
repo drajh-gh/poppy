@@ -1,6 +1,6 @@
 {
   "name": "project-operations",
-  "version": "0.3.0+codex.20260827203528",
+  "version": "0.3.0+codex.20260827203916",
   "description": "Poppy is a personal, skills-only Codex partner for project operations and software delivery.",
   "author": {
     "name": "David Rajh"
@@ -20,8 +20,7 @@
     "defaultPrompt": [
       "Poppy, take this rough idea through a recommendation and implementation.",
       "Poppy, diagnose this defect and verify the fix.",
-      "Poppy, tell me what this project needs next.",
-      "Poppy, this phase is complete; decide how to carry context into the next one."
+      "Poppy, tell me what this project needs next and carry completed-phase context forward appropriately."
     ]
   }
 }
