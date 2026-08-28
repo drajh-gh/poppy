@@ -26,16 +26,17 @@ Load detailed guidance only when the situation calls for it:
 
 ## Move work forward
 
-1. Establish the user outcome, current behavior, constraints, acceptance signal, and authorized target.
-2. Bring in missing perspectives and recommend the smallest coherent solution with material tradeoffs.
-3. Preserve existing changes. Stop if the intended edit overlaps them.
-4. Implement in the authorized working tree. Use an ephemeral native plan only when dependencies matter.
-5. Run targeted checks first, then broader checks sequentially when risk warrants them.
-6. For a user-visible change that needs the user's judgment before PR preparation, create the smallest faithful visual-evidence packet described in [evidence and assurance](../../references/evidence-and-assurance.md). Use screenshots for static states and short video for interaction or motion when supported; do not install tooling merely to obtain a preferred medium.
-7. Present the candidate-bound evidence and pause PR preparation for the user's explicit `ACCEPT`, `REJECT`, or `REQUEST_CHANGES` decision. Route rejection or requested changes back through the authorized implementation path, and recapture after any relevant candidate change. Missing or unfaithful capture remains unverified rather than being substituted with a claim.
-8. Use `poppy-assure` for a fresh read-only pass when uncertainty, blast radius, or release consequence warrants independence.
-9. Report the behavior changed, exact verification, visual-acceptance decision when applicable, limitations, and unverified or conflicted evidence.
+1. Establish the originating stakeholder wording, user outcome, observed current behavior, intended behavior, constraints, acceptance signal, and authorized target.
+2. For a material business-behavior change, bind delivery to the smallest useful behavioral contract: the reported scenario, confirmed invariant, representative lifecycle or boundary cases, non-goals, decision owner, and observable acceptance. A reported example proves that case exists; it does not define the general policy. If a material item remains unsettled, return to intake or discovery instead of mutating behavior.
+3. Bring in missing perspectives and recommend the smallest coherent vertical slice with material tradeoffs. Do not combine independently valuable requests merely because they touch the same subsystem.
+4. Preserve existing changes. Stop if the intended edit overlaps them.
+5. Implement in the authorized working tree. Use an ephemeral native plan only when dependencies matter.
+6. Run targeted checks first, then broader checks sequentially when risk warrants them.
+7. For a user-visible change that needs the user's judgment before PR preparation, create the smallest faithful visual-evidence packet described in [evidence and assurance](../../references/evidence-and-assurance.md). Use screenshots for static states and short video for interaction or motion when supported; do not install tooling merely to obtain a preferred medium.
+8. Present the candidate-bound evidence and pause PR preparation for the user's explicit `ACCEPT`, `REJECT`, or `REQUEST_CHANGES` decision. Route rejection or requested changes back through the authorized implementation path, and recapture after any relevant candidate change. Missing or unfaithful capture remains unverified rather than being substituted with a claim.
+9. Use `poppy-assure` for a fresh read-only pass when uncertainty, blast radius, or release consequence warrants independence.
+10. Report the behavior changed, exact verification, candidate-acceptance decision when applicable, limitations, and every later acceptance state that remains unverified or conflicted.
 
-The owner prefers adaptive delegation when useful. Keep one writer per target. Give any delegated writer an isolated worktree and explicit file boundary; all other delegates remain read-only. Root integrates and verifies the candidate.
+Continue in the informed task by default. Delegate only when its expected decision or delivery value exceeds the context and integration cost. Keep one writer per target. Give any delegated writer an isolated worktree and explicit file boundary; all other delegates remain read-only. Root integrates and verifies the candidate.
 
 Visual acceptance qualifies only the displayed candidate. It does not authorize a commit, push, pull request, merge, publication, deployment, dependency addition, installation, or other external effect. Obtain the authority required for each exact effect separately.

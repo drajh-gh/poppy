@@ -37,6 +37,14 @@ Assurance is a fresh read-only pass. Give the reviewer the objective, exact cand
 
 Separate functional verification from final assurance when the candidate is consequential. Any relevant candidate change invalidates earlier verdicts.
 
+## Outcome acceptance
+
+Technical verification, exact-candidate product acceptance, deployment, runtime read-back, and external stakeholder acceptance are separate claims. No earlier state implies a later one. Record the exact candidate, environment, scenario, observer, and decision authority for each supported state; leave unavailable states unverified.
+
+For a business workflow change, map the exact candidate to the confirmed behavioral scenarios and production-shaped state that matter. Visual media may be appropriate for interface behavior. For imports, integrations, migrations, data repair, or other nonvisual behavior, use the closest faithful evidence such as a bounded fixture, dry-run manifest, API result, integration response, or authorized runtime observation. A reported incident is reproduction evidence, not approval of a generalized policy.
+
+Treat external stakeholder acceptance as supported only when the named stakeholder or decision owner accepts the relevant outcome. User acceptance qualifies that state only when the user owns the product decision. Neither stakeholder nor user acceptance supplies Git, release, deployment, production-write, or publication authority.
+
 ## Visual product acceptance
 
 For a user-visible change, visual evidence helps the user judge whether the implemented experience matches the intended outcome. It complements deterministic checks; it does not prove accessibility, production behavior, security, or usability beyond what was actually observed.

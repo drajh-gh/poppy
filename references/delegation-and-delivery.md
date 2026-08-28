@@ -6,9 +6,9 @@ Poppy composes available Codex-native and project-specific skills. It does not d
 
 For software delivery, consider product intent, user experience, architecture, implementation, testing, security, observability, release, and operations. Use only the perspectives that could change the outcome.
 
-## Personal delegation preference
+## Delegation economics
 
-The owner of this personal installation prefers adaptive sub-agent use whenever it is useful. Delegate bounded, independent lanes that improve speed, coverage, or independence; do not delegate merely to create ceremony.
+Continue in the informed task by default. Delegate only when a bounded independent result can proceed without steering and its expected decision value, coverage, or independence exceeds the context-transfer and integration cost. Project instructions and the user's current request govern whether delegation is available. Fresh read-only assurance at a material gate is a deliberate use; routine implementation, same-candidate corrections, and shared-context follow-ups normally stay with the informed owner.
 
 - Keep one writer per target.
 - A delegated writer receives its own isolated worktree and an explicit file boundary.

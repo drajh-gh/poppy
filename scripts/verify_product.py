@@ -70,6 +70,7 @@ REQUIRED_SCENARIOS = {
     "S19_REQUEST_FIDELITY_AND_LANGUAGE",
     "S20_LEGACY_GATE_CHRONOLOGY",
     "S21_PRE_PR_VISUAL_ACCEPTANCE",
+    "S22_CLIENT_REPORT_READINESS_BOUNDARY",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -108,6 +109,7 @@ REQUIRED_NEGATIVE_CASES = {
     "N33_HUMAN_PROCEDURE_EFFECT_SAFETY",
     "N34_OBSIDIAN_MEMORY_BOUNDARY",
     "N35_VISUAL_ACCEPTANCE_NOT_PR_AUTHORITY",
+    "N36_INCIDENT_DOES_NOT_AUTHORIZE_PREVENTION",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -431,7 +433,9 @@ def policy_check() -> dict:
         "preserve existing user changes",
         "leaves the affected claim unverified",
         "leaves it conflicted",
-        "standing personal preference for adaptive sub-agent use",
+        "incoming issue, client request, support report, incident, proposed fix",
+        "does not by itself establish intended policy or implementation readiness",
+        "continue in the informed task by default",
         "keep the originating request as the acceptance anchor",
     )
     required_combined = (
@@ -458,6 +462,9 @@ def policy_check() -> dict:
         "pause before pull-request preparation",
         "a relevant candidate change invalidates visual acceptance",
         "user acceptance never supplies git or release authority",
+        "a resolved incident does not make generalized prevention ready",
+        "a reported example proves that case exists; it does not define the general policy",
+        "technical verification, exact-candidate product acceptance, deployment, runtime read-back, and external stakeholder acceptance",
     )
     missing = [phrase for phrase in required_root if phrase not in root]
     missing += [phrase for phrase in required_combined if phrase not in combined]

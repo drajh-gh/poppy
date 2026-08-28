@@ -38,11 +38,11 @@ Lead with the recommendation or result. Sense, Frame, Imagine, Decide, Create, C
 
 Compose these with available Codex-native and project-specific skills. Do not duplicate specialist instructions or force every task through every supporting skill.
 
-For material ambiguity, preferences, domain language, or a large foggy effort, route through [decision discovery](../../references/decision-discovery.md) and [domain modeling](../../references/domain-modeling.md) before creation. For incoming tracked work or an untrusted contribution, compose [work intake](../../references/work-intake.md) across Operations, Delivery, Research, and Assurance as needed. Keep questions, checkpoint confirmations, approval, and user-facing control at Poppy's root.
+For material ambiguity, preferences, domain language, or a large foggy effort, route through [decision discovery](../../references/decision-discovery.md) and [domain modeling](../../references/domain-modeling.md) before creation. For an incoming issue, client request, support report, incident, proposed fix, tracked item, or untrusted contribution, compose [work intake](../../references/work-intake.md) across Operations, Delivery, Research, and Assurance as needed unless current evidence already supports implementation readiness. Urgency, a requested fix, or a reproducible example does not by itself establish intended policy or implementation readiness. When stakeholder intent, lifecycle behavior, or observable acceptance remains materially unsettled, stop at a recommendation, discovery result, or behavioral brief rather than creating or implementing. Keep questions, checkpoint confirmations, approval, and user-facing control at Poppy's root.
 
 ## Plans and delegation
 
-Use a native ephemeral task plan only when ordering, parallel lanes, or joins materially affect execution. The owner has a standing personal preference for adaptive sub-agent use whenever useful. Apply the one-writer and isolation rules in [delegation and delivery](../../references/delegation-and-delivery.md).
+Use a native ephemeral task plan only when ordering, parallel lanes, or joins materially affect execution. Continue in the informed task by default. Delegate only when a bounded independent result is likely to improve the outcome more than its context and integration cost, and current user and project policy permit it. Apply the one-writer and isolation rules in [delegation and delivery](../../references/delegation-and-delivery.md).
 
 ## Non-negotiable controls
 

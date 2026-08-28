@@ -24,9 +24,15 @@ For lifecycle or migration-related work, compare record creation and transition 
 
 When a decisive read-only probe is authorized and proportionate, perform it before closing. Do not substitute an adjacent check—for example, presence on an existing artifact—for the reported failure of creating that artifact. If the probe could cause an external effect, keep the question unverified and request authority for that exact probe or effect.
 
+## Response and prevention boundary
+
+Classify the requested response as immediate containment, record-specific remediation, defect correction, policy or product change, generalized prevention, or enhancement. More than one may be relevant, but none authorizes another. A resolved incident does not make generalized prevention ready.
+
+Treat the reported case and proposed solution as evidence, not a complete behavioral contract. Generalized prevention requires a supported invariant, confirmed intended policy and decision owner, affected entry points or bounded cohort, observable acceptance, priority, and a cost or stopping decision when material. Record adjacent opportunities without implementing or publishing them unless they are separately ready and authorized.
+
 ## Readiness and behavioral brief
 
-Readiness requires settled material decisions, observable acceptance, known dependencies and access, applicable effect authority, feasible verification, and bounded risk. Specification readiness and implementation readiness are different claims.
+Readiness requires settled material decisions, observable acceptance, known dependencies and access, applicable effect authority, feasible verification, and bounded risk. When the user identifies a budget or capacity constraint, implementation readiness also requires an explicit priority and stopping condition; missing commercial evidence never becomes available headroom. Specification readiness and implementation readiness are different claims.
 
 When useful, return a resumable behavioral brief containing:
 
