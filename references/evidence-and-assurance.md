@@ -65,6 +65,22 @@ When the user requests pre-PR judgment or the project requires it:
 
 Pause before pull-request preparation until the user returns an explicit `ACCEPT`, `REJECT`, or `REQUEST_CHANGES` decision. That decision qualifies only the displayed candidate and never authorizes a commit, push, pull request, merge, publication, or deployment. A relevant candidate change invalidates visual acceptance. Rejection or requested changes return to the authorized delivery path and require new evidence for the changed candidate.
 
+### Client-ready acceptance recording
+
+For every client-visible behavioral change, keep a pending client-acceptance recording checkpoint in the delivery flow. If the user did not request a recording with the implementation, offer the checkpoint after local verification; do not prepare data or record merely because the checkpoint exists. A later recording request may begin from an already-implemented candidate.
+
+Before recording, propose a compact demo contract for the user's approval. Derive it from the original stakeholder wording, accepted behavior, exact candidate, implementation, and tests. Include the relevant scenarios, starting state, synthetic seed data, acting roles, visible steps and outcomes, permission or validation paths, lifecycle or error cases, and explicit exclusions. Resolve clear details without ceremony, but ask when conflict or ambiguity could change client expectations or material scope.
+
+Choose between an authorized local, development, or preview environment by fidelity rather than habit. Prefer development or preview when the exact candidate and required integrations can be represented safely; prefer local when isolation and deterministic data produce more faithful evidence. Keep the environment and technical limitations in the user's private coverage notes rather than the client media unless they materially affect what the client is being asked to accept. Any deployment remains a separately gated effect.
+
+Prepare realistic synthetic, client-safe accounts, records, roles, sessions, and lifecycle state. Never expose real personal data, credentials, production exports, terminals, setup machinery, or secrets. Keep disposable demo support out of Git unless it is separately justified and authorized as durable test support.
+
+Produce one concise video when the complete story remains easy to follow, or several clearly named clips when roles or scenarios would make one video hard to understand. Record at a readable full-interface scale with deliberate movement and pauses, no dead time, and no artificial speed-up. Use concise burned-in subtitles in the client's language and no audio narration. Ask the user when the language is not certain. Keep the client media free of ticket numbers, commit hashes, test names, environment badges, AI references, implementation detail, and ornamental introductions or conclusions. Explain only the user action, relevant context, and visible outcome.
+
+Watch every rendered clip from beginning to end before handoff. Give the user the media, private candidate and environment identity, scenario coverage and limitations, artifact location and disposition, and a short natural client-message draft. Do not upload, publish, contact the client, or retain the media in Git without separate authority.
+
+Client acceptance is semantic, not an incantation. A named client's ordinary affirmative response such as “yes, that's it” supports acceptance of the behavior faithfully shown in that recording when the user supplies or summarizes the response. It does not authorize release or another external effect. A candidate change that could alter an accepted scenario requires replacement evidence; a demonstrably irrelevant change does not. Requested changes invalidate only the affected scenarios, which return through implementation, verification, and recapture.
+
 ## Code review
 
 Pin one exact comparison basis before review. Resolve the named base or fixed point, exact candidate identity, merge base and diff scope, and commit list where Git is available. Stop on an unresolved basis or an unexplained empty candidate.
