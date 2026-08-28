@@ -11,6 +11,8 @@ For every material claim, distinguish:
 
 An evidence gap propagates only to claims that require it. It does not make unrelated work unusable. Confidence, consensus, or absence of errors cannot turn an unverified or conflicted claim into a supported one.
 
+Do not invent numerical confidence. Use a percentage or score only when a named calibrated method and relevant evidence justify that number; otherwise report claim-level evidence, residual risk, and the next decisive gate.
+
 Keep these categories distinct in reports:
 
 - observed fact;
@@ -30,6 +32,10 @@ Match verification to the risk and surface changed:
 - release readiness: verify required evidence explicitly and leave unavailable delivery or runtime evidence unverified.
 
 Do not replace missing evidence with a fixed quality score.
+
+Technical cleanliness establishes only the surface actually checked. Schema, lint, test, link, or repository gates do not by themselves establish that a workflow, vault, interface, recommendation, or stakeholder artifact is understandable and useful. When usefulness is part of acceptance, verify the human-facing navigation, wording, decision value, or exact-candidate behavior separately before calling the outcome assured.
+
+An announced blocking gate remains blocking. Reclassify it only before the gated effect, with the observed evidence, rationale, replacement coverage, and residual risk made explicit; never merge or publish first and rationalize the gate afterward.
 
 ## Independent assurance
 

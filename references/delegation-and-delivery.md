@@ -10,11 +10,19 @@ For software delivery, consider product intent, user experience, architecture, i
 
 Continue in the informed task by default. Delegate only when a bounded independent result can proceed without steering and its expected decision value, coverage, or independence exceeds the context-transfer and integration cost. Project instructions and the user's current request govern whether delegation is available. Fresh read-only assurance at a material gate is a deliberate use; routine implementation, same-candidate corrections, and shared-context follow-ups normally stay with the informed owner.
 
+A separate user-visible task is for durable user ownership, a distinct authority boundary, or later independent continuation—not an internal work packet. Use bounded internal delegation when available and sufficient. Concurrency is a ceiling, never a reason to close an unresolved lane so another can start.
+
 - Keep one writer per target.
 - A delegated writer receives its own isolated worktree and an explicit file boundary.
 - Delegates without a writer assignment remain read-only.
 - The root retains authority, integrates results, resolves conflicts, and verifies the final candidate.
 - Do not let two workers run CPU-intensive local checks concurrently.
+
+## Delegation contract and join
+
+Give a delegate the smallest sufficient packet: exact objective and acceptance anchor, pinned project and candidate identity, settled decisions and rejected interpretations, authority, relevant primary evidence, explicit boundary, and required return shape. Prefer a narrow or no-history fork when full conversation history does not change the task.
+
+A delegate returns the answer or artifact, decisive evidence, remaining unverified or conflicted claims, and exact next action. The root independently checks that result against the acceptance anchor, urgency, language and format, authority, and decisive evidence. Reject an adjacent answer, unsupported closure, or premature hand-back instead of relaying it. Do not echo the full handoff or result back into context when a compact delta is sufficient.
 
 ## Delivery shape
 
@@ -40,3 +48,5 @@ At a natural phase boundary, decide in this order:
 5. Otherwise compact for an explicitly named next phase, retaining the objective, decisions, evidence and provenance, constraints, acceptance conditions, authority, and unresolved or conflicted claims.
 
 Do not clear or compact mid-phase merely for tidiness. Continue or split a bounded remainder. Context transitions are informational only and never expand authority. Handoffs and compactions are lossy secondary sources, so retain links to primary evidence and preserve reasoning that the next phase still needs.
+
+Before releasing, replacing, or handing off a task or worktree that contains a needed candidate, establish an artifact checkpoint: exact commit, tree, or durable patch identity; location; verification result; owner; persistence expectation; rollback; and next authorized effect. If durable preservation is not authorized, keep the informed owner and workspace alive and do not claim the phase is handoff-ready or complete.

@@ -71,6 +71,12 @@ REQUIRED_SCENARIOS = {
     "S20_LEGACY_GATE_CHRONOLOGY",
     "S21_PRE_PR_VISUAL_ACCEPTANCE",
     "S22_CLIENT_REPORT_READINESS_BOUNDARY",
+    "S23_BATCH_TRIAGE_DECISION_READY",
+    "S24_DELEGATED_JOIN_FIDELITY",
+    "S25_ARTIFACT_AND_CONTEXT_CHECKPOINT",
+    "S26_PREPARED_APPROVAL_AND_REUSE",
+    "S27_BLOCKING_GATE_INTEGRITY",
+    "S28_CALIBRATED_EVIDENCE_RECOMMENDATION",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -110,6 +116,12 @@ REQUIRED_NEGATIVE_CASES = {
     "N34_OBSIDIAN_MEMORY_BOUNDARY",
     "N35_VISUAL_ACCEPTANCE_NOT_PR_AUTHORITY",
     "N36_INCIDENT_DOES_NOT_AUTHORIZE_PREVENTION",
+    "N37_QUEUE_THROUGHPUT_NOT_COMPLETION",
+    "N38_FULL_HISTORY_AND_VISIBLE_TASK_SPRAWL",
+    "N39_ADJACENT_CHILD_RESULT_NOT_JOINED",
+    "N40_EPHEMERAL_CANDIDATE_NOT_COMPLETE",
+    "N41_APPROVAL_NOT_DEBUGGING_OR_INCANTATION",
+    "N42_UNCALIBRATED_CONFIDENCE_AND_GATE_DRIFT",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -437,6 +449,7 @@ def policy_check() -> dict:
         "does not by itself establish intended policy or implementation readiness",
         "continue in the informed task by default",
         "keep the originating request as the acceptance anchor",
+        "do not hand agent-owned work back to the user",
     )
     required_combined = (
         "one writer per target",
@@ -465,6 +478,15 @@ def policy_check() -> dict:
         "a resolved incident does not make generalized prevention ready",
         "a reported example proves that case exists; it does not define the general policy",
         "technical verification, exact-candidate product acceptance, deployment, runtime read-back, and external stakeholder acceptance",
+        "missing evidence narrows the affected claim; it does not erase the best supported recommendation",
+        "a separate user-visible task is for durable user ownership",
+        "reject an adjacent answer, unsupported closure, or premature hand-back",
+        "establish an artifact checkpoint",
+        "approval is semantic, not an incantation",
+        "human approval is the final gate to a prepared effect",
+        "do not invent numerical confidence",
+        "an announced blocking gate remains blocking",
+        "treat its stable language, length, structure, tone, terminology, and commitment style as acceptance conditions",
     )
     missing = [phrase for phrase in required_root if phrase not in root]
     missing += [phrase for phrase in required_combined if phrase not in combined]

@@ -13,6 +13,8 @@ An ordinary implementation request authorizes scoped, reversible working-tree ed
 
 Profiles, roles, confidence, conventions, and earlier broad consent may narrow action but never widen it.
 
+Requested read-only investigation and plan preparation proceed without a separate approval ceremony. Complete safe preparation that does not itself cause the gated effect before asking the user to approve that effect.
+
 ## Consequential-effect gate
 
 Before an external or difficult-to-recover effect:
@@ -27,6 +29,10 @@ Before an external or difficult-to-recover effect:
 
 Changed target, content, or effect invalidates approval. Silence is not approval.
 
+Approval is semantic, not an incantation. A direct affirmative answer to an exact current preview is valid; do not require the user to repeat targets, hashes, or prescribed wording unless an external system inherently requires it. Multiple named effects may be approved as one explicit bundle, while each still receives its own execution boundary and read-back. Reacquire approval only when the target, content, effect, material risk, or rollback changes.
+
+For an effectful helper or production repair, validate the approval contract first: exact target selection, schema and type assumptions, imports and runtime compatibility, prepare-only compilation or dry run, preservation guards, rollback behavior, and expected read-back. Human approval is the final gate to a prepared effect, not part of iterative harness debugging.
+
 ## User work and destructive actions
 
 Inspect the relevant working tree before editing. Preserve modified and untracked files. If intended edits overlap user changes, stop and ask for direction. Never clean, reset, replace, or delete unrelated work.
@@ -39,7 +45,7 @@ Report only observed effects. A command exit is not enough when the destination 
 
 ## Deferred effects and partial failure
 
-Treat tracker publication, Git history changes, provider mutations, and effectful generated procedures as distinct effect bundles. Preview exact targets, content, ordering, idempotency or repeat behavior, verification, recovery, and rollback before approval. Approval to author an effectful helper does not authorize running it.
+Treat tracker publication, Git history changes, provider mutations, and effectful generated procedures as distinct effects. They may share one explicit approval bundle, but preview exact targets, content, ordering, idempotency or repeat behavior, verification, recovery, and rollback before approval. Approval to author an effectful helper does not authorize running it.
 
 After every external mutation, read back the authoritative destination. Stop immediately on partial failure, inventory observed effects, and reconcile before retrying. Never silently continue, duplicate an effect, or report aggregate success.
 

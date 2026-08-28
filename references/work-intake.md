@@ -24,6 +24,8 @@ For lifecycle or migration-related work, compare record creation and transition 
 
 When a decisive read-only probe is authorized and proportionate, perform it before closing. Do not substitute an adjacent check—for example, presence on an existing artifact—for the reported failure of creating that artifact. If the probe could cause an external effect, keep the question unverified and request authority for that exact probe or effect.
 
+Close intake when it is decision-ready, not when every possible fact is collected or a queue slot is needed. Complete every available authorized read-only probe that can change the answer. If the requested resolution needs a consequential effect, return the supported diagnosis, exact effect preview, verification and rollback, and only the approval or decision the user genuinely owns. For every unresolved item, state its status, causal reason, decisive missing evidence, and next-action owner.
+
 ## Response and prevention boundary
 
 Classify the requested response as immediate containment, record-specific remediation, defect correction, policy or product change, generalized prevention, or enhancement. More than one may be relevant, but none authorizes another. A resolved incident does not make generalized prevention ready.

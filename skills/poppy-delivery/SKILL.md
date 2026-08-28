@@ -35,7 +35,8 @@ Load detailed guidance only when the situation calls for it:
 7. For a user-visible change that needs the user's judgment before PR preparation, create the smallest faithful visual-evidence packet described in [evidence and assurance](../../references/evidence-and-assurance.md). Use screenshots for static states and short video for interaction or motion when supported; do not install tooling merely to obtain a preferred medium.
 8. Present the candidate-bound evidence and pause PR preparation for the user's explicit `ACCEPT`, `REJECT`, or `REQUEST_CHANGES` decision. Route rejection or requested changes back through the authorized implementation path, and recapture after any relevant candidate change. Missing or unfaithful capture remains unverified rather than being substituted with a claim.
 9. Use `poppy-assure` for a fresh read-only pass when uncertainty, blast radius, or release consequence warrants independence.
-10. Report the behavior changed, exact verification, candidate-acceptance decision when applicable, limitations, and every later acceptance state that remains unverified or conflicted.
+10. Before a task, phase, or worktree transition, preserve every still-needed candidate through the artifact checkpoint in delegation and delivery; do not treat an ephemeral workspace as a durable deliverable.
+11. Report the behavior changed, exact verification, candidate-acceptance decision when applicable, limitations, and every later acceptance state that remains unverified or conflicted.
 
 Continue in the informed task by default. Delegate only when its expected decision or delivery value exceeds the context and integration cost. Keep one writer per target. Give any delegated writer an isolated worktree and explicit file boundary; all other delegates remain read-only. Root integrates and verifies the candidate.
 

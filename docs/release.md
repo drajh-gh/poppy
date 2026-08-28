@@ -7,7 +7,10 @@ A candidate is eligible for personal cutover only when:
 3. the exact v2 rollback tag and package are verified;
 4. all synthetic scenarios and negative controls pass against that exact candidate;
 5. a fresh independent read-only review finds no blocking defect; and
-6. the user's shared project surfaces remain byte-identical.
+6. every failure-derived fresh-task forward evaluation nominated for a material behavior correction passes against the exact candidate; and
+7. the user's shared project surfaces remain byte-identical.
+
+A forward evaluator receives the realistic request, exact candidate skill, and minimum synthetic evidence, but not the suspected defect, proposed fix, intended answer, or desired verdict. Static policy and catalog checks never substitute for this observed behavior.
 
 Commit, local tag, remote tag, push, pull request, merge, publication, installation, automation mutation, and deployment are distinct effects. Each retains its own exact authority gate.
 

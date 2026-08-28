@@ -9,7 +9,8 @@ Poppy v3 is a documentation-and-skills product. Python is needed only for determ
 5. Validate JSON syntax and exact scenario/fixture parity, then run `python scripts/materialize_scenario.py --verify-catalog`.
 6. Run `python scripts/verify_product.py` sequentially.
 7. Run impact-based scenario checks for a leaf-only change; rerun the complete suite for root, authority, context/profile, delegation, assurance, inventory, or scenario-contract changes.
+8. For a material skill-behavior correction, run independent fresh-task forward evaluation against realistic synthetic evidence. Give the evaluator the request, candidate skill, and minimum raw artifacts—not the suspected defect, proposed fix, intended answer, or desired verdict.
 
 The scenario catalog is acceptance material, not a runtime contract or execution ledger. Evidence captured while dogfooding belongs outside the repository.
 
-Keep required scenario identifiers centralized in the verifier and derive counts from those sets. Add behavior-focused assertions instead of scattering fixed totals or matching incidental prose. Source adaptations must use original Poppy wording and retain concise upstream provenance.
+Keep required scenario identifiers centralized in the verifier and derive counts from those sets. Add behavior-focused assertions instead of scattering fixed totals or matching incidental prose. Static catalog and policy checks prove contract presence, not live usefulness; retain fresh-task results separately as candidate evidence. Source adaptations must use original Poppy wording and retain concise upstream provenance.
