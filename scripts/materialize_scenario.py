@@ -32,12 +32,24 @@ def load_catalogs() -> tuple[dict, dict, dict[str, dict]]:
 
 
 def safe_relative(raw: str) -> Path:
+    if "\\" in raw or ":" in raw:
+        raise ValueError(f"unsafe host-sensitive fixture path: {raw}")
     pure = PurePosixPath(raw)
     if pure.is_absolute() or not pure.parts or any(part in {"", ".", ".."} for part in pure.parts):
         raise ValueError(f"unsafe fixture path: {raw}")
-    if ":" in pure.parts[0] or raw.startswith(("\\", "/")):
+    if raw.startswith(("\\", "/")):
         raise ValueError(f"absolute fixture path: {raw}")
     return Path(*pure.parts)
+
+
+def resolved_member(root: Path, raw: str) -> Path:
+    resolved_root = root.resolve()
+    destination = (resolved_root / safe_relative(raw)).resolve()
+    try:
+        destination.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError(f"fixture path escapes output root: {raw}") from exc
+    return destination
 
 
 def validate_fixture(case_id: str, fixture: dict) -> None:
@@ -99,7 +111,7 @@ def render_content(content: str, output: Path) -> str:
 
 
 def write_fixture_file(output: Path, raw: str, content: str) -> Path:
-    destination = output / safe_relative(raw)
+    destination = resolved_member(output, raw)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(render_content(content, output), encoding="utf-8", newline="\n")
     return destination
@@ -148,7 +160,11 @@ def materialize(case_id: str, output: Path) -> dict:
     )
     if "git" in fixture:
         git = fixture["git"]
-        repository = output if git["repository_root"] == "." else output / safe_relative(git["repository_root"])
+        repository = (
+            output.resolve()
+            if git["repository_root"] == "."
+            else resolved_member(output, git["repository_root"])
+        )
         repository.mkdir(parents=True, exist_ok=True)
         for raw, content in git["base_files"].items():
             destination = write_fixture_file(output, raw, content).resolve()
@@ -200,6 +216,13 @@ def materialize(case_id: str, output: Path) -> dict:
 def verify_catalog() -> dict:
     _, fixtures, cases = load_catalogs()
     digests: dict[str, str] = {}
+    unsafe_paths = ("../outside", "..\\outside", "nested/..\\outside", "C" + ":/outside", "nested:file")
+    for unsafe in unsafe_paths:
+        try:
+            safe_relative(unsafe)
+        except ValueError:
+            continue
+        raise ValueError(f"unsafe fixture path was accepted: {unsafe}")
     with tempfile.TemporaryDirectory(prefix="poppy-v3-scenarios-") as temporary:
         root = Path(temporary)
         for case_id in sorted(cases):
@@ -213,13 +236,13 @@ def verify_catalog() -> dict:
             }
             for raw, content in expected_files.items():
                 expected = render_content(content, root / case_id)
-                if (root / case_id / safe_relative(raw)).read_text(encoding="utf-8") != expected:
+                if resolved_member(root / case_id, raw).read_text(encoding="utf-8") != expected:
                     raise ValueError(f"materialized content mismatch for {case_id}: {raw}")
             if "git" in fixture:
                 repository = (
                     root / case_id
                     if fixture["git"]["repository_root"] == "."
-                    else root / case_id / safe_relative(fixture["git"]["repository_root"])
+                    else resolved_member(root / case_id, fixture["git"]["repository_root"])
                 )
                 observed = run_git(repository, "status", "--porcelain").splitlines()
                 if observed != fixture["git"]["expected_status"]:

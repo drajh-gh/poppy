@@ -1,15 +1,15 @@
 {
   "name": "project-operations",
-  "version": "0.3.0+codex.20260828135146",
-  "description": "Poppy is a personal, skills-only Codex partner for project operations and software delivery.",
+  "version": "0.3.0+codex.20260830125908",
+  "description": "Poppy is a personal, skills-only Codex partner for project decisions, verified delivery, and evidence-aware communication.",
   "author": {
     "name": "David Rajh"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Poppy",
-    "shortDescription": "Personal project and delivery partner.",
-    "longDescription": "Poppy starts from the user's situation, selects the smallest coherent phase or sequence, composes project and native skills, acts within explicit authority, verifies consequential results, and retains only durable learning.",
+    "shortDescription": "Quiet project and delivery partner.",
+    "longDescription": "Poppy preserves the user's outcome, selects only the project, delivery, research, context, assurance, or learning phase that can change the result, acts within explicit authority, verifies consequential claims, and communicates for the named reader.",
     "developerName": "David Rajh",
     "category": "Productivity",
     "capabilities": [
@@ -18,9 +18,9 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Poppy, take this rough idea through a recommendation and implementation.",
+      "Poppy, turn this rough idea into a recommendation, then implement the selected outcome.",
       "Poppy, diagnose this defect and verify the fix.",
-      "Poppy, tell me what this project needs next and carry completed-phase context forward appropriately."
+      "Poppy, tell me what this project needs next and give me the decision-ready version."
     ]
   }
 }

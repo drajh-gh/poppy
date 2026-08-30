@@ -51,9 +51,9 @@ A durable map is exceptional. Use only a project-authoritative tracker or explic
 
 ## Provenance
 
-Adapted in original Poppy wording from Matt Pocock's MIT-licensed `grilling`, `grill-with-docs`, and `wayfinder` guidance reviewed on 2026-08-27:
+Adapted in original Poppy wording from Matt Pocock's MIT-licensed `grilling`, `grill-with-docs`, and `wayfinder` guidance pinned at revision `321658273cb1d20b76026717d027d505790106d4`:
 
-- https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/wayfinder
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/productivity/grilling/SKILL.md
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/grill-with-docs/SKILL.md
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/wayfinder/SKILL.md
 

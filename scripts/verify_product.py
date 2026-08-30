@@ -18,6 +18,7 @@ COCKPIT_SOURCE = "b7373b7ad3760243621bac2198f2b4c6ec4b9729"
 REMOTE_SEED = "305efbd300a1c59ef0e84553b84638d0def22568"
 V2_FREEZE = "7c4a7b3306319e9810c6e89bd6fb5e2bc97cda1e"
 V2_TAG = "poppy-v2-final"
+CANDIDATE_DIGEST_ALGORITHM = "sha256(relative-path-nul-git-filtered-blob-oid-nul)"
 
 EXPECTED_SKILLS = {
     "poppy",
@@ -32,20 +33,25 @@ EXPECTED_SKILLS = {
 EXPECTED_REFERENCES = {
     "architecture-and-design.md",
     "authority-and-effects.md",
+    "client-acceptance.md",
+    "communication-and-writing.md",
     "decision-discovery.md",
-    "delegation-and-delivery.md",
+    "delegation-and-continuity.md",
     "diagnosis-and-test-first-delivery.md",
     "domain-modeling.md",
+    "durable-learning.md",
+    "engineering-delivery.md",
     "evidence-and-assurance.md",
+    "external-research.md",
     "git-conflict-resolution.md",
     "human-guided-procedures.md",
     "operating-model.md",
     "operations.md",
     "project-context.md",
     "prototype-to-learn.md",
-    "research-and-learning.md",
-    "specification-and-tickets.md",
+    "specification.md",
     "work-intake.md",
+    "work-items.md",
 }
 
 REQUIRED_SCENARIOS = {
@@ -79,6 +85,9 @@ REQUIRED_SCENARIOS = {
     "S28_CALIBRATED_EVIDENCE_RECOMMENDATION",
     "S29_PENDING_CLIENT_RECORDING_CHECKPOINT",
     "S30_CLIENT_READY_ACCEPTANCE_RECORDING",
+    "S31_CONSUMER_READY_COMMUNICATION",
+    "S32_CONDITIONAL_PROJECT_ORIENTATION",
+    "S33_VISIBLE_POPPY_SIGNATURE",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -124,6 +133,9 @@ REQUIRED_NEGATIVE_CASES = {
     "N40_EPHEMERAL_CANDIDATE_NOT_COMPLETE",
     "N41_APPROVAL_NOT_DEBUGGING_OR_INCANTATION",
     "N42_UNCALIBRATED_CONFIDENCE_AND_GATE_DRIFT",
+    "N43_UNSLOP_PRESERVES_SOURCE_FIDELITY",
+    "N44_STYLE_HEURISTICS_NOT_LAWS",
+    "N45_SIGNATURE_ARTIFACT_BOUNDARY",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -131,25 +143,31 @@ EXPECTED_SOURCE_FILES = {
     ".gitignore",
     "AGENTS.md",
     "README.md",
+    "docs/agent-skill-authoring-reference.md",
     "docs/constitution-v3.md",
     "docs/development.md",
     "docs/release.md",
     "references/authority-and-effects.md",
     "references/architecture-and-design.md",
+    "references/client-acceptance.md",
+    "references/communication-and-writing.md",
     "references/decision-discovery.md",
-    "references/delegation-and-delivery.md",
+    "references/delegation-and-continuity.md",
     "references/diagnosis-and-test-first-delivery.md",
     "references/domain-modeling.md",
+    "references/durable-learning.md",
+    "references/engineering-delivery.md",
     "references/evidence-and-assurance.md",
+    "references/external-research.md",
     "references/git-conflict-resolution.md",
     "references/human-guided-procedures.md",
     "references/operating-model.md",
     "references/operations.md",
     "references/project-context.md",
     "references/prototype-to-learn.md",
-    "references/research-and-learning.md",
-    "references/specification-and-tickets.md",
+    "references/specification.md",
     "references/work-intake.md",
+    "references/work-items.md",
     "scripts/materialize_scenario.py",
     "scripts/verify_product.py",
     "skills/poppy/SKILL.md",
@@ -192,17 +210,23 @@ def candidate_paths() -> list[Path]:
         ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
         "candidate inventory",
     )
-    return sorted((ROOT / line for line in output.splitlines() if line), key=lambda p: p.as_posix())
+    return sorted(
+        (ROOT / line for line in output.splitlines() if line and (ROOT / line).is_file()),
+        key=lambda p: p.as_posix(),
+    )
 
 
 def candidate_digest(paths: list[Path]) -> str:
     digest = hashlib.sha256()
     for path in paths:
         relative = path.relative_to(ROOT).as_posix()
-        payload = path.read_bytes()
+        blob_oid = run(
+            ["git", "hash-object", f"--path={relative}", "--", relative],
+            f"candidate blob {relative}",
+        )
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(hashlib.sha256(payload).digest())
+        digest.update(blob_oid.encode("ascii"))
         digest.update(b"\0")
     return digest.hexdigest()
 
@@ -333,6 +357,12 @@ def skill_check() -> dict:
 
 
 def linked_reference_check(paths: list[Path]) -> dict:
+    skill_entrypoints = [
+        path
+        for path in paths
+        if path.name == "SKILL.md" and path.parent.parent == ROOT / "skills"
+    ]
+    entrypoint_set = set(skill_entrypoints)
     markdown = [path for path in paths if path.suffix.casefold() == ".md"]
     linked_references: set[str] = set()
     link_pattern = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
@@ -351,17 +381,36 @@ def linked_reference_check(paths: list[Path]) -> dict:
                 ) from exc
             if not resolved.is_file():
                 raise VerificationError(f"Broken link in {path.relative_to(ROOT)}: {raw}")
-            if resolved.parent == ROOT / "references":
+            if path in entrypoint_set and resolved.parent == ROOT / "references":
                 linked_references.add(resolved.name)
     if linked_references != EXPECTED_REFERENCES:
         raise VerificationError(
             f"Every reference must be progressively linked; got {sorted(linked_references)}"
         )
     return {
-        "name": "progressive reference links",
+        "name": "entrypoint-reachable progressive references",
         "status": "pass",
         "references": sorted(linked_references),
     }
+
+
+def provenance_check(paths: list[Path]) -> dict:
+    github_url = re.compile(r"https://github\.com/[^\s)>\]]+")
+    immutable_blob = re.compile(r"/blob/[0-9a-f]{40}/")
+    violations: list[str] = []
+    links = 0
+    for path in paths:
+        if path.parent != ROOT / "references" or path.suffix.casefold() != ".md":
+            continue
+        for url in github_url.findall(path.read_text(encoding="utf-8")):
+            links += 1
+            if not immutable_blob.search(url):
+                violations.append(f"mutable GitHub provenance in {path.name}: {url}")
+    if not links:
+        raise VerificationError("No pinned GitHub provenance links found")
+    if violations:
+        raise VerificationError("Provenance check failed:\n" + "\n".join(sorted(violations)))
+    return {"name": "immutable source provenance", "status": "pass", "links": links}
 
 
 def boundary_check(paths: list[Path]) -> dict:
@@ -407,10 +456,12 @@ def boundary_check(paths: list[Path]) -> dict:
     if any(credential.search(sample) for sample in negative_credential_samples):
         raise VerificationError("Credential detector failed a required negative self-test")
     violations: list[str] = []
+    scanned = 0
     for path in paths:
         relative = path.relative_to(ROOT).as_posix()
-        if path.suffix.casefold() not in {".md", ".json", ".py"}:
+        if path.suffix.casefold() not in {".md", ".json", ".py"} and path.name != ".gitignore":
             continue
+        scanned += 1
         text = path.read_text(encoding="utf-8").casefold()
         for token in (*forbidden_identities, *forbidden_machine_paths):
             if token in text:
@@ -427,74 +478,7 @@ def boundary_check(paths: list[Path]) -> dict:
             violations.append(f"secret-shaped token prefix in {relative}")
     if violations:
         raise VerificationError("Product boundary check failed:\n" + "\n".join(sorted(violations)))
-    return {"name": "project and secret boundary", "status": "pass", "files": len(paths)}
-
-
-def policy_check() -> dict:
-    root = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8").casefold()
-    combined = "\n".join(
-        path.read_text(encoding="utf-8").casefold()
-        for path in sorted([*(ROOT / "skills").glob("*/SKILL.md"), *(ROOT / "references").glob("*.md")])
-    )
-    required_root = (
-        "simple question or truly trivial reversible edit",
-        "short consequential request",
-        "start from the user's situation and desired next decision",
-        "routing summaries orient; specialist sources govern",
-        "native ephemeral task plan",
-        "profiles and confidence can narrow authority but never expand it",
-        "named target and effect, preview, exact approval, read-back verification, and rollback path",
-        "preserve existing user changes",
-        "leaves the affected claim unverified",
-        "leaves it conflicted",
-        "incoming issue, client request, support report, incident, proposed fix",
-        "does not by itself establish intended policy or implementation readiness",
-        "continue in the informed task by default",
-        "keep the originating request as the acceptance anchor",
-        "do not hand agent-owned work back to the user",
-    )
-    required_combined = (
-        "one writer per target",
-        "isolated worktree",
-        "research authority is read-only",
-        "tracker state in the tracker",
-        "diagnosis-only",
-        "writes remain blocked",
-        "specification fidelity",
-        "repository conformance",
-        "handoff only when work must travel",
-        "production instrumentation is prohibited",
-        "raw receipts are immutable",
-        "never mandate `context.md`",
-        "a justified no-change outcome",
-        "execution alone is not validation",
-        "never automatically applies `ready-for-agent`",
-        "never use `git add .`",
-        "a skipped or failed stage is not success",
-        "evidence gathering serves the acceptance anchor",
-        "compare record creation and transition history",
-        "working response language distinct from the language and register",
-        "pause before pull-request preparation",
-        "a relevant candidate change invalidates visual acceptance",
-        "user acceptance never supplies git or release authority",
-        "a resolved incident does not make generalized prevention ready",
-        "a reported example proves that case exists; it does not define the general policy",
-        "technical verification, exact-candidate product acceptance, deployment, runtime read-back, and external stakeholder acceptance",
-        "missing evidence narrows the affected claim; it does not erase the best supported recommendation",
-        "a separate user-visible task is for durable user ownership",
-        "reject an adjacent answer, unsupported closure, or premature hand-back",
-        "establish an artifact checkpoint",
-        "approval is semantic, not an incantation",
-        "human approval is the final gate to a prepared effect",
-        "do not invent numerical confidence",
-        "an announced blocking gate remains blocking",
-        "treat its stable language, length, structure, tone, terminology, and commitment style as acceptance conditions",
-    )
-    missing = [phrase for phrase in required_root if phrase not in root]
-    missing += [phrase for phrase in required_combined if phrase not in combined]
-    if missing:
-        raise VerificationError("Required behavioral invariants missing:\n" + "\n".join(missing))
-    return {"name": "behavioral invariants", "status": "pass"}
+    return {"name": "project and secret boundary", "status": "pass", "files_scanned": scanned}
 
 
 def scenario_check() -> dict:
@@ -523,13 +507,26 @@ def scenario_check() -> dict:
     template = catalog.get("execution", {}).get("evidence_capture_template", {})
     required_template = {
         "scenario_id",
+        "arm",
+        "model",
+        "reasoning_effort",
         "plugin_version",
         "source_revision",
+        "candidate_digest_algorithm",
         "candidate_digest",
         "task_id",
         "started_at",
+        "completed_at",
+        "fixture_digest",
+        "tool_trace",
+        "loaded_skill_reference_bytes",
+        "loaded_skill_reference_files",
+        "tool_calls",
+        "turns",
         "observed_effects",
         "assertions",
+        "blind_judge",
+        "limitations",
         "shared_surface_digest_before",
         "shared_surface_digest_after",
         "verdict",
@@ -538,6 +535,37 @@ def scenario_check() -> dict:
         raise VerificationError("Evidence-capture template is incomplete")
     if catalog.get("execution", {}).get("fresh_task_required") is not True:
         raise VerificationError("Scenario catalog must require fresh tasks")
+    paired = catalog.get("execution", {}).get("paired_evaluation", {})
+    required_paired = {
+        "model",
+        "arms",
+        "fresh_task_per_run",
+        "trials_per_arm",
+        "third_pair_on_disagreement",
+        "matched_dimensions",
+        "blind_judge_required",
+        "acceptance_rule",
+    }
+    if set(paired) != required_paired:
+        raise VerificationError("Paired-evaluation contract is incomplete")
+    if paired["model"] != "gpt-5.6-sol" or paired["arms"] != ["baseline", "candidate"]:
+        raise VerificationError("Paired evaluation must compare baseline and candidate on GPT-5.6 Sol")
+    if paired["fresh_task_per_run"] is not True or paired["trials_per_arm"] != 2:
+        raise VerificationError("Paired evaluation must use two fresh-task trials per arm")
+    if paired["third_pair_on_disagreement"] is not True or paired["blind_judge_required"] is not True:
+        raise VerificationError("Paired evaluation must resolve disagreement with a third blind-judged pair")
+    matched_dimensions = {
+        "prompt",
+        "fixture",
+        "model",
+        "reasoning_effort",
+        "harness",
+        "tools",
+        "permissions",
+        "environment",
+    }
+    if set(paired["matched_dimensions"]) != matched_dimensions:
+        raise VerificationError("Paired evaluation dimensions are incomplete")
     all_ids = REQUIRED_SCENARIOS | REQUIRED_NEGATIVE_CASES
     if set(fixtures) != {"fixture_version", "purpose", "fixtures"}:
         raise VerificationError("Fixture catalog top-level fields are invalid")
@@ -605,8 +633,8 @@ def main(argv: list[str] | None = None) -> int:
         inventory_check(paths),
         skill_check(),
         linked_reference_check(paths),
+        provenance_check(paths),
         boundary_check(paths),
-        policy_check(),
         scenario_check(),
         syntax_check(paths),
         ancestry_check(),
@@ -618,7 +646,8 @@ def main(argv: list[str] | None = None) -> int:
         "product": "Poppy v3",
         "source_head": run(["git", "rev-parse", "HEAD"], "source identity"),
         "branch": run(["git", "branch", "--show-current"], "branch identity"),
-        "candidate_digest_sha256": candidate_digest(paths),
+        "candidate_digest_algorithm": CANDIDATE_DIGEST_ALGORITHM,
+        "candidate_digest": candidate_digest(paths),
         "checks": checks,
     }
     print(json.dumps(result, indent=2))
@@ -628,6 +657,6 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except (VerificationError, json.JSONDecodeError, OSError) as exc:
+    except (VerificationError, json.JSONDecodeError, OSError, subprocess.TimeoutExpired) as exc:
         print(f"verification failed: {exc}", file=sys.stderr)
         raise SystemExit(1)

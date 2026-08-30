@@ -1,22 +1,22 @@
 ---
 name: poppy-learn
-description: Review evidenced outcomes and retain the smallest durable future-useful lesson when policy permits. Use behind Poppy after substantive completed work; directly invokable for focused testing.
+description: Review a completed evidenced outcome and retain the smallest durable future-useful lesson when exact project-memory policy and write authority permit it. Use behind Poppy only after a substantive outcome; directly invokable for focused testing.
 ---
 
 # Poppy Learn
 
-Read [research and learning](../../references/research-and-learning.md), [project context and memory](../../references/project-context.md), and [evidence and assurance](../../references/evidence-and-assurance.md).
+Read [durable learning](../../references/durable-learning.md).
 
-## Decide whether anything is durable
+## Decide before loading memory
 
-Ask whether the outcome changed future-useful understanding. A durable lesson has evidence, a bounded scope, and a likely future decision or behavior it will change. Capture counterexamples, uncertainty, or an expiration condition when relevant.
+First decide whether the completed outcome changed future-useful understanding. Do nothing for trivial, read-only, review-only, diagnosis-only, proposed, conflicted, or unverified material. Do not turn task narration into memory.
 
-Do nothing for trivial, read-only, diagnosis-only, or review-only work. Do not convert task narration into memory.
+Classify a supported lesson before choosing a destination:
 
-## Retain safely
+- project fact, rationale, or domain lesson: propose the smallest update to nominated project memory;
+- recurring repository-level correction: propose the smallest project-owned structural guard;
+- Poppy-wide behavior improvement: propose a separate versioned Poppy change with matched Sol baseline-versus-candidate evaluation.
 
-Invoke `poppy-context` to confirm project identity, the configured memory root, and exact memory-write policy. If any is missing, keep the proposed lesson in the response only; do not write.
+A lesson does not authorize its capture or implementation. For an actual memory write, invoke Poppy Context and read [project context and memory](../../references/project-context.md) to confirm identity, destination, policy, confinement, and provenance. Read [domain modeling](../../references/domain-modeling.md) before retaining terminology, boundaries, or rationale.
 
-When authorized, make the smallest confined update, preserve provenance, and read it back. When the nominated memory is an Obsidian vault, preserve its canonical pages, immutable raw receipts, freshness metadata, links, and human-owned notes; append its knowledge log when required. Keep tracker state in the tracker. Never silently modify installed Poppy skills or shared project policy; recurring, supported improvements become proposals for separate review.
-
-Read [domain modeling](../../references/domain-modeling.md) before retaining a terminology, boundary, or rationale change. Retain only confirmed, source-backed, future-useful understanding; proposed, conflicted, review-only, or diagnosis-only material stays in the response.
+When authorized, make the smallest confined update and read it back. Preserve canonical pages, immutable receipts, freshness, links, aliases, translations, and human-owned notes. Keep tracker state in the tracker. Never silently rewrite repository policy, tooling, installed Poppy skills, or shared instructions.

@@ -30,6 +30,8 @@ Use interface depth, leverage, locality, deletion as a thought experiment, depen
 - Keep software adapters distinct from any historical Poppy project-adapter terminology.
 - Prefer interfaces that hide meaningful complexity, localize change, and keep effect boundaries legible, while preserving project vocabulary and conventions.
 
+Include reader load in the tradeoff. Consider both the layers a maintainer must trace and the hidden or mutable state they must retain to predict behavior. Pass-through wrappers, duplicated abstractions, and interfaces that hide no meaningful decision are candidates for simplification. This is advisory: do not impose an arbitrary timing metric, a universal preference for pure functions, or a fixed maximum layer count.
+
 Classify dependencies only when it helps: stable or volatile, internal or external, effectful or pure, owned or third-party, synchronous or asynchronous. Place seams where independent change, testing, failure handling, security, or migration value outweighs added indirection.
 
 Treat deletion as a thought experiment: if removing a module, adapter, abstraction, or test clarifies where its responsibility would move, that evidence informs the design. It does not automatically authorize deletion.
@@ -46,6 +48,10 @@ Visual before/after explanation is optional and must have accessible text equiva
 
 Adapted in original Poppy wording from Matt Pocock's MIT-licensed guidance reviewed at source revision `321658273cb1d20b76026717d027d505790106d4`:
 
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/improve-codebase-architecture
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/codebase-design
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/improve-codebase-architecture/SKILL.md
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/codebase-design/SKILL.md
+
+The reader-load heuristic is adapted in original Poppy wording from Cursor's MIT-licensed guidance pinned at revision `68836ddaf5697224520f1847d90cdb90ca8babaa`:
+
+- https://github.com/cursor/plugins/blob/68836ddaf5697224520f1847d90cdb90ca8babaa/pstack/skills/principle-minimize-reader-load/SKILL.md
 

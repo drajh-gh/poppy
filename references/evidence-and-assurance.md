@@ -1,95 +1,58 @@
 # Evidence and assurance
 
-## Claim-level evidence
+## Keep claims calibrated
 
 For every material claim, distinguish:
 
-- supported: current evidence directly supports the claim;
-- contradicted: current credible evidence directly opposes the claim;
+- supported: current evidence directly supports it;
+- contradicted: current credible evidence directly opposes it;
 - conflicted: credible sources disagree and authority or recency does not resolve them; and
 - unverified: required evidence is missing, stale, inaccessible, malformed, or insufficient.
 
-An evidence gap propagates only to claims that require it. It does not make unrelated work unusable. Confidence, consensus, or absence of errors cannot turn an unverified or conflicted claim into a supported one.
+An evidence gap propagates only to dependent claims. Confidence, consensus, or absence of errors cannot turn an unverified or conflicted claim into a supported one. Do not invent a numerical confidence score.
 
-Do not invent numerical confidence. Use a percentage or score only when a named calibrated method and relevant evidence justify that number; otherwise report claim-level evidence, residual risk, and the next decisive gate.
+Describe unavailable evidence precisely: say it was not supplied, observed, or accessible rather than claiming it does not exist unless nonexistence is itself evidenced.
 
-Keep these categories distinct in reports:
+Keep observed fact, inference, recommendation, decision, proposed effect, and verified completed effect separate.
 
-- observed fact;
-- inference;
-- recommendation;
-- user or project decision;
-- proposed effect; and
-- verified completed effect.
+When recommending the smallest decisive next probe, name the question it resolves, the evidence shape needed to interpret it, and the authoritative owner or access boundary when one is known. Separate permission to inspect a cohort or system from permission to remediate it.
 
-## Proportionate verification
+Keep the recommendation inside the evidence scope. Evidence from one case does not support cohort-wide remediation: say what must not yet be generalized and name the residual risk. If the recommended action is not currently authorized, make the recommendation conditional at the point it is stated rather than disclosing the missing authority only afterward.
 
-Match verification to the risk and surface changed:
+## Verify in proportion to risk
 
-- trivial edit: inspect the diff or targeted result;
-- code change: focused tests plus the smallest relevant lint, type, build, or visual check;
-- cross-cutting or consequential change: broader gates and an independent read-only review;
-- release readiness: verify required evidence explicitly and leave unavailable delivery or runtime evidence unverified.
+- Routine edit: inspect the exact diff or result.
+- Product or code change: verify changed behavior plus the smallest relevant static, integration, build, or visual gate.
+- Cross-cutting or consequential change: add broader project-required gates and independent read-only assurance.
+- Release readiness: verify each required state explicitly and leave unavailable runtime or delivery evidence unverified.
 
-Do not replace missing evidence with a fixed quality score.
+Technical cleanliness establishes only the surface checked. Schema, lint, tests, links, and repository gates do not prove that a workflow, interface, recommendation, or stakeholder artifact is understandable or useful. Check those acceptance qualities separately when they matter.
 
-Technical cleanliness establishes only the surface actually checked. Schema, lint, test, link, or repository gates do not by themselves establish that a workflow, vault, interface, recommendation, or stakeholder artifact is understandable and useful. When usefulness is part of acceptance, verify the human-facing navigation, wording, decision value, or exact-candidate behavior separately before calling the outcome assured.
+An announced blocking gate remains blocking. Reclassify it only before the effect, with observed evidence, rationale, replacement coverage, and residual risk made explicit.
 
-An announced blocking gate remains blocking. Reclassify it only before the gated effect, with the observed evidence, rationale, replacement coverage, and residual risk made explicit; never merge or publish first and rationalize the gate afterward.
+## Prove load-bearing safety facts
 
-## Independent assurance
+For a meaningful blast-radius or safety claim, identify the one or two facts on which the candidate's safety depends. Verify each against the closest faithful allowed artifact or runtime path. Examples include the actual caller set, authorization boundary, migration invariant, rollback behavior, data-selection guard, or production-shaped integration response.
 
-Assurance is a fresh read-only pass. Give the reviewer the objective, exact candidate identity, acceptance conditions, allowed checks, and declared evidence—not the desired verdict. The reviewer does not edit the candidate or approve external effects.
+An unproven load-bearing fact remains unverified. This focused probe supplements complete claim-level analysis; it never replaces acceptance coverage or licenses a broader effect.
 
-Separate functional verification from final assurance when the candidate is consequential. Any relevant candidate change invalidates earlier verdicts.
+## Perform independent assurance
 
-## Outcome acceptance
+Assurance is a fresh read-only pass over an exact candidate. Give the reviewer the objective, original acceptance wording, comparison basis, allowed checks, and evidence, never a desired verdict. The reviewer does not edit, remediate, approve effects, or broaden scope.
 
-Technical verification, exact-candidate product acceptance, deployment, runtime read-back, and external stakeholder acceptance are separate claims. No earlier state implies a later one. Record the exact candidate, environment, scenario, observer, and decision authority for each supported state; leave unavailable states unverified.
+Pin the base or fixed point, candidate identity, merge base and diff scope, and commit list where Git is available. Stop on an unresolved comparison basis or unexplained empty candidate.
 
-For a business workflow change, map the exact candidate to the confirmed behavioral scenarios and production-shaped state that matter. Visual media may be appropriate for interface behavior. For imports, integrations, migrations, data repair, or other nonvisual behavior, use the closest faithful evidence such as a bounded fixture, dry-run manifest, API result, integration response, or authorized runtime observation. A reported incident is reproduction evidence, not approval of a generalized policy.
+Assess two independent axes:
 
-Treat external stakeholder acceptance as supported only when the named stakeholder or decision owner accepts the relevant outcome. User acceptance qualifies that state only when the user owns the product decision. Neither stakeholder nor user acceptance supplies Git, release, deployment, production-write, or publication authority.
+1. Specification fidelity: one pass, fail, or unverified result per original acceptance item, with direct evidence or a reason.
+2. Repository conformance: applicable project rules and deterministic evidence, with advisory heuristics explicitly separated.
 
-## Visual product acceptance
+A required fail or unverified item blocks a passing verdict. Finding counts are summaries, not scores. A diff cannot prove runtime behavior.
 
-For a user-visible change, visual evidence helps the user judge whether the implemented experience matches the intended outcome. It complements deterministic checks; it does not prove accessibility, production behavior, security, or usability beyond what was actually observed.
+For a workflow, navigation surface, or stakeholder artifact, also assess audience, language, format, specificity, source fidelity, and supported commitments. For exact-candidate or client review, use the client-acceptance reference.
 
-When the user requests pre-PR judgment or the project requires it:
+Finish with pass, pass with explicit non-blocking limitations, or fail. A relevant candidate change invalidates the verdict. Assurance never authorizes a commit, publication, installation, deployment, message, tracker change, or other effect.
 
-- bind the evidence to the exact commit or working-tree snapshot under review;
-- prefer focused screenshots for static states and a short video for interaction, motion, or a sequence, using only already-available authorized capabilities;
-- map each capture to the original acceptance wording and record the reproduction state, viewport or device when relevant, capture time, and material limitations;
-- present the media in the current task when the interface supports it, keep local artifacts disposable and out of Git, declare their disposition, and never upload or publish them without separate authority; and
-- when faithful execution or capture is unavailable, mark the affected claim unverified instead of fabricating evidence. A nonvisual change may use a reasoned not-applicable result plus the closest observable evidence.
+## Provenance
 
-Pause before pull-request preparation until the user returns an explicit `ACCEPT`, `REJECT`, or `REQUEST_CHANGES` decision. That decision qualifies only the displayed candidate and never authorizes a commit, push, pull request, merge, publication, or deployment. A relevant candidate change invalidates visual acceptance. Rejection or requested changes return to the authorized delivery path and require new evidence for the changed candidate.
-
-### Client-ready acceptance recording
-
-For every client-visible behavioral change, keep a pending client-acceptance recording checkpoint in the delivery flow. If the user did not request a recording with the implementation, offer the checkpoint after local verification; do not prepare data or record merely because the checkpoint exists. A later recording request may begin from an already-implemented candidate.
-
-Before recording, propose a compact demo contract for the user's approval. Derive it from the original stakeholder wording, accepted behavior, exact candidate, implementation, and tests. Include the relevant scenarios, starting state, synthetic seed data, acting roles, visible steps and outcomes, permission or validation paths, lifecycle or error cases, and explicit exclusions. Resolve clear details without ceremony, but ask when conflict or ambiguity could change client expectations or material scope.
-
-Choose between an authorized local, development, or preview environment by fidelity rather than habit. Prefer development or preview when the exact candidate and required integrations can be represented safely; prefer local when isolation and deterministic data produce more faithful evidence. Keep the environment and technical limitations in the user's private coverage notes rather than the client media unless they materially affect what the client is being asked to accept. Any deployment remains a separately gated effect.
-
-Prepare realistic synthetic, client-safe accounts, records, roles, sessions, and lifecycle state. Never expose real personal data, credentials, production exports, terminals, setup machinery, or secrets. Keep disposable demo support out of Git unless it is separately justified and authorized as durable test support.
-
-Produce one concise video when the complete story remains easy to follow, or several clearly named clips when roles or scenarios would make one video hard to understand. Record at a readable full-interface scale with deliberate movement and pauses, no dead time, and no artificial speed-up. Use concise burned-in subtitles in the client's language and no audio narration. Ask the user when the language is not certain. Keep the client media free of ticket numbers, commit hashes, test names, environment badges, AI references, implementation detail, and ornamental introductions or conclusions. Explain only the user action, relevant context, and visible outcome.
-
-Watch every rendered clip from beginning to end before handoff. Give the user the media, private candidate and environment identity, scenario coverage and limitations, artifact location and disposition, and a short natural client-message draft. Do not upload, publish, contact the client, or retain the media in Git without separate authority.
-
-Client acceptance is semantic, not an incantation. A named client's ordinary affirmative response such as “yes, that's it” supports acceptance of the behavior faithfully shown in that recording when the user supplies or summarizes the response. It does not authorize release or another external effect. A candidate change that could alter an accepted scenario requires replacement evidence; a demonstrably irrelevant change does not. Requested changes invalidate only the affected scenarios, which return through implementation, verification, and recapture.
-
-## Code review
-
-Pin one exact comparison basis before review. Resolve the named base or fixed point, exact candidate identity, merge base and diff scope, and commit list where Git is available. Stop on an unresolved basis or an unexplained empty candidate.
-
-Discover intent from user-named paths, issue references, repository documents, and history, but keep discovery separate from authority. Project and repository instructions plus approved or user-confirmed requirements govern. Bind specification review to the original acceptance wording; implementation, remediation, and assurance must not silently rephrase or narrow it.
-
-Keep two evidence axes separate:
-
-1. **Specification fidelity:** one `pass`, `fail`, or `unverified` result for every original acceptance item, with direct evidence or reason. Missing, duplicated, reworded, or reviewer-invented items are invalid. A required fail or unverified item blocks a passing verdict.
-2. **Repository conformance:** compliance with applicable repository and project rules plus explicitly advisory quality heuristics. Deterministic tooling, runtime checks, security review, and project-specific expertise remain distinct.
-
-Preserve both reports, then derive the overall evidence-backed verdict without merging or reranking the axes. Finding counts are summaries, never quality scores. A diff cannot prove runtime behavior. Use one context-separated review pass by default; add a separate read-only specialist only when risk, coverage, or independence materially warrants it.
+The load-bearing-fact heuristic is adapted in original Poppy wording from Cursor's MIT-licensed Blast radius guidance pinned at revision 68836ddaf5697224520f1847d90cdb90ca8babaa: https://github.com/cursor/plugins/blob/68836ddaf5697224520f1847d90cdb90ca8babaa/pstack/skills/blast-radius/SKILL.md

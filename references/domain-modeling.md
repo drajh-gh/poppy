@@ -35,7 +35,7 @@ Only confirmed source-backed terminology, boundaries, or rationale may become du
 
 ## Provenance
 
-Adapted in original Poppy wording from Matt Pocock's MIT-licensed `domain-modeling` guidance reviewed on 2026-08-27:
+Adapted in original Poppy wording from Matt Pocock's MIT-licensed `domain-modeling` guidance pinned at revision `321658273cb1d20b76026717d027d505790106d4`:
 
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/domain-modeling/SKILL.md
 

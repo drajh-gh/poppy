@@ -58,7 +58,7 @@ For any tracker comment, disclosure, label, transition, closure, or link, previe
 
 ## Provenance
 
-Adapted in original Poppy wording from Matt Pocock's MIT-licensed `triage` guidance reviewed on 2026-08-27:
+Adapted in original Poppy wording from Matt Pocock's MIT-licensed `triage` guidance pinned at revision `321658273cb1d20b76026717d027d505790106d4`:
 
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/triage
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/triage/SKILL.md
 

@@ -1,27 +1,20 @@
 ---
 name: poppy-operations
-description: Turn project evidence into health, finance, meeting, decision, commitment, risk, and stakeholder outputs. Use behind Poppy for operations work; directly invokable for focused testing.
+description: Turn authoritative project evidence into priorities, readiness, decisions, commitments, risks, meetings, finance, work-item, and stakeholder outputs. Use behind Poppy when the next question is what should happen, why, when, or with whose agreement; directly invokable for focused testing.
 ---
 
 # Poppy Operations
 
-Read [project operations](../../references/operations.md), [authority and effects](../../references/authority-and-effects.md), and [evidence and assurance](../../references/evidence-and-assurance.md).
+Read [project operations](../../references/operations.md).
 
-Invoke `poppy-context` first when the project has not been oriented in this task.
+## Own project work
 
-## Work recommendation-first
+Reconcile outcome, scope, schedule, budget, capacity, quality, risk, decision, and commitment evidence only from sources authoritative for each claim. Lead with the decision or action needed. Keep observed facts, inferences, recommendations, decisions, and completed effects separate.
 
-- Reconcile outcome, scope, schedule, budget, capacity, quality, risk, decision, and commitment evidence only from the sources authoritative for each claim.
-- Lead with what needs attention or a decision; place supporting mechanics after it.
-- Keep observed facts, inferences, recommendations, decisions, and completed effects separate.
-- Preserve unverified or conflicted status when required evidence is missing, stale, inaccessible, malformed, insufficient, or contradictory.
+Operations owns project direction, readiness, coordination, meeting outcomes, finance, tracker-facing work, commitments, and stakeholder artifacts. It does not create or silently redefine the product or code candidate. When the selected outcome needs implementation, hand its settled behavioral contract to Poppy Delivery.
 
-For meetings, produce decisions, commitments, owners, dates, risks, open questions, and an unsent stakeholder draft. Drafting does not authorize sending. For finance, state units, dates, baseline, actuals, forecast, and evidence gaps without manufacturing a healthy interpretation.
+For a decision interview or large uncertain effort, read [decision discovery](../../references/decision-discovery.md). Add [domain modeling](../../references/domain-modeling.md) when terminology or boundaries matter. For issue, request, incident, proposal, or pull-request intake, read [work intake](../../references/work-intake.md). Use [work items](../../references/work-items.md) only for decomposition or tracker publication. For a procedure with human-only values or provider stages, read [human-guided procedures](../../references/human-guided-procedures.md).
 
-Do not write a tracker, send a message, schedule an event, change a baseline, or write durable memory unless the exact effect is authorized and verified.
+For meetings, stakeholder drafts, or other audience-sensitive artifacts, read [communication and writing](../../references/communication-and-writing.md). Preserve supplied communication precedent, requested language and register, accepted commitments, and evidence status.
 
-## Conditional modes
-
-- For an interview, unresolved preferences, or a large uncertain effort, read [decision discovery](../../references/decision-discovery.md); add [domain modeling](../../references/domain-modeling.md) when language or boundaries matter.
-- For issue, request, or pull-request intake, read [work intake](../../references/work-intake.md). Own history reconciliation, project workflow vocabulary, outcome recommendation, and exact tracker-effect preview, approval, and read-back.
-- For a procedure requiring human-only values or provider steps, read [human-guided procedures](../../references/human-guided-procedures.md). Own discovery of the human-only boundary and the target, stage, value, sensitivity, and risk map.
+Authority is effect-specific. Drafting is not sending. Before a tracker write, message, calendar event, financial change, baseline change, memory write, or another external effect, read [authority and effects](../../references/authority-and-effects.md), preview the exact target and effect, obtain approval, perform only the named effect, and read it back.
