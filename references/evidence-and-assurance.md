@@ -36,6 +36,17 @@ For a meaningful blast-radius or safety claim, identify the one or two facts on 
 
 An unproven load-bearing fact remains unverified. This focused probe supplements complete claim-level analysis; it never replaces acceptance coverage or licenses a broader effect.
 
+## Bounded meta-verification
+
+When the object of verification is Poppy, another agent workflow, or the verification process itself, prevent the check from recursively expanding into a full workflow run:
+
+- Pin the exact candidate and one claim before loading more context.
+- Reuse current candidate-bound orientation, receipts, and passed checks. Reopen them only when the candidate changed or the evidence is stale, insufficient, inaccessible, or contradicted.
+- Name the smallest missing probe and its evidence surface. Do not read the full repository, vault, installed package, or history when one source-specific check can decide the claim.
+- Stop when the probe resolves the claim. If it cannot, leave the claim unverified and name the next decisive probe; expand only for a specific unresolved dependency exposed by the result.
+
+Evidence volume is not confidence. A broader read is justified by a named evidence gap, not by the fact that the system can inspect itself. Suspected process failure is one claim to check, not authority to audit the whole task. Required fresh matched evaluation arms and predeclared trials remain required probes; reuse valid supporting evidence within them, never across a candidate change or in place of the trial itself.
+
 ## Perform independent assurance
 
 Assurance is a fresh read-only pass over an exact candidate. Give the reviewer the objective, original acceptance wording, comparison basis, allowed checks, and evidence, never a desired verdict. The reviewer does not edit, remediate, approve effects, or broaden scope.

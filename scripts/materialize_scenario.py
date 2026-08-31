@@ -14,6 +14,18 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = ROOT / "tests" / "scenarios.json"
 FIXTURES = ROOT / "tests" / "fixtures.json"
+GRADING_ONLY_FIELDS = {
+    "kind",
+    "setup",
+    "observable_assertions",
+    "expected_evidence_limits",
+    "permitted_effects",
+    "verification",
+    "git",
+    "arm",
+    "desired_result",
+    "grader_rationale",
+}
 
 
 def load_catalogs() -> tuple[dict, dict, dict[str, dict]]:
@@ -106,6 +118,25 @@ def fixture_digest(case: dict, fixture: dict) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def task_descriptor(case: dict, fixture: dict) -> dict:
+    """Project only authentic task input into a behavior workspace."""
+    return {
+        "prompt": case["prompt"],
+        "evidence": {
+            key: fixture[key]
+            for key in ("evidence",)
+            if key in fixture
+        },
+    }
+
+
+def assert_task_projection(descriptor: dict) -> None:
+    serialized = json.dumps(descriptor, ensure_ascii=False)
+    leaked = sorted(field for field in GRADING_ONLY_FIELDS if f'"{field}"' in serialized)
+    if leaked:
+        raise ValueError(f"grading-only fields leaked into task descriptor: {leaked}")
+
+
 def render_content(content: str, output: Path) -> str:
     return content.replace("{{FIXTURE_ROOT}}", output.resolve().as_posix())
 
@@ -148,12 +179,9 @@ def materialize(case_id: str, output: Path) -> dict:
     output.mkdir(parents=True)
     for raw, content in fixture["files"].items():
         write_fixture_file(output, raw, content)
-    descriptor = {
-        "scenario": cases[case_id],
-        "fixture": {key: value for key, value in fixture.items() if key != "files"},
-        "fixture_digest_sha256": fixture_digest(cases[case_id], fixture),
-    }
-    (output / "scenario.json").write_text(
+    descriptor = task_descriptor(cases[case_id], fixture)
+    assert_task_projection(descriptor)
+    (output / "task.json").write_text(
         json.dumps(descriptor, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
         newline="\n",
@@ -206,16 +234,44 @@ def materialize(case_id: str, output: Path) -> dict:
                 *fixture["files"],
                 *fixture.get("git", {}).get("base_files", {}),
                 *fixture.get("git", {}).get("mutations", {}),
-                "scenario.json",
+                "task.json",
             ]
         ),
-        "fixture_digest_sha256": descriptor["fixture_digest_sha256"],
+        "fixture_digest_sha256": fixture_digest(cases[case_id], fixture),
     }
 
 
 def verify_catalog() -> dict:
     _, fixtures, cases = load_catalogs()
     digests: dict[str, str] = {}
+    canaries = {
+        "case": "PRIVATE-CASE-CANARY-8C92F7",
+        "setup": "PRIVATE-SETUP-CANARY-36D1A4",
+        "kind": "PRIVATE-KIND-CANARY-574BE2",
+        "verification": "PRIVATE-VERIFY-CANARY-91AF03",
+        "git": "PRIVATE-GIT-CANARY-C4E885",
+    }
+    projected_canary = task_descriptor(
+        {
+            "prompt": "Synthetic task prompt.",
+            "permitted_effects": [canaries["case"]],
+            "expected_evidence_limits": canaries["case"],
+            "observable_assertions": [canaries["case"]],
+        },
+        {
+            "kind": canaries["kind"],
+            "setup": [canaries["setup"]],
+            "files": {},
+            "evidence": ["Synthetic evidence."],
+            "verification": [canaries["verification"]],
+            "git": {"private": canaries["git"]},
+        },
+    )
+    projected_text = json.dumps(projected_canary, ensure_ascii=False)
+    leaked_canaries = sorted(name for name, value in canaries.items() if value in projected_text)
+    if leaked_canaries:
+        raise ValueError(f"grading canaries leaked into task projection: {leaked_canaries}")
+    assert_task_projection(projected_canary)
     unsafe_paths = ("../outside", "..\\outside", "nested/..\\outside", "C" + ":/outside", "nested:file")
     for unsafe in unsafe_paths:
         try:
@@ -238,6 +294,10 @@ def verify_catalog() -> dict:
                 expected = render_content(content, root / case_id)
                 if resolved_member(root / case_id, raw).read_text(encoding="utf-8") != expected:
                     raise ValueError(f"materialized content mismatch for {case_id}: {raw}")
+            descriptor = json.loads((root / case_id / "task.json").read_text(encoding="utf-8"))
+            if descriptor != task_descriptor(cases[case_id], fixture):
+                raise ValueError(f"task projection mismatch for {case_id}")
+            assert_task_projection(descriptor)
             if "git" in fixture:
                 repository = (
                     root / case_id
@@ -248,7 +308,15 @@ def verify_catalog() -> dict:
                 if observed != fixture["git"]["expected_status"]:
                     raise ValueError(f"verified git status mismatch for {case_id}: {observed}")
             digests[case_id] = result["fixture_digest_sha256"]
-    return {"status": "pass", "scenarios": len(cases), "fixture_digests": digests}
+    return {
+        "status": "pass",
+        "scenarios": len(cases),
+        "fixture_digests": digests,
+        "task_projection": {
+            "behavior_fields": ["prompt", "evidence.evidence", "materialized fixture files"],
+            "grading_only_fields_excluded": sorted(GRADING_ONLY_FIELDS),
+        },
+    }
 
 
 def main() -> int:

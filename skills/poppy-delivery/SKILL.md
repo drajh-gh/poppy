@@ -26,4 +26,6 @@ Read [communication and writing](../../references/communication-and-writing.md) 
 
 Preserve existing changes and keep one writer per target. Before a commit, dependency adoption, deployment, publication, installation, destructive action, or external effect, read [authority and effects](../../references/authority-and-effects.md). Local implementation authority never implies one of those effects.
 
+Keep verification inside the authorized candidate surface. When a tool can run in an equivalent no-cache or no-generated-artifact mode, prefer it and inspect exact status or diff afterward. Do not delete unknown or pre-existing artifacts; if an unavoidable generated artifact remains and cleanup is not clearly authorized, report its exact disposition instead of claiming a clean scoped candidate.
+
 Use Poppy Assurance for a fresh read-only pass when uncertainty, blast radius, or release consequence warrants independence. Report the exact candidate, behavior changed, verification performed, limitations, and every later acceptance or effect state that remains unverified.

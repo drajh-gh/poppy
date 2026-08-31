@@ -8,13 +8,17 @@ A candidate is eligible for personal installation preview only when:
 2. the exact source revision, package version, candidate digest algorithm, and candidate digest are recorded;
 3. the nominated source commits and v2 rollback tag remain ancestors or valid rollback evidence;
 4. the complete synthetic catalog materializes;
-5. matched GPT-5.6 Sol baseline-versus-candidate evaluation passes for the impact-selected scenarios;
+5. the smallest decision-relevant evidence for the changed behavior passes, with broader behavioral or efficiency claims left unverified when their optional evaluation was not run;
 6. no safety, authority, request-fidelity, evidence-calibration, or material capability regression is observed;
-7. a fresh independent read-only assurance pass finds no blocking defect;
-8. the candidate is committed under separate authority and python scripts/verify_product.py --require-clean passes; and
-9. the user's shared project surfaces remain unchanged.
+7. any model-based evaluation stays within a declared call and elapsed-time budget, uses deterministic grading first, and records only the semantic judging or human adjudication on which the decision actually depends;
+8. trigger and non-trigger checks affected by the candidate pass;
+9. a fresh independent read-only assurance pass finds no blocking defect;
+10. the candidate is committed under separate authority and python scripts/verify_product.py --require-clean passes; and
+11. the user's shared project surfaces remain unchanged.
 
 Static verification establishes structure and contract integrity, not behavioral superiority. Paired evaluation establishes only the scenarios and conditions observed. No aggregate score can offset a safety failure. Efficiency matters only after quality passes.
+
+Universal superiority is not a release requirement. Full paired evaluation, private held-out cases, judge calibration, human adjudication, activation-matrix testing, and performance measurement are conditional evidence for claims that actually depend on them. Before such work starts, set the decision question, selected cases, maximum model calls, maximum elapsed time, and stop condition. Without separate approval, allow at most one scenario and one fresh task per arm, with no automatic resume or expansion. Reaching the boundary leaves the dependent claim unverified; it does not license another run.
 
 ## Exact-effect separation
 
@@ -28,11 +32,14 @@ A fresh task after installation must establish:
 
 - active plugin ID, version, source revision, digest algorithm, and digest;
 - exactly the seven Poppy v3 skills and no active v2 skill identities;
+- explicit Poppy invocation in one fresh task;
+- automatic activation and routine non-activation only when trigger behavior changed;
+- pre-existing-task catalog behavior only when upgrade lifecycle behavior is an acceptance item;
 - no active Poppy MCP server, app, cockpit, telemetry, automation, or repository-local installation;
 - installation under the user's plugin environment for Codex Desktop and CLI; and
 - the exact preserved rollback package can be restored.
 
-ChatGPT and other hosts remain unverified unless separately tested. Any later plugin, root, authority, profile, delegation, or assurance change invalidates this proof.
+Retain the raw machine-readable traces for checks actually run. If a pre-existing task keeps a stale skill catalog, record it as a host lifecycle limitation rather than adding version checks or installation narration to Poppy. ChatGPT and other hosts remain unverified unless separately tested. Any later plugin, root, authority, profile, delegation, or assurance change invalidates this proof.
 
 ## Rollback
 

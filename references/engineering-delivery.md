@@ -34,6 +34,8 @@ Generated helpers, repository instrumentation, dependencies, commits, installati
 
 Verify every observable acceptance item for the changed behavior, then the smallest relevant static, integration, build, visual, or repository gate. A passing subcheck does not establish an unchecked sibling behavior. Run broader checks sequentially when blast radius or project policy requires them. Respect local resource limits and report unavailable gates instead of disguising them as passing.
 
+Prefer an equivalent no-cache or no-generated-artifact verification mode when the tool offers one, then inspect exact status or diff. Never delete an unknown or pre-existing artifact merely to make the candidate look clean. If an unavoidable generated artifact remains and cleanup is not clearly authorized, preserve it, report its exact disposition, and keep any clean-candidate claim unverified.
+
 For a meaningful safety or blast-radius claim, identify the one or two facts on which safety depends and verify them against the closest faithful allowed artifact or runtime path. This supplements, rather than replaces, acceptance-by-acceptance verification.
 
 Use independent read-only assurance when consequence, uncertainty, breadth, or release readiness warrants a fresh perspective. Any relevant candidate change invalidates the earlier verdict.

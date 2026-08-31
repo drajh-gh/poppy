@@ -11,6 +11,8 @@ Read [durable learning](../../references/durable-learning.md).
 
 First decide whether the completed outcome changed future-useful understanding. Do nothing for trivial, read-only, review-only, diagnosis-only, proposed, conflicted, or unverified material. Do not turn task narration into memory.
 
+Course-correction observations, retry counts, provisional risks, self-review notes, and assurance packets remain transient working context. They do not by themselves trigger Learn or authorize a memory write.
+
 Classify a supported lesson before choosing a destination:
 
 - project fact, rationale, or domain lesson: propose the smallest update to nominated project memory;

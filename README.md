@@ -14,6 +14,8 @@ Poppy keeps project decisions and candidate delivery distinct:
 
 Communication guidance is progressively loaded. It favors concrete, reader-ready prose and natural judgment while preserving accepted wording, evidence status, canonical terminology, and commitments. Style patterns remain contextual heuristics.
 
+At material failures, retries, consequential actions, and completion claims, Poppy quietly checks whether the next step can add evidence and still matches the request, candidate, gates, authority, and declared budget. It changes course or surfaces the exact blocker without creating a watcher, attempt ledger, telemetry stream, or automatic memory. Long or model-based evaluation is bounded before it starts and never resumes or expands itself beyond that boundary.
+
 Poppy is deliberately small. There is no cockpit, telemetry service, automation, universal capability graph, runtime engine, schema platform, persistent execution ledger, project adapter, or repository-local installation.
 
 ## Product map
@@ -24,6 +26,7 @@ Poppy is deliberately small. There is no cockpit, telemetry service, automation,
 - tests/scenarios.json and tests/fixtures.json — synthetic acceptance contracts.
 - scripts/verify_product.py — deterministic structure, catalog, boundary, ancestry, and candidate-identity gate.
 - docs/constitution-v3.md — product boundaries and operating promise.
+- docs/agent-skill-authoring-reference.md — focused guidance for creating, updating, and assessing skills.
 
 Poppy consumes applicable project instructions and relevant native or project-specific skills. It does not inject personal policy into shared repositories. Optional external project memory remains evidence with provenance, never a shadow tracker or automatic source of current truth.
 
@@ -39,4 +42,4 @@ For a separately authorized committed candidate:
 
 The verifier reports a line-ending-stable candidate digest based on Git-filtered blob identities. Behavioral improvement is established separately through matched GPT-5.6 Sol baseline-versus-candidate evaluation.
 
-See the [v3 constitution](docs/constitution-v3.md), [development guide](docs/development.md), and [release policy](docs/release.md).
+See the [v3 constitution](docs/constitution-v3.md), [development guide](docs/development.md), [skill authoring and review reference](docs/agent-skill-authoring-reference.md), and [release policy](docs/release.md).

@@ -47,6 +47,7 @@ EXPECTED_REFERENCES = {
     "human-guided-procedures.md",
     "operating-model.md",
     "operations.md",
+    "process-observation.md",
     "project-context.md",
     "prototype-to-learn.md",
     "specification.md",
@@ -88,6 +89,8 @@ REQUIRED_SCENARIOS = {
     "S31_CONSUMER_READY_COMMUNICATION",
     "S32_CONDITIONAL_PROJECT_ORIENTATION",
     "S33_VISIBLE_POPPY_SIGNATURE",
+    "S34_TRANSIENT_COURSE_CORRECTION",
+    "S35_VERIFICATION_AVOIDS_GENERATED_ARTIFACTS",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -136,6 +139,8 @@ REQUIRED_NEGATIVE_CASES = {
     "N43_UNSLOP_PRESERVES_SOURCE_FIDELITY",
     "N44_STYLE_HEURISTICS_NOT_LAWS",
     "N45_SIGNATURE_ARTIFACT_BOUNDARY",
+    "N46_BLIND_RETRY_IS_NOT_PROGRESS",
+    "N47_PROCESS_OBSERVATIONS_STAY_TRANSIENT",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -163,6 +168,7 @@ EXPECTED_SOURCE_FILES = {
     "references/human-guided-procedures.md",
     "references/operating-model.md",
     "references/operations.md",
+    "references/process-observation.md",
     "references/project-context.md",
     "references/prototype-to-learn.md",
     "references/specification.md",
@@ -486,6 +492,8 @@ def scenario_check() -> dict:
     fixtures = json.loads((ROOT / "tests" / "fixtures.json").read_text(encoding="utf-8"))
     scenarios = catalog.get("scenarios", [])
     negative = catalog.get("negative_cases", [])
+    if catalog.get("catalog_version") != 2:
+        raise VerificationError("Scenario catalog version must be 2")
     if {item.get("id") for item in scenarios} != REQUIRED_SCENARIOS:
         raise VerificationError("Required mixed-scenario identifiers are incomplete or renamed")
     if {item.get("id") for item in negative} != REQUIRED_NEGATIVE_CASES:
@@ -518,14 +526,19 @@ def scenario_check() -> dict:
         "started_at",
         "completed_at",
         "fixture_digest",
+        "behavior_input_sha256",
+        "behavior_prompt_sha256",
+        "judge_prompt_sha256_by_order",
         "tool_trace",
         "loaded_skill_reference_bytes",
         "loaded_skill_reference_files",
         "tool_calls",
         "turns",
         "observed_effects",
+        "deterministic_results",
         "assertions",
         "blind_judge",
+        "human_adjudication",
         "limitations",
         "shared_surface_digest_before",
         "shared_surface_digest_after",
@@ -535,25 +548,151 @@ def scenario_check() -> dict:
         raise VerificationError("Evidence-capture template is incomplete")
     if catalog.get("execution", {}).get("fresh_task_required") is not True:
         raise VerificationError("Scenario catalog must require fresh tasks")
+    behavior_input = catalog.get("execution", {}).get("behavior_input", {})
+    required_behavior_input = {
+        "case_fields",
+        "fixture_fields",
+        "grading_only_fields",
+        "read_only_fresh_empty_directory",
+        "behavior_prompt_hash_required",
+        "judge_prompt_hash_required",
+    }
+    if set(behavior_input) != required_behavior_input:
+        raise VerificationError("Behavior-input isolation contract is incomplete")
+    if behavior_input["case_fields"] != ["prompt"] or behavior_input["fixture_fields"] != ["files", "evidence"]:
+        raise VerificationError("Behavior input must contain only the authentic prompt and fixture evidence")
+    required_grading_only = {
+        "kind",
+        "setup",
+        "permitted_effects",
+        "expected_evidence_limits",
+        "observable_assertions",
+        "verification",
+        "git",
+        "arm",
+        "desired_result",
+        "grader_rationale",
+    }
+    if set(behavior_input["grading_only_fields"]) != required_grading_only:
+        raise VerificationError("Grading-only behavior-input exclusions are incomplete")
+    if not all(
+        behavior_input[field] is True
+        for field in (
+            "read_only_fresh_empty_directory",
+            "behavior_prompt_hash_required",
+            "judge_prompt_hash_required",
+        )
+    ):
+        raise VerificationError("Behavior prompt isolation and prompt digests must be required")
     paired = catalog.get("execution", {}).get("paired_evaluation", {})
     required_paired = {
         "model",
         "arms",
         "fresh_task_per_run",
+        "required_only_for",
+        "explicit_budget_approval_required",
+        "default_targeted_probe_trials_per_arm",
+        "automatic_resume_forbidden",
         "trials_per_arm",
         "third_pair_on_disagreement",
         "matched_dimensions",
         "blind_judge_required",
+        "position_swap_required",
+        "deterministic_graders_required",
+        "human_calibration_required",
+        "held_out_cases_required",
+        "human_adjudication_triggers",
         "acceptance_rule",
     }
     if set(paired) != required_paired:
         raise VerificationError("Paired-evaluation contract is incomplete")
     if paired["model"] != "gpt-5.6-sol" or paired["arms"] != ["baseline", "candidate"]:
         raise VerificationError("Paired evaluation must compare baseline and candidate on GPT-5.6 Sol")
+    if set(paired["required_only_for"]) != {
+        "broad behavioral superiority claim",
+        "release decision that depends on subjective comparative behavior",
+    }:
+        raise VerificationError("Full paired evaluation must remain conditional on a decision-bearing broad claim")
+    if paired["explicit_budget_approval_required"] is not True:
+        raise VerificationError("Full paired evaluation must require explicit budget approval")
+    if paired["default_targeted_probe_trials_per_arm"] != 1 or paired["automatic_resume_forbidden"] is not True:
+        raise VerificationError("Targeted behavioral probes must default to one pair without automatic resume")
     if paired["fresh_task_per_run"] is not True or paired["trials_per_arm"] != 2:
         raise VerificationError("Paired evaluation must use two fresh-task trials per arm")
     if paired["third_pair_on_disagreement"] is not True or paired["blind_judge_required"] is not True:
         raise VerificationError("Paired evaluation must resolve disagreement with a third blind-judged pair")
+    if not all(
+        paired[field] is True
+        for field in (
+            "position_swap_required",
+            "deterministic_graders_required",
+            "human_calibration_required",
+            "held_out_cases_required",
+        )
+    ):
+        raise VerificationError("Bias controls, deterministic graders, calibration, and held-out cases are required")
+    required_adjudication = {
+        "safety_or_fidelity_difference",
+        "position_sensitive_result",
+        "deterministic_semantic_disagreement",
+        "split_trials",
+    }
+    if set(paired["human_adjudication_triggers"]) != required_adjudication:
+        raise VerificationError("Human-adjudication triggers are incomplete")
+    private_evidence = catalog.get("execution", {}).get("private_evidence", {})
+    required_private_evidence = {
+        "conditional_on_full_evaluation",
+        "held_out_manifest_hash_required",
+        "judge_calibration_manifest_hash_required",
+        "activation_trace_manifest_hash_required",
+        "performance_routes",
+        "minimum_interleaved_performance_pairs_per_route",
+        "performance_metrics",
+        "activation_cases",
+        "raw_machine_readable_traces_required",
+    }
+    if set(private_evidence) != required_private_evidence:
+        raise VerificationError("Private evaluation-evidence contract is incomplete")
+    if private_evidence["conditional_on_full_evaluation"] is not True:
+        raise VerificationError("Private evaluation evidence must remain conditional on full evaluation")
+    if not all(
+        private_evidence[field] is True
+        for field in (
+            "held_out_manifest_hash_required",
+            "judge_calibration_manifest_hash_required",
+            "activation_trace_manifest_hash_required",
+            "raw_machine_readable_traces_required",
+        )
+    ):
+        raise VerificationError("Private evaluation manifests and raw traces must be required")
+    if private_evidence["performance_routes"] != [
+        "routine_edit",
+        "stakeholder_synthesis",
+        "bounded_delivery",
+    ] or private_evidence["minimum_interleaved_performance_pairs_per_route"] < 5:
+        raise VerificationError("Performance methodology must use five interleaved pairs on three routes")
+    required_performance_metrics = {
+        "input_tokens",
+        "output_tokens",
+        "loaded_bytes",
+        "response_characters",
+        "tool_calls",
+        "turns",
+        "median_latency",
+        "dispersion",
+        "outliers",
+        "cache_state",
+        "task_success",
+    }
+    if set(private_evidence["performance_metrics"]) != required_performance_metrics:
+        raise VerificationError("Performance evidence metrics are incomplete")
+    if set(private_evidence["activation_cases"]) != {
+        "explicit_fresh",
+        "automatic_fresh",
+        "routine_non_activation",
+        "pre_upgrade_task",
+    }:
+        raise VerificationError("Activation lifecycle evidence cases are incomplete")
     matched_dimensions = {
         "prompt",
         "fixture",
@@ -576,6 +715,15 @@ def scenario_check() -> dict:
     )
     if materializer.get("status") != "pass" or materializer.get("scenarios") != len(all_ids):
         raise VerificationError("Scenario materializer did not verify the complete catalog")
+    projection = materializer.get("task_projection", {})
+    if projection.get("behavior_fields") != [
+        "prompt",
+        "evidence.evidence",
+        "materialized fixture files",
+    ]:
+        raise VerificationError("Scenario materializer task projection is not behavior-safe")
+    if set(projection.get("grading_only_fields_excluded", [])) != required_grading_only:
+        raise VerificationError("Scenario materializer grading-only exclusions are incomplete")
     return {
         "name": "synthetic scenario contract",
         "status": "pass",

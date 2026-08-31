@@ -86,11 +86,15 @@ Prefer paired evaluation:
 - For a new skill, compare the same tasks **with the skill** and **without it**.
 - For an update, compare the candidate with the previous version.
 - Keep the model, harness, tools, environment, and task inputs matched.
-- Use representative tasks, real failure cases, edge cases, and held-out prompts.
+- Give behavior trials only authentic task input. Keep assertions, evidence limits, verification expectations, arm identity, and grader rationale in the grading surface, and hash both rendered inputs.
+- Use representative regressions, real failure cases, and edge cases. Freeze a separate held-out set and its manifest before results; a tuned failure may become a later regression but cannot remain held out.
 - Run multiple trials when non-determinism could change the conclusion.
-- Prefer deterministic end-state checks; use model or human judgment only for qualities that require judgment.
-- Measure task completion, instruction adherence, safety, routing, token use, latency, tool calls, and regressions as relevant.
+- Prefer deterministic end-state checks where observable; judge subjective comparisons in both A/B and B/A order and calibrate automated judgment against human-labeled controls.
+- Test routing separately with positive, paraphrased, near-miss, and negative activation cases.
+- Measure task completion, instruction adherence, safety, routing, token use, latency, tool calls, and regressions as relevant. Use interleaved pairs and distributions for performance claims rather than summed duration.
 - Count efficiency as an improvement only when required quality still passes.
+
+Before any model-based evaluation, name the decision it can change, the selected cases, the maximum model calls and elapsed time, and the stop condition. Use one focused matched pair by default. Do not automatically resume, widen, or repeat a run after the budget or stop condition is reached; leave the dependent claim unverified or ask for explicit approval of a concrete expansion.
 
 Do not optimize against the evaluation set until the skill merely memorizes its examples. Convert important fixed failures into regression cases and retain separate capability tests that remain challenging.
 

@@ -6,6 +6,8 @@ Review the completed outcome, not merely the process. A lesson is durable only w
 
 Capture the smallest reusable statement, its scope, decisive evidence, and any counterexample or expiry condition. Do not turn task narration, preferences inferred from one exchange, or transient tracker state into memory.
 
+Retry counts, provisional risks, self-review notes, course-correction observations, and assurance packets are working context. Repetition within one task does not establish a recurring durable lesson.
+
 Classify before choosing a destination:
 
 - a project fact, rationale, or domain lesson belongs in nominated project memory when policy and authority permit;
