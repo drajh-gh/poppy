@@ -11,6 +11,8 @@ Read [coordination and operations](../../references/operations.md).
 
 Reconcile schedule, budget, capacity, quality, risk, dependencies, decisions, and commitments only from sources authoritative for each claim. Lead with the action or decision needed. Never convert a proposed owner, date, handoff, or remedy into observed progress.
 
+Meeting-note reconciliation and stakeholder drafts remain Coordinate work when the task is to record supplied decisions, commitments, risks, and open questions faithfully. Keep an uncertain item open or unverified; it does not by itself require Intake or Decide.
+
 Use [work items](../../references/work-items.md) only when decomposition or tracker publication is needed. For meetings, stakeholder drafts, or audience-sensitive artifacts, read [communication and writing](../../references/communication-and-writing.md). For a procedure containing human-only values or provider stages, read [human-guided procedures](../../references/human-guided-procedures.md).
 
 ## Stop at the boundary

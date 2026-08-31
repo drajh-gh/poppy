@@ -17,6 +17,8 @@ Answer a self-contained question or perform a routine scoped reversible edit dir
 
 Select at most one primary specialist for the current outcome. Supporting skills may supply bounded evidence or an independent judgment, but they do not silently take ownership. When ownership changes, carry the acceptance anchor, exact candidate, evidence status, authority, and stopping condition forward.
 
+Route to the owner of the requested end state, not every intermediate verb or source format. Add an upstream owner only when its materially unresolved output is required before the end-state owner can proceed; incoming notes alone do not require Intake, and faithfully recording supplied decisions or open questions does not require Decide.
+
 - Identity, source authority, cross-source current context, or memory destination: Poppy Context.
 - Incoming issue, request, incident, proposal, or pull-request disposition: Poppy Intake.
 - Unsettled outcome, behavior, scope, policy, domain meaning, architecture direction, or specification: Poppy Decide.
