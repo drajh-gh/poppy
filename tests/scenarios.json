@@ -74,6 +74,53 @@
       "verdict": "pass|fail|unverified"
     }
   },
+  "routing_expectations": {
+    "purpose": "Grading-only expected primary-owner sequence; never included in behavior input.",
+    "candidate_smoke": {
+      "maximum_fresh_tasks": 3,
+      "maximum_elapsed_minutes": 30,
+      "baseline_arm_required": false,
+      "automatic_expansion_forbidden": true,
+      "rerun_policy": "After a routing correction, rerun only the failed case and remain inside the same task and elapsed-time cap."
+    },
+    "sequences": {
+      "S1_DIRECT_TINY_EDIT": ["root-direct"],
+      "S2_ROUGH_FEATURE": ["poppy-decide", "poppy-delivery"],
+      "S3_DEFECT_FIX": ["poppy-diagnose", "poppy-delivery"],
+      "S4_UX_IMPROVEMENT": ["poppy-decide", "poppy-delivery"],
+      "S5_RESEARCH_DECISION": ["poppy-research"],
+      "S6_RELEASE_READINESS": ["poppy-assure"],
+      "S7_MEETING_TO_ACTIONS": ["poppy-coordinate"],
+      "S8_DURABLE_LESSON": ["poppy-learn"],
+      "S9_PHASE_BOUNDARY_CONTINUE": ["poppy-delivery"],
+      "S10_DECISION_DISCOVERY_AND_WAYFINDING": ["poppy-decide"],
+      "S11_ARCHITECTURE_ASSESSMENT_AND_DESIGN": ["poppy-decide"],
+      "S12_PROTOTYPE_TO_LEARN": ["poppy-delivery"],
+      "S13_DIAGNOSIS_ONLY": ["poppy-diagnose"],
+      "S14_LEGACY_CHARACTERIZATION": ["poppy-delivery"],
+      "S15_SPECIFICATION_TO_TICKET_PREVIEW": ["poppy-decide", "poppy-coordinate"],
+      "S16_GIT_CONFLICT_RESOLUTION": ["poppy-delivery"],
+      "S17_WORK_INTAKE_TRIAGE": ["poppy-intake"],
+      "S18_HUMAN_GUIDED_PROCEDURE": ["poppy-coordinate", "poppy-delivery"],
+      "S19_REQUEST_FIDELITY_AND_LANGUAGE": ["poppy-intake", "poppy-coordinate"],
+      "S20_LEGACY_GATE_CHRONOLOGY": ["poppy-intake"],
+      "S21_PRE_PR_VISUAL_ACCEPTANCE": ["poppy-delivery", "poppy-acceptance"],
+      "S22_CLIENT_REPORT_READINESS_BOUNDARY": ["poppy-intake", "poppy-decide"],
+      "S23_BATCH_TRIAGE_DECISION_READY": ["poppy-intake"],
+      "S24_DELEGATED_JOIN_FIDELITY": ["poppy"],
+      "S25_ARTIFACT_AND_CONTEXT_CHECKPOINT": ["poppy"],
+      "S26_PREPARED_APPROVAL_AND_REUSE": ["poppy-delivery"],
+      "S27_BLOCKING_GATE_INTEGRITY": ["poppy-assure"],
+      "S28_CALIBRATED_EVIDENCE_RECOMMENDATION": ["poppy-assure"],
+      "S29_PENDING_CLIENT_RECORDING_CHECKPOINT": ["poppy-delivery", "poppy-acceptance"],
+      "S30_CLIENT_READY_ACCEPTANCE_RECORDING": ["poppy-acceptance"],
+      "S31_CONSUMER_READY_COMMUNICATION": ["poppy-coordinate"],
+      "S32_CONDITIONAL_PROJECT_ORIENTATION": ["root-direct"],
+      "S33_VISIBLE_POPPY_SIGNATURE": ["poppy-decide"],
+      "S34_TRANSIENT_COURSE_CORRECTION": ["poppy"],
+      "S35_VERIFICATION_AVOIDS_GENERATED_ARTIFACTS": ["poppy-delivery"]
+    }
+  },
   "scenarios": [
     {
       "id": "S1_DIRECT_TINY_EDIT",

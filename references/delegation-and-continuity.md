@@ -6,6 +6,8 @@ Continue in the informed task by default. Delegate only when a bounded result ca
 
 Good uses include independent research lanes, bounded specialist analysis, and fresh read-only assurance at a material gate. Routine implementation, same-candidate correction, and shared-context follow-ups normally stay with the informed owner.
 
+When many similar independent items are proposed for delegation, test one representative slice first. Use its observed context needs, output shape, failure modes, and integration cost to decide whether fan-out still adds value. Do not multiply work packets from an untested assumption or use one slice's result as evidence for uninspected items.
+
 A separate user-visible task is for durable user ownership, a distinct authority boundary, or later independent continuation. It is not the default internal work packet.
 
 - Keep one writer per target.
@@ -29,6 +31,8 @@ Give a delegate:
 Prefer a narrow or no-history fork when the full conversation will not change the result. Do not include the desired verdict in an assurance assignment.
 
 The delegate returns the answer or artifact, decisive evidence, affected unverified or conflicted claims, and exact next action. The root checks it against request fidelity, authority, language and format, candidate identity, and decisive evidence. Do not relay an adjacent answer or unsupported closure.
+
+Preserve source-to-output fidelity when transforming a delegate's result. Summarize only at the integration boundary and retain the exact question, material caveats, controlled wording, and links to decisive evidence. If the requested tool or handoff surface cannot faithfully carry required information, report the limitation and use the smallest honest fallback rather than simulating success.
 
 ## Preserve continuity across phases
 

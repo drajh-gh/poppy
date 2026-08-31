@@ -9,7 +9,7 @@ Use the [agent skill authoring and review reference](agent-skill-authoring-refer
 1. Work from an exact base in an isolated branch or worktree.
 2. Preserve pre-existing changes and keep one writer per target.
 3. Keep product content project-agnostic, synthetic, machine-path-free, and skills-only.
-4. Validate every changed skill and every reference directly reachable from the seven entrypoints.
+4. Validate every changed skill and every reference directly reachable from the declared entrypoints.
 5. Validate JSON and fixture parity with python scripts/materialize_scenario.py --verify-catalog.
 6. Run git diff --check and python scripts/verify_product.py sequentially.
 7. For a separately authorized committed candidate, run python scripts/verify_product.py --require-clean.
@@ -44,9 +44,11 @@ Record exact baseline and candidate revisions, package versions, digest algorith
 
 For a latency or response-efficiency claim, separately approve the evaluation cost, then use at least five interleaved pairs on each route named by that claim. Report paired input and output tokens, loaded bytes, response characters, tool calls, turns, median latency, dispersion, outliers, cache state, and task success. Do not infer general speed from summed duration. When efficiency is not an acceptance item, its absence remains unverified and does not block a quality-only candidate.
 
-Test only trigger and non-trigger behavior affected by the change. After a separately approved installation, always verify the installed version, digest, seven-skill inventory, and explicit activation in one fresh task. Add automatic activation, routine non-activation, or pre-upgrade task checks only when the change touches those behaviors. Retain raw machine-readable traces for checks actually run. If the host retains stale task catalogs, document that lifecycle limitation rather than adding version narration to Poppy.
+Test only trigger and non-trigger behavior affected by the change. After a separately approved installation, always verify the installed version, digest, exact declared skill inventory, and explicit activation in one fresh task. Add automatic activation, routine non-activation, or pre-upgrade task checks only when the change touches those behaviors. Retain raw machine-readable traces for checks actually run. If the host retains stale task catalogs, document that lifecycle limitation rather than adding version narration to Poppy.
 
-The checked-in scenario catalog is public regression acceptance material, not a runtime, scorecard, or execution ledger. Held-out cases, judge calibration labels, prompts, and fresh-task evidence belong outside the repository.
+For an ownership-routing change that does not claim broad superiority, use the grading-only routing expectations and at most three candidate-only fresh-task smokes within 30 elapsed minutes. Do not add a baseline arm, blind judge, performance study, or automatic expansion. After a correction, rerun only the failed case and remain inside the same cap.
+
+The checked-in scenario catalog is public regression acceptance material, including grading-only owner sequences; it is not a runtime, scorecard, or execution ledger. Owner expectations never enter behavior input. Held-out cases, judge calibration labels, prompts, and fresh-task evidence belong outside the repository.
 
 ## Source adaptations
 

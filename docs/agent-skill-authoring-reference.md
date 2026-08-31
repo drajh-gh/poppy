@@ -91,6 +91,7 @@ Prefer paired evaluation:
 - Run multiple trials when non-determinism could change the conclusion.
 - Prefer deterministic end-state checks where observable; judge subjective comparisons in both A/B and B/A order and calibrate automated judgment against human-labeled controls.
 - Test routing separately with positive, paraphrased, near-miss, and negative activation cases.
+- Judge routing from the selected skill or loaded-reference trace and the resulting behavior, not from whether the response echoes a skill name, heading, or prescribed phrase.
 - Measure task completion, instruction adherence, safety, routing, token use, latency, tool calls, and regressions as relevant. Use interleaved pairs and distributions for performance claims rather than summed duration.
 - Count efficiency as an improvement only when required quality still passes.
 

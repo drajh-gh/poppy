@@ -5,7 +5,7 @@ This repository is the canonical, project-agnostic source for Poppy v3.
 ## Product boundary
 
 - Keep the plugin installable from the repository root and expose only skills.
-- Keep exactly seven skill directories: `poppy`, `poppy-context`, `poppy-operations`, `poppy-delivery`, `poppy-assure`, `poppy-research`, and `poppy-learn`.
+- Keep the release's exact declared skill inventory: `poppy`, `poppy-context`, `poppy-intake`, `poppy-decide`, `poppy-coordinate`, `poppy-research`, `poppy-diagnose`, `poppy-delivery`, `poppy-acceptance`, `poppy-assure`, and `poppy-learn`. The count is not a product principle; an inventory change requires a distinct ownership contract, routing evidence, verifier update, and rollback coverage.
 - Do not add a cockpit, MCP server, telemetry, automation, graph registry, runtime, schema platform, execution ledger, project adapter, generated repository instructions, or repository-local installation.
 - Keep real project names, vault contents, runtime records, credentials, machine paths, installed plugin copies, and live configuration out of Git.
 - Use only clearly synthetic identifiers in tests and examples.

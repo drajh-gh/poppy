@@ -25,7 +25,7 @@ Ask one dependency layer per round. Ask at most three independent questions, def
 
 For a large foggy effort, use an ephemeral map in the current task. Each decision unit records its question, importance, evidence needed, method, responsible owner, blockers, completion signal, and effect gates. Owner means responsibility, not assignment, permission, or authority.
 
-Methods are optional and proportional: research for external evidence, a prototype for artifact-based learning, domain modeling for unclear concepts, Operations for decisions and coordination, Delivery for implementation evidence, and Assurance for an independent check. None implies a subagent or external effect.
+Methods are optional and proportional: Research for external evidence, a prototype for artifact-based learning, domain modeling for unclear concepts, Decide for the material choice, Coordinate for operational sequencing, Delivery for implementation evidence, and Assurance for an independent check. None implies a subagent or external effect.
 
 ## Preserve checkpoints
 
@@ -45,7 +45,7 @@ Confirmed checkpoints remain stable until explicitly reopened. Recompute only af
 
 ## Stop and hand off
 
-Stop when the route is responsibly clear enough for a recommendation, specification, ticket preview, or Delivery handoff—not when every possible uncertainty disappears. Discovery must not route directly into implementation merely because the interview ended. Apply the phase-boundary decision and carry original evidence and wording forward.
+Stop when the route is responsibly clear enough for a recommendation, specification, Coordinate handoff, or Delivery handoff—not when every possible uncertainty disappears. Discovery must not route directly into implementation merely because the interview ended. Apply the phase-boundary decision and carry original evidence and wording forward.
 
 A durable map is exceptional. Use only a project-authoritative tracker or explicitly nominated document, preview the exact effect, obtain approval, and read it back. Never create a local shadow tracker, private graph, automatic assignment, credential record, or durable-memory mirror.
 

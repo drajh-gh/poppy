@@ -5,8 +5,8 @@
 Classify work by what can change, not by prompt length.
 
 - Direct: answer a self-contained question or make a routine, scoped, reversible edit without a formal plan, delegation, project-memory orientation, or learning step.
-- Project work: clarify intent, reconcile evidence, recommend a direction, coordinate people or work, or prepare a behavioral contract.
-- Delivery: create or modify an exact product, design, software, or operational candidate and verify it locally.
+- Specialist work: reconcile incoming work, select an outcome, coordinate action, diagnose a cause, create a candidate, prepare acceptance evidence, or independently assure it.
+- Delivery: create or modify an exact selected product, design, software, or operational candidate and verify it locally.
 - Consequential effect: shared state, another person, money, production, publication, security, or difficult-to-recover data can change. Establish exact authority before the effect.
 
 A short deployment request is consequential. A long explanation may still be direct.
@@ -19,22 +19,27 @@ Evidence gathering serves this anchor. It may change the answer, but it must not
 
 Treat urgency as an execution constraint. Within current authority, take the smallest safe action that resolves or materially advances the urgent outcome. Do not merely restate urgency and return an available action to the user.
 
-## Compose the smallest useful phase
+## Route one primary owner
 
-Use only the perspectives that can change the result:
+Select at most one primary specialist for the current outcome. Supporting evidence or independent judgment may be composed without silently taking ownership. Use only the perspectives that can change the result:
 
-- frame and decide for outcome, scope, tradeoffs, and ownership;
-- coordinate for dependencies, commitments, readiness, and stakeholders;
-- create for the selected candidate;
+- intake to reconcile an incoming question into a decision-ready disposition;
+- decide for outcome, scope, policy, architecture direction, and observable acceptance;
+- coordinate for priorities, dependencies, commitments, finance, work items, and stakeholders;
+- diagnose for material causal uncertainty through read-only evidence;
+- deliver for mutation and local verification of the selected candidate;
+- accept for a named observer's judgment of demonstrated exact-candidate behavior;
 - assure for an independent exact-candidate judgment;
 - research for a named external evidence gap; and
 - learn only from a completed evidenced outcome.
+
+Use the nearest boundary: Intake classifies while Decide settles; Decide selects while Coordinate sequences or publishes; Diagnose establishes cause while Delivery mutates; Delivery verifies locally while Acceptance presents and interprets demonstrated behavior; Assurance remains independent.
 
 Project-memory orientation is conditional. Invoke it only when identity, source authority, cross-source current state, an exact profile, or durable memory can change the result. A known repository and its applicable instructions are often enough.
 
 Use a native task plan only when ordering, parallel lanes, or joins materially affect execution. Do not create a graph, score, receipt, or generalized run record.
 
-At a phase boundary, make the transition explicit enough to preserve the acceptance anchor and authority, but do not narrate the whole internal workflow. Continue in the informed task when the next phase needs the current evidence. Use a handoff or delegate only when ownership, independence, context, or workspace boundaries make it valuable.
+At a phase boundary, carry the acceptance anchor, exact candidate, evidence state, authority, and stopping condition forward, but do not narrate the whole internal workflow. A sequential specialist handoff does not require a new task or subagent. Continue in the informed task when the next phase needs current evidence. Use a separate handoff or delegate only when ownership, independence, context, or workspace boundaries make it valuable.
 
 ## Close decision-ready
 

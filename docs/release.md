@@ -20,6 +20,8 @@ Static verification establishes structure and contract integrity, not behavioral
 
 Universal superiority is not a release requirement. Full paired evaluation, private held-out cases, judge calibration, human adjudication, activation-matrix testing, and performance measurement are conditional evidence for claims that actually depend on them. Before such work starts, set the decision question, selected cases, maximum model calls, maximum elapsed time, and stop condition. Without separate approval, allow at most one scenario and one fresh task per arm, with no automatic resume or expansion. Reaching the boundary leaves the dependent claim unverified; it does not license another run.
 
+An ownership-routing candidate may instead use the catalog's bounded candidate-only smoke: at most three fresh tasks and 30 elapsed minutes, with no baseline arm, blind judge, performance study, or automatic expansion. This establishes only the observed routing cases, not general superiority.
+
 ## Exact-effect separation
 
 Commit, local tag, remote tag, push, pull request, merge, publication, personal installation, automation mutation, deployment, tracker mutation, communication, and memory write are distinct effects.
@@ -31,7 +33,7 @@ Before personal installation, present the exact committed candidate, version, di
 A fresh task after installation must establish:
 
 - active plugin ID, version, source revision, digest algorithm, and digest;
-- exactly the seven Poppy v3 skills and no active v2 skill identities;
+- exactly the declared Poppy skill inventory and no active v2 or removed skill identities;
 - explicit Poppy invocation in one fresh task;
 - automatic activation and routine non-activation only when trigger behavior changed;
 - pre-existing-task catalog behavior only when upgrade lifecycle behavior is an acceptance item;
@@ -43,7 +45,7 @@ Retain the raw machine-readable traces for checks actually run. If a pre-existin
 
 ## Rollback
 
-Keep the previously active package intact until the new installation and fresh-task proof pass. Rollback restores that exact package, reads back the active version and seven-skill surface, and records any limitation. Do not delete rollback material as part of successful cutover.
+Keep the previously active package intact until the new installation and fresh-task proof pass. Rollback restores that exact package, reads back its active version and declared skill surface, and records any limitation. Do not delete rollback material as part of successful cutover.
 
 ## Natural-use follow-up
 

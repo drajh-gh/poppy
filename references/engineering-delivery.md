@@ -4,7 +4,7 @@
 
 Delivery begins when the intended outcome is sufficiently settled to create or change an exact candidate. Retain the originating acceptance wording, selected behavior, non-goals, constraints, authority, and relevant evidence.
 
-Return a material decision to project work when any of these remains unsettled enough to change the outcome:
+Return a material decision to Poppy Decide when any of these remains unsettled enough to change the outcome:
 
 - user-visible behavior or success;
 - scope or non-goals;
@@ -24,7 +24,7 @@ Choose the smallest coherent change that satisfies the acceptance anchor. Preser
 
 ## Implement through observable seams
 
-For a defect, reproduce or characterize the decisive failure before correcting it when feasible. For new behavior, identify the closest observable seam and establish useful feedback early. Tests should protect behavior and material failure modes, not merely mirror implementation structure.
+For a defect whose cause or correction is already sufficiently supported, reproduce or characterize the decisive failure before correcting it when feasible. When material causal uncertainty remains, return the symptom and evidence to Poppy Diagnose. For new behavior, identify the closest observable seam and establish useful feedback early. Tests should protect behavior and material failure modes, not merely mirror implementation structure.
 
 Keep one writer per target. A delegated writer uses an isolated worktree and explicit file boundary. Do not let implementation or remediation broaden the authorized target.
 
@@ -51,4 +51,4 @@ Report:
 - disposable artifacts and their disposition; and
 - the next acceptance or effect, if one genuinely remains.
 
-Technical verification does not imply product acceptance, client acceptance, commit, publication, installation, deployment, or production correctness. Keep each state separate and ask only for the next decision the user owns.
+Technical verification does not imply product-owner acceptance, client acceptance, independent assurance, commit, publication, installation, deployment, or production correctness. Hand demonstrated human review to Poppy Acceptance and independent exact-candidate judgment to Poppy Assure. Keep each state separate and ask only for the next decision the user owns.

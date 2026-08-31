@@ -1,31 +1,30 @@
 ---
 name: poppy-delivery
-description: Turn a sufficiently selected product, design, or engineering change into a preserved and locally verified candidate. Use behind Poppy for implementation, defect repair, prototypes, architecture design, and release preparation; directly invokable for focused testing.
+description: Turn a sufficiently selected product, design, or engineering change into a preserved and locally verified candidate. Use behind Poppy when candidate mutation is authorized; directly invokable for focused testing. Do not use for unresolved causal diagnosis or human acceptance.
 ---
 
 # Poppy Delivery
 
 Read [engineering delivery](../../references/engineering-delivery.md).
 
-## Change the candidate
+## Own candidate mutation
 
-Delivery owns creation or modification of the exact product, design, or software candidate and its local verification. It consumes the originating wording and settled behavioral contract; it must not silently redefine them.
+Delivery creates or modifies the exact product, design, software, or operational candidate and verifies it locally. It consumes the originating wording and settled behavioral contract; it must not silently redefine them.
 
-If intended behavior, scope, lifecycle, decision ownership, or observable acceptance remains materially unsettled, return the missing decision to Poppy project work. Resolve minor reversible implementation details without ceremony.
+If behavior, scope, lifecycle, decision ownership, or observable acceptance remains materially unsettled, return the decision to Poppy Decide. If material causal uncertainty reappears, return the exact symptom and evidence to Poppy Diagnose. Resolve minor reversible implementation details without ceremony.
 
-Compose only the guidance that can change the candidate:
+Use only the guidance that can change the candidate:
 
-- architecture health, selected design, module boundaries, or dependency seams: [architecture and design](../../references/architecture-and-design.md);
+- module boundaries, dependency seams, or selected software design: [implementation design](../../references/implementation-design.md);
 - a bounded learning artifact: [prototype to learn](../../references/prototype-to-learn.md);
-- diagnosis, regression-first repair, characterization, or test-first feedback: [diagnosis and test-first delivery](../../references/diagnosis-and-test-first-delivery.md);
+- regression-first, characterization, or other observable implementation feedback: [test-first delivery](../../references/test-first-delivery.md);
 - Git already stopped on a conflict: [Git conflict resolution](../../references/git-conflict-resolution.md);
-- a guided checklist or helper with human-only stages: [human-guided procedures](../../references/human-guided-procedures.md);
-- client or pre-PR visual evidence, recording, or exact-candidate acceptance: [client acceptance](../../references/client-acceptance.md).
+- a helper or checklist with human-only stages: [human-guided procedures](../../references/human-guided-procedures.md).
 
-Read [communication and writing](../../references/communication-and-writing.md) for documentation, captions, acceptance material, or sharing drafts. Use [delegation and continuity](../../references/delegation-and-continuity.md) only when delegation, a worktree transition, or artifact preservation is material.
+## Preserve and hand off
 
 Preserve existing changes and keep one writer per target. Before a commit, dependency adoption, deployment, publication, installation, destructive action, or external effect, read [authority and effects](../../references/authority-and-effects.md). Local implementation authority never implies one of those effects.
 
-Keep verification inside the authorized candidate surface. When a tool can run in an equivalent no-cache or no-generated-artifact mode, prefer it and inspect exact status or diff afterward. Do not delete unknown or pre-existing artifacts; if an unavoidable generated artifact remains and cleanup is not clearly authorized, report its exact disposition instead of claiming a clean scoped candidate.
+Keep verification inside the authorized candidate surface. Prefer equivalent no-cache or no-generated-artifact modes when available, inspect exact status or diff afterward, and never delete unknown or pre-existing artifacts to make a candidate appear clean.
 
-Use Poppy Assurance for a fresh read-only pass when uncertainty, blast radius, or release consequence warrants independence. Report the exact candidate, behavior changed, verification performed, limitations, and every later acceptance or effect state that remains unverified.
+Report exact candidate identity, behavior changed and preserved, checks and observed results, limitations, and remaining acceptance or effect states. Hand demonstrated product-owner or client review to Poppy Acceptance and an independent conformance or release judgment to Poppy Assure.

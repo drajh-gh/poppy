@@ -10,7 +10,8 @@ Its adaptive loop is understand, orient when material, decide, act, verify, repo
 
 - Self-contained questions and routine scoped reversible edits run directly, without a formal plan, delegation, project-memory orientation, or learning step.
 - Consequence, uncertainty, and coordination determine control; prompt length does not.
-- Project work decides what should happen and why. Delivery creates or changes the selected exact candidate. Neither silently rewrites the other's contract.
+- Intake reconciles incoming work, Decide selects intended outcomes, Coordinate turns selected outcomes into commitments and operational action, Diagnose resolves material causal uncertainty, and Delivery changes the selected exact candidate. No owner silently rewrites another's contract.
+- Root Poppy selects at most one primary specialist for the current outcome. Supporting evidence and independent judgment may be composed without silently taking ownership, and a sequential handoff does not imply a permanent subagent or fixed pipeline.
 - Context is conditional. A selected repository and its applicable instructions may be sufficient.
 - Plans are native ephemeral aids used only when order or joins matter.
 - Poppy composes relevant Codex-native and project-specific skills rather than duplicating them.
@@ -43,4 +44,6 @@ Decision maps, diagnosis evidence, review reports, specifications, work-item pre
 
 ## Deliberate non-goals
 
-Poppy v3 has exactly seven skill directories and exposes only skills. It has no cockpit, MCP server, telemetry, recurring automation, universal capability graph, runtime engine, schema platform, persistent execution ledger, project adapter, generated repository instructions, fixed quality score, or mandatory orchestration choreography.
+Each Poppy release exposes only its exact declared skill inventory. Skill count is a versioned packaging decision, not an architectural doctrine. This release has one adaptive root and ten focused specialists for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, and learning.
+
+Poppy has no cockpit, MCP server, telemetry, recurring automation, universal capability graph, runtime engine, schema platform, persistent execution ledger, project adapter, generated repository instructions, fixed quality score, permanent agent team, or mandatory orchestration choreography.

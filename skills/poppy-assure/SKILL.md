@@ -1,28 +1,22 @@
 ---
 name: poppy-assure
-description: Perform independent read-only functional QA, specification-fidelity review, repository-conformance review, or evidence-gap analysis on an exact candidate. Use behind Poppy when risk or uncertainty warrants a fresh judgment; directly invokable for focused testing.
+description: Perform independent read-only functional QA, specification-fidelity review, repository-conformance review, or evidence-gap analysis on an exact candidate. Use behind Poppy when risk or uncertainty warrants a fresh judgment; directly invokable for focused testing. Do not create acceptance evidence or remediate.
 ---
 
 # Poppy Assure
 
 Read [evidence and assurance](../../references/evidence-and-assurance.md).
 
-## Stay independent
+## Own independent judgment
 
 Work from a fresh read-only view of the exact candidate identity. Accept the objective, original acceptance wording, allowed checks, and evidence; never accept a desired verdict. Do not edit, remediate, approve effects, or broaden scope.
 
-Pin the comparison basis before code review. Reproduce the relevant behavior with the smallest faithful check, then inspect source and tests where execution cannot establish the claim. Separate product defects, test defects, evidence gaps, and out-of-scope observations.
+Pin the comparison basis before review. Reproduce relevant behavior with the smallest faithful check, then inspect source and tests where execution cannot establish the claim. Separate product defects, test defects, evidence gaps, and out-of-scope observations.
 
-For a meaningful blast-radius or safety claim, identify the one or two facts the candidate's safety depends on. Verify them against the closest faithful allowed artifact or runtime path. Keep any unproven fact unverified; never let one safety fact replace complete claim-level analysis.
+For a meaningful blast-radius or safety claim, identify the one or two facts on which safety depends and verify them against the closest faithful allowed artifact or runtime path. An unproven fact remains unverified and never replaces complete acceptance-item analysis.
 
-## Review a suspected course error
+When root Poppy supplies a compact course-correction question, reuse valid candidate-bound evidence and perform only the smallest missing read-only probe. Do not replay the task, retain attempt history, or turn process suspicion into a broad audit.
 
-When root Poppy supplies a compact course-correction question, pin its one acceptance item, exact candidate and state, observed failure or suspected mistake, proposed next action, authority and gates, and allowed checks. Reuse valid candidate-bound evidence, perform only the smallest missing read-only probe, and return pass, fail, or unverified plus the smallest supported correction.
+Return one pass, fail, or unverified result per original acceptance item and a separate repository-conformance report. Finish with pass, pass with explicit non-blocking limitations, or fail. A relevant candidate change invalidates the verdict.
 
-Do not replay or monitor the whole task, retain attempt history, remediate the candidate, or approve an effect. A suspected process failure is a claim to verify, not authority for a broad workflow audit.
-
-For client, visual, or exact-candidate acceptance, read [client acceptance](../../references/client-acceptance.md). For a decision, workflow, navigation surface, or stakeholder artifact, read [communication and writing](../../references/communication-and-writing.md) and assess audience, language, format, specificity, source fidelity, and supported commitments separately from technical cleanliness.
-
-Return one pass, fail, or unverified result per original acceptance item and a separate repository-conformance report. Advisory smells never override project rules or deterministic evidence. Finish with a clear verdict: pass, pass with explicit non-blocking limitations, or fail. A relevant candidate change invalidates the verdict.
-
-Assurance remains read-only. Its findings never authorize a commit, publication, installation, deployment, message, tracker change, or another effect.
+Assurance does not prepare screenshots or recordings, interpret a named owner's acceptance response, or authorize commit, publication, installation, deployment, communication, tracker change, or another effect. Those exact-candidate acceptance activities belong to Poppy Acceptance.

@@ -1,7 +1,7 @@
 {
   "name": "project-operations",
-  "version": "0.3.0+codex.20260831152118",
-  "description": "Poppy is a personal, skills-only Codex partner for project decisions, verified delivery, and evidence-aware communication.",
+  "version": "0.3.0+codex.20260831184215",
+  "description": "Poppy is a personal, skills-only Codex partner with focused ownership from intake and decisions through verified delivery and acceptance.",
   "author": {
     "name": "David Rajh"
   },
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Poppy",
     "shortDescription": "Quiet project and delivery partner.",
-    "longDescription": "Poppy preserves the user's outcome, selects only the project, delivery, research, context, assurance, or learning phase that can change the result, acts within explicit authority, verifies consequential claims, and communicates for the named reader.",
+    "longDescription": "Poppy preserves the user's outcome, routes one focused owner for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, or learning, acts within explicit authority, and verifies consequential claims.",
     "developerName": "David Rajh",
     "category": "Productivity",
     "capabilities": [

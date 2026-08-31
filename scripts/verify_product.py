@@ -23,21 +23,25 @@ CANDIDATE_DIGEST_ALGORITHM = "sha256(relative-path-nul-git-filtered-blob-oid-nul
 EXPECTED_SKILLS = {
     "poppy",
     "poppy-context",
-    "poppy-operations",
-    "poppy-delivery",
-    "poppy-assure",
+    "poppy-intake",
+    "poppy-decide",
+    "poppy-coordinate",
     "poppy-research",
+    "poppy-diagnose",
+    "poppy-delivery",
+    "poppy-acceptance",
+    "poppy-assure",
     "poppy-learn",
 }
 
 EXPECTED_REFERENCES = {
-    "architecture-and-design.md",
+    "architecture-assessment.md",
     "authority-and-effects.md",
     "client-acceptance.md",
     "communication-and-writing.md",
     "decision-discovery.md",
     "delegation-and-continuity.md",
-    "diagnosis-and-test-first-delivery.md",
+    "diagnosis.md",
     "domain-modeling.md",
     "durable-learning.md",
     "engineering-delivery.md",
@@ -45,14 +49,43 @@ EXPECTED_REFERENCES = {
     "external-research.md",
     "git-conflict-resolution.md",
     "human-guided-procedures.md",
+    "implementation-design.md",
     "operating-model.md",
     "operations.md",
     "process-observation.md",
     "project-context.md",
     "prototype-to-learn.md",
     "specification.md",
+    "test-first-delivery.md",
     "work-intake.md",
     "work-items.md",
+}
+
+REFERENCE_OWNERS = {
+    "architecture-assessment.md": "poppy-decide",
+    "authority-and-effects.md": "poppy",
+    "client-acceptance.md": "poppy-acceptance",
+    "communication-and-writing.md": "poppy",
+    "decision-discovery.md": "poppy-decide",
+    "delegation-and-continuity.md": "poppy",
+    "diagnosis.md": "poppy-diagnose",
+    "domain-modeling.md": "poppy-decide",
+    "durable-learning.md": "poppy-learn",
+    "engineering-delivery.md": "poppy-delivery",
+    "evidence-and-assurance.md": "poppy-assure",
+    "external-research.md": "poppy-research",
+    "git-conflict-resolution.md": "poppy-delivery",
+    "human-guided-procedures.md": "poppy-coordinate",
+    "implementation-design.md": "poppy-delivery",
+    "operating-model.md": "poppy",
+    "operations.md": "poppy-coordinate",
+    "process-observation.md": "poppy",
+    "project-context.md": "poppy-context",
+    "prototype-to-learn.md": "poppy-delivery",
+    "specification.md": "poppy-decide",
+    "test-first-delivery.md": "poppy-delivery",
+    "work-intake.md": "poppy-intake",
+    "work-items.md": "poppy-coordinate",
 }
 
 REQUIRED_SCENARIOS = {
@@ -153,12 +186,12 @@ EXPECTED_SOURCE_FILES = {
     "docs/development.md",
     "docs/release.md",
     "references/authority-and-effects.md",
-    "references/architecture-and-design.md",
+    "references/architecture-assessment.md",
     "references/client-acceptance.md",
     "references/communication-and-writing.md",
     "references/decision-discovery.md",
     "references/delegation-and-continuity.md",
-    "references/diagnosis-and-test-first-delivery.md",
+    "references/diagnosis.md",
     "references/domain-modeling.md",
     "references/durable-learning.md",
     "references/engineering-delivery.md",
@@ -166,22 +199,28 @@ EXPECTED_SOURCE_FILES = {
     "references/external-research.md",
     "references/git-conflict-resolution.md",
     "references/human-guided-procedures.md",
+    "references/implementation-design.md",
     "references/operating-model.md",
     "references/operations.md",
     "references/process-observation.md",
     "references/project-context.md",
     "references/prototype-to-learn.md",
     "references/specification.md",
+    "references/test-first-delivery.md",
     "references/work-intake.md",
     "references/work-items.md",
     "scripts/materialize_scenario.py",
     "scripts/verify_product.py",
     "skills/poppy/SKILL.md",
     "skills/poppy-assure/SKILL.md",
+    "skills/poppy-acceptance/SKILL.md",
     "skills/poppy-context/SKILL.md",
+    "skills/poppy-coordinate/SKILL.md",
+    "skills/poppy-decide/SKILL.md",
     "skills/poppy-delivery/SKILL.md",
+    "skills/poppy-diagnose/SKILL.md",
+    "skills/poppy-intake/SKILL.md",
     "skills/poppy-learn/SKILL.md",
-    "skills/poppy-operations/SKILL.md",
     "skills/poppy-research/SKILL.md",
     "tests/fixtures.json",
     "tests/scenarios.json",
@@ -371,6 +410,7 @@ def linked_reference_check(paths: list[Path]) -> dict:
     entrypoint_set = set(skill_entrypoints)
     markdown = [path for path in paths if path.suffix.casefold() == ".md"]
     linked_references: set[str] = set()
+    links_by_skill: dict[str, set[str]] = {name: set() for name in EXPECTED_SKILLS}
     link_pattern = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
     for path in markdown:
         text = path.read_text(encoding="utf-8")
@@ -389,14 +429,27 @@ def linked_reference_check(paths: list[Path]) -> dict:
                 raise VerificationError(f"Broken link in {path.relative_to(ROOT)}: {raw}")
             if path in entrypoint_set and resolved.parent == ROOT / "references":
                 linked_references.add(resolved.name)
+                links_by_skill[path.parent.name].add(resolved.name)
     if linked_references != EXPECTED_REFERENCES:
         raise VerificationError(
             f"Every reference must be progressively linked; got {sorted(linked_references)}"
         )
+    if set(REFERENCE_OWNERS) != EXPECTED_REFERENCES:
+        raise VerificationError("Every reference must have one declared primary owner")
+    ownership_violations = [
+        f"{reference} is not directly linked by declared owner {owner}"
+        for reference, owner in sorted(REFERENCE_OWNERS.items())
+        if reference not in links_by_skill[owner]
+    ]
+    if ownership_violations:
+        raise VerificationError(
+            "Reference ownership check failed:\n" + "\n".join(ownership_violations)
+        )
     return {
-        "name": "entrypoint-reachable progressive references",
+        "name": "owned entrypoint-reachable progressive references",
         "status": "pass",
         "references": sorted(linked_references),
+        "owners": REFERENCE_OWNERS,
     }
 
 
@@ -498,6 +551,55 @@ def scenario_check() -> dict:
         raise VerificationError("Required mixed-scenario identifiers are incomplete or renamed")
     if {item.get("id") for item in negative} != REQUIRED_NEGATIVE_CASES:
         raise VerificationError("Required negative-control identifiers are incomplete or renamed")
+    routing = catalog.get("routing_expectations", {})
+    if set(routing) != {"purpose", "candidate_smoke", "sequences"}:
+        raise VerificationError("Routing-expectation contract is incomplete")
+    candidate_smoke = routing["candidate_smoke"]
+    required_smoke_fields = {
+        "maximum_fresh_tasks",
+        "maximum_elapsed_minutes",
+        "baseline_arm_required",
+        "automatic_expansion_forbidden",
+        "rerun_policy",
+    }
+    if (
+        set(candidate_smoke) != required_smoke_fields
+        or candidate_smoke["maximum_fresh_tasks"] != 3
+        or candidate_smoke["maximum_elapsed_minutes"] != 30
+        or candidate_smoke["baseline_arm_required"] is not False
+        or candidate_smoke["automatic_expansion_forbidden"] is not True
+        or not candidate_smoke["rerun_policy"].strip()
+    ):
+        raise VerificationError("Candidate-only routing smoke must remain bounded and non-comparative")
+    sequences = routing["sequences"]
+    if set(sequences) != REQUIRED_SCENARIOS:
+        raise VerificationError("Every mixed scenario must declare one primary-owner sequence")
+    allowed_owners = EXPECTED_SKILLS | {"root-direct"}
+    for case_id, sequence in sequences.items():
+        if (
+            not isinstance(sequence, list)
+            or not sequence
+            or any(owner not in allowed_owners for owner in sequence)
+            or ("root-direct" in sequence and sequence != ["root-direct"])
+        ):
+            raise VerificationError(f"Routing sequence invalid for {case_id}: {sequence}")
+    required_boundaries = {
+        "S1_DIRECT_TINY_EDIT": ["root-direct"],
+        "S3_DEFECT_FIX": ["poppy-diagnose", "poppy-delivery"],
+        "S6_RELEASE_READINESS": ["poppy-assure"],
+        "S7_MEETING_TO_ACTIONS": ["poppy-coordinate"],
+        "S10_DECISION_DISCOVERY_AND_WAYFINDING": ["poppy-decide"],
+        "S13_DIAGNOSIS_ONLY": ["poppy-diagnose"],
+        "S17_WORK_INTAKE_TRIAGE": ["poppy-intake"],
+        "S21_PRE_PR_VISUAL_ACCEPTANCE": ["poppy-delivery", "poppy-acceptance"],
+        "S22_CLIENT_REPORT_READINESS_BOUNDARY": ["poppy-intake", "poppy-decide"],
+        "S30_CLIENT_READY_ACCEPTANCE_RECORDING": ["poppy-acceptance"],
+    }
+    for case_id, expected in required_boundaries.items():
+        if sequences.get(case_id) != expected:
+            raise VerificationError(
+                f"Required ownership boundary changed for {case_id}: {sequences.get(case_id)}"
+            )
     required_fields = {
         "id",
         "prompt",
@@ -729,6 +831,8 @@ def scenario_check() -> dict:
         "status": "pass",
         "mixed_scenarios": len(scenarios),
         "negative_controls": len(negative),
+        "routing_expectations": len(sequences),
+        "candidate_routing_smoke": candidate_smoke,
         "self_contained_fixtures": materializer["scenarios"],
     }
 
