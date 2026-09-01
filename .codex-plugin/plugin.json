@@ -1,15 +1,16 @@
 {
   "name": "project-operations",
-  "version": "0.3.0+codex.20260901094035",
-  "description": "Poppy is a personal, skills-only Codex partner with focused ownership from intake and decisions through verified delivery and acceptance.",
+  "version": "0.3.0+codex.20260901121850",
+  "description": "Poppy is a personal Codex partner with focused skills and optional stateless housekeeping hooks from intake through verified delivery and organized closure.",
   "author": {
     "name": "David Rajh"
   },
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Poppy",
     "shortDescription": "Quiet project and delivery partner.",
-    "longDescription": "Poppy preserves the user's outcome, routes one focused owner for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, or learning, acts within explicit authority, and verifies consequential claims.",
+    "longDescription": "Poppy preserves the user's outcome, routes one focused owner for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, learning, or Codex housekeeping, acts within explicit authority, and verifies consequential claims. Optional stateless hooks provide narrow lifecycle reminders and metadata guards.",
     "developerName": "David Rajh",
     "category": "Productivity",
     "capabilities": [

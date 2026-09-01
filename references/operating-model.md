@@ -5,7 +5,7 @@
 Classify work by what can change, not by prompt length.
 
 - Direct: answer a self-contained question or make a routine, scoped, reversible edit without a formal plan, delegation, project-memory orientation, or learning step.
-- Specialist work: reconcile incoming work, select an outcome, coordinate action, diagnose a cause, create a candidate, prepare acceptance evidence, or independently assure it.
+- Specialist work: reconcile incoming work, select an outcome, coordinate action, diagnose a cause, create a candidate, prepare acceptance evidence, independently assure it, or maintain Codex task lifecycle metadata.
 - Delivery: create or modify an exact selected product, design, software, or operational candidate and verify it locally.
 - Consequential effect: shared state, another person, money, production, publication, security, or difficult-to-recover data can change. Establish exact authority before the effect.
 
@@ -30,10 +30,11 @@ Select at most one primary specialist for the current outcome. Supporting eviden
 - deliver for mutation and local verification of the selected candidate;
 - accept for a named observer's judgment of demonstrated exact-candidate behavior;
 - assure for an independent exact-candidate judgment;
-- research for a named external evidence gap; and
-- learn only from a completed evidenced outcome.
+- research for a named external evidence gap;
+- learn only from a completed evidenced outcome; and
+- housekeep Codex task metadata, archive eligibility, delegation hygiene, and workspace organization after the substantive owner establishes the disposition.
 
-Use the nearest boundary: Intake classifies while Decide settles; Decide selects while Coordinate sequences or publishes; Diagnose establishes cause while Delivery mutates; Delivery verifies locally while Acceptance presents and interprets demonstrated behavior; Assurance remains independent.
+Use the nearest boundary: Intake classifies while Decide settles; Decide selects while Coordinate sequences or publishes; Diagnose establishes cause while Delivery mutates; Delivery verifies locally while Acceptance presents and interprets demonstrated behavior; Assurance remains independent; substantive owners establish lifecycle truth while Housekeeping records or audits its Codex metadata.
 
 Project-memory orientation is conditional. Invoke it only when identity, source authority, cross-source current state, an exact profile, or durable memory can change the result. A known repository and its applicable instructions are often enough.
 

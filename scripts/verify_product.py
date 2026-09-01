@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical deterministic verification gate for the Poppy v3 skills-only plugin."""
+"""Canonical deterministic verification gate for the Poppy v3 skill-and-hook plugin."""
 
 from __future__ import annotations
 
@@ -32,6 +32,7 @@ EXPECTED_SKILLS = {
     "poppy-acceptance",
     "poppy-assure",
     "poppy-learn",
+    "poppy-housekeeping",
 }
 
 EXPECTED_REFERENCES = {
@@ -59,6 +60,7 @@ EXPECTED_REFERENCES = {
     "test-first-delivery.md",
     "work-intake.md",
     "work-items.md",
+    "task-housekeeping.md",
 }
 
 REFERENCE_OWNERS = {
@@ -86,6 +88,7 @@ REFERENCE_OWNERS = {
     "test-first-delivery.md": "poppy-delivery",
     "work-intake.md": "poppy-intake",
     "work-items.md": "poppy-coordinate",
+    "task-housekeeping.md": "poppy-housekeeping",
 }
 
 REQUIRED_SCENARIOS = {
@@ -125,6 +128,7 @@ REQUIRED_SCENARIOS = {
     "S34_TRANSIENT_COURSE_CORRECTION",
     "S35_VERIFICATION_AVOIDS_GENERATED_ARTIFACTS",
     "S36_ACTIVE_POPPY_IDENTITY",
+    "S37_TASK_HOUSEKEEPING",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -177,6 +181,7 @@ REQUIRED_NEGATIVE_CASES = {
     "N47_PROCESS_OBSERVATIONS_STAY_TRANSIENT",
     "N48_CACHE_ORDER_IS_NOT_ACTIVATION",
     "N49_PROJECT_INDEX_NO_MATCH_STAYS_CLOSED",
+    "N50_HOUSEKEEPING_ARCHIVE_FAILS_CLOSED",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -188,6 +193,8 @@ EXPECTED_SOURCE_FILES = {
     "docs/constitution-v3.md",
     "docs/development.md",
     "docs/release.md",
+    "hooks/hooks.json",
+    "hooks/housekeeping_hook.py",
     "references/authority-and-effects.md",
     "references/architecture-assessment.md",
     "references/client-acceptance.md",
@@ -210,6 +217,7 @@ EXPECTED_SOURCE_FILES = {
     "references/prototype-to-learn.md",
     "references/specification.md",
     "references/test-first-delivery.md",
+    "references/task-housekeeping.md",
     "references/work-intake.md",
     "references/work-items.md",
     "scripts/materialize_scenario.py",
@@ -224,6 +232,7 @@ EXPECTED_SOURCE_FILES = {
     "skills/poppy-diagnose/SKILL.md",
     "skills/poppy-intake/SKILL.md",
     "skills/poppy-learn/SKILL.md",
+    "skills/poppy-housekeeping/SKILL.md",
     "skills/poppy-research/SKILL.md",
     "tests/fixtures.json",
     "tests/scenarios.json",
@@ -328,7 +337,7 @@ def inventory_check(paths: list[Path]) -> dict:
     if violations:
         raise VerificationError("Inventory check failed:\n" + "\n".join(sorted(violations)))
     return {
-        "name": "exact skills-only inventory",
+        "name": "exact skill-and-hook inventory",
         "status": "pass",
         "files": len(paths),
         "skills": sorted(EXPECTED_SKILLS),
@@ -338,23 +347,172 @@ def inventory_check(paths: list[Path]) -> dict:
 def manifest_check() -> dict:
     path = ROOT / ".codex-plugin" / "plugin.json"
     manifest = json.loads(path.read_text(encoding="utf-8"))
-    required = {"name", "version", "description", "author", "skills", "interface"}
+    required = {"name", "version", "description", "author", "skills", "hooks", "interface"}
     if set(manifest) != required:
         raise VerificationError(
             f"Manifest keys must be exactly {sorted(required)}, got {sorted(manifest)}"
         )
-    if manifest["name"] != "project-operations" or manifest["skills"] != "./skills/":
-        raise VerificationError("Manifest package identity or skills path is invalid")
+    if (
+        manifest["name"] != "project-operations"
+        or manifest["skills"] != "./skills/"
+        or manifest["hooks"] != "./hooks/hooks.json"
+    ):
+        raise VerificationError("Manifest package identity, skills path, or hooks path is invalid")
     if not re.fullmatch(r"0\.3\.0\+codex\.\d{14}", manifest["version"]):
         raise VerificationError(f"Manifest version is not a v3 local candidate: {manifest['version']}")
     component_fields = {"skills", "mcpServers", "apps", "ui", "commands", "hooks"}
     exposed = component_fields.intersection(manifest)
-    if exposed != {"skills"}:
-        raise VerificationError(f"Manifest must expose only skills, got {sorted(exposed)}")
+    if exposed != {"skills", "hooks"}:
+        raise VerificationError(f"Manifest must expose only skills and hooks, got {sorted(exposed)}")
     return {
-        "name": "skills-only plugin manifest",
+        "name": "skill-and-hook plugin manifest",
         "status": "pass",
         "version": manifest["version"],
+    }
+
+
+def execute_hook(event: dict) -> dict:
+    completed = subprocess.run(
+        [sys.executable, str(ROOT / "hooks" / "housekeeping_hook.py")],
+        cwd=ROOT,
+        input=json.dumps(event, ensure_ascii=False),
+        text=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=5,
+    )
+    if completed.returncode != 0:
+        raise VerificationError(
+            f"Housekeeping hook exited {completed.returncode}: {completed.stderr.strip()}"
+        )
+    try:
+        result = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise VerificationError(
+            f"Housekeeping hook returned invalid JSON: {completed.stdout!r}"
+        ) from exc
+    if not isinstance(result, dict):
+        raise VerificationError("Housekeeping hook output must be a JSON object")
+    return result
+
+
+def hook_contract_check() -> dict:
+    config_path = ROOT / "hooks" / "hooks.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    if set(config) != {"description", "hooks"} or not config["description"].strip():
+        raise VerificationError("Hook config metadata is incomplete")
+    hooks = config["hooks"]
+    expected_events = {"SessionStart", "PreToolUse", "PostToolUse"}
+    if set(hooks) != expected_events:
+        raise VerificationError(
+            f"Hook event inventory mismatch: expected {sorted(expected_events)}, got {sorted(hooks)}"
+        )
+    expected_matchers = {
+        "SessionStart": "^(resume|compact)$",
+        "PreToolUse": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
+        "PostToolUse": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
+    }
+    for event_name, groups in hooks.items():
+        if not isinstance(groups, list) or len(groups) != 1:
+            raise VerificationError(f"Hook event must have one matcher group: {event_name}")
+        group = groups[0]
+        expected_group_fields = {"matcher", "hooks"}
+        if set(group) != expected_group_fields:
+            raise VerificationError(f"Hook matcher group fields invalid for {event_name}")
+        if group["matcher"] != expected_matchers[event_name]:
+            raise VerificationError(f"Hook matcher is not narrowly pinned for {event_name}")
+        handlers = group["hooks"]
+        if not isinstance(handlers, list) or len(handlers) != 1:
+            raise VerificationError(f"Hook event must have one command handler: {event_name}")
+        handler = handlers[0]
+        required_handler_fields = {
+            "type",
+            "command",
+            "commandWindows",
+            "timeout",
+            "additionalContextLimit",
+        }
+        if set(handler) != required_handler_fields:
+            raise VerificationError(f"Hook handler fields invalid for {event_name}")
+        if (
+            handler["type"] != "command"
+            or handler["timeout"] != 3
+            or "$PLUGIN_ROOT/hooks/housekeeping_hook.py" not in handler["command"]
+            or "%PLUGIN_ROOT%\\hooks\\housekeeping_hook.py" not in handler["commandWindows"]
+        ):
+            raise VerificationError(f"Hook handler is not bounded and plugin-relative for {event_name}")
+        if handler["additionalContextLimit"] != 240:
+            raise VerificationError(f"Hook context limit is not bounded for {event_name}")
+
+    script = (ROOT / "hooks" / "housekeeping_hook.py").read_text(encoding="utf-8")
+    forbidden_runtime_tokens = (
+        "transcript_path",
+        "PLUGIN_DATA",
+        "urllib",
+        "requests",
+        "socket",
+        "subprocess",
+        "open(",
+        "Path(",
+    )
+    found = [token for token in forbidden_runtime_tokens if token in script]
+    if found:
+        raise VerificationError(
+            "Housekeeping hook must remain transcript-free, network-free, and stateless: "
+            + ", ".join(found)
+        )
+
+    resume = execute_hook({"hook_event_name": "SessionStart", "source": "resume"})
+    resume_context = resume.get("hookSpecificOutput", {}).get("additionalContext", "")
+    if "Poppy Housekeeping" not in resume_context or "Clear the marker" not in resume_context:
+        raise VerificationError("SessionStart hook does not preserve reopen semantics")
+
+    invalid_title = execute_hook(
+        {
+            "hook_event_name": "PreToolUse",
+            "tool_name": "mcp__codex_app__set_thread_title",
+            "tool_input": {"threadId": "synthetic-task-1", "title": "✅ [D] 🚧 [B] Atlas"},
+        }
+    )
+    if invalid_title.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
+        raise VerificationError("PreToolUse hook did not reject a stacked lifecycle marker")
+
+    valid_title = execute_hook(
+        {
+            "hook_event_name": "PreToolUse",
+            "tool_name": "mcp__codex_app__set_thread_title",
+            "tool_input": {"threadId": "synthetic-task-1", "title": "✅ [D] Atlas review"},
+        }
+    )
+    if "additionalContext" not in valid_title.get("hookSpecificOutput", {}):
+        raise VerificationError("PreToolUse hook did not admit an exact lifecycle marker with context")
+
+    implicit_archive = execute_hook(
+        {
+            "hook_event_name": "PreToolUse",
+            "tool_name": "mcp__codex_app__set_thread_archived",
+            "tool_input": {"archived": True},
+        }
+    )
+    if implicit_archive.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
+        raise VerificationError("PreToolUse hook did not require an exact archive target")
+
+    post_title = execute_hook(
+        {
+            "hook_event_name": "PostToolUse",
+            "tool_name": "mcp__codex_app__set_thread_title",
+            "tool_input": {"threadId": "synthetic-task-1", "title": "✅ [D] Atlas review"},
+            "tool_response": {"status": "ok"},
+        }
+    )
+    if "read the authoritative task title back" not in post_title.get("hookSpecificOutput", {}).get("additionalContext", ""):
+        raise VerificationError("PostToolUse hook does not require title read-back")
+
+    return {
+        "name": "stateless Housekeeping hook contract",
+        "status": "pass",
+        "events": sorted(expected_events),
+        "representative_payloads": 5,
     }
 
 
@@ -621,6 +779,7 @@ def scenario_check() -> dict:
         "S21_PRE_PR_VISUAL_ACCEPTANCE": ["poppy-delivery", "poppy-acceptance"],
         "S22_CLIENT_REPORT_READINESS_BOUNDARY": ["poppy-intake", "poppy-decide"],
         "S30_CLIENT_READY_ACCEPTANCE_RECORDING": ["poppy-acceptance"],
+        "S37_TASK_HOUSEKEEPING": ["poppy-housekeeping"],
     }
     for case_id, expected in required_boundaries.items():
         if sequences.get(case_id) != expected:
@@ -911,6 +1070,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest_check(),
         inventory_check(paths),
         skill_check(),
+        hook_contract_check(),
         active_poppy_identity_contract_check(),
         linked_reference_check(paths),
         provenance_check(paths),

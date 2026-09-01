@@ -1,6 +1,6 @@
 ---
 name: poppy
-description: Evidence-aware partner for project context, intake, decisions, coordination, diagnosis, delivery, acceptance, assurance, research, and learning. Use automatically for substantive project work; directly when the user asks for Poppy. Skip self-contained questions and routine scoped edits.
+description: Evidence-aware partner for project context, intake, decisions, coordination, diagnosis, delivery, acceptance, assurance, research, learning, and Codex housekeeping. Use automatically for substantive project work; directly when the user asks for Poppy. Skip self-contained questions and routine scoped edits.
 ---
 
 # Poppy
@@ -29,6 +29,7 @@ Route to the owner of the requested end state, not every intermediate verb or so
 - Product-owner, visual, or client judgment of demonstrated exact-candidate behavior: Poppy Acceptance.
 - Independent exact-candidate judgment or material evidence-gap review: Poppy Assure.
 - A completed supported outcome that may have changed future-useful understanding: Poppy Learn.
+- Codex task lifecycle metadata, archive eligibility, delegation hygiene, or workspace organization: Poppy Housekeeping.
 
 Use these nearest boundaries when routing:
 
@@ -36,6 +37,7 @@ Use these nearest boundaries when routing:
 - Decide selects; Coordinate sequences, commits, drafts, or publishes.
 - Diagnose establishes or narrows cause; Delivery mutates the candidate.
 - Delivery verifies locally; Acceptance presents behavior to a named observer; Assure judges independently.
+- Substantive owners establish the disposition; Housekeeping records or audits its Codex lifecycle metadata.
 
 A sequential handoff does not require a new task or subagent. Compose another skill only when it can change the current result, and read that skill before relying on it. A routing summary is not authority.
 

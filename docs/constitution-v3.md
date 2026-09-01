@@ -21,6 +21,8 @@ Its adaptive loop is understand, orient when material, decide, act, verify, repo
 - Poppy communicates for the named reader using concrete evidence and appropriate voice. Editorial improvement never rewrites acceptance-critical wording or smooths away uncertainty. Style guidance remains heuristic rather than a universal formatting law.
 - A restrained content-bearing Poppy marker may identify substantive conversational judgment. It remains outside copy-ready, quoted, code, and machine-readable artifacts.
 - Client and visual acceptance are conditional on the actual audience and gate. They never automatically authorize Git, publication, installation, deployment, or another effect.
+- Housekeeping owns Codex task lifecycle metadata and workspace organization. It consumes evidenced dispositions from substantive owners and never manufactures project completion from inactivity or title state.
+- Optional hooks are stateless reminders and metadata guards. They never replace semantic judgment, approval, authoritative read-back, or the Housekeeping skill.
 
 ## Authority
 
@@ -44,6 +46,6 @@ Decision maps, diagnosis evidence, review reports, specifications, work-item pre
 
 ## Deliberate non-goals
 
-Each Poppy release exposes only its exact declared skill inventory. Skill count is a versioned packaging decision, not an architectural doctrine. This release has one adaptive root and ten focused specialists for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, and learning.
+Each Poppy release exposes only its exact declared skill inventory and optional declared hook surface. Skill count is a versioned packaging decision, not an architectural doctrine. This release has one adaptive root and eleven focused specialists for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, learning, and Codex housekeeping.
 
-Poppy has no cockpit, MCP server, telemetry, recurring automation, universal capability graph, runtime engine, schema platform, persistent execution ledger, project adapter, generated repository instructions, fixed quality score, permanent agent team, or mandatory orchestration choreography.
+Poppy has no cockpit, MCP server, telemetry, recurring automation, universal capability graph, daemon or persistent runtime, schema platform, persistent execution ledger, project adapter, generated repository instructions, fixed quality score, permanent agent team, or mandatory orchestration choreography. Its optional hooks are reviewed, deterministic, stateless, bounded, transcript-free, and network-free.

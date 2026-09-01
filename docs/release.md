@@ -11,7 +11,7 @@ A candidate is eligible for personal installation preview only when:
 5. the smallest decision-relevant evidence for the changed behavior passes, with broader behavioral or efficiency claims left unverified when their optional evaluation was not run;
 6. no safety, authority, request-fidelity, evidence-calibration, or material capability regression is observed;
 7. any model-based evaluation stays within a declared call and elapsed-time budget, uses deterministic grading first, and records only the semantic judging or human adjudication on which the decision actually depends;
-8. trigger and non-trigger checks affected by the candidate pass;
+8. trigger and non-trigger checks affected by the candidate pass, and any declared hook passes representative event-payload checks;
 9. a fresh independent read-only assurance pass finds no blocking defect;
 10. the candidate is committed under separate authority and python scripts/verify_product.py --require-clean passes; and
 11. the user's shared project surfaces remain unchanged.
@@ -33,11 +33,12 @@ Before personal installation, present the exact committed candidate, version, di
 A fresh task after installation must establish:
 
 - the loaded root `SKILL.md` path and its nearest package manifest before recording the active plugin ID, version, source revision, digest algorithm, and digest;
-- exactly the declared Poppy skill inventory and no active v2 or removed skill identities;
+- exactly the declared Poppy skill inventory and hook definition and no active v2 or removed skill identities;
 - explicit Poppy invocation in one fresh task;
 - automatic activation and routine non-activation only when trigger behavior changed;
 - pre-existing-task catalog behavior only when upgrade lifecycle behavior is an acceptance item;
-- no active Poppy MCP server, app, cockpit, telemetry, automation, or repository-local installation;
+- no active Poppy MCP server, app, cockpit, telemetry, recurring automation, daemon, persistent runtime, or repository-local installation;
+- the exact hook definition is either explicitly trusted after review or reported as installed but inactive; installation alone never proves hook execution;
 - installation under the user's plugin environment for Codex Desktop and CLI; and
 - the exact preserved rollback package can be restored.
 
@@ -47,7 +48,7 @@ Retain the raw machine-readable traces for checks actually run. If a pre-existin
 
 ## Rollback
 
-Keep the previously active package intact until the new installation and fresh-task proof pass. Rollback restores that exact package, reads back its active version and declared skill surface, and records any limitation. Do not delete rollback material as part of successful cutover.
+Keep the previously active package intact until the new installation and fresh-task proof pass. Rollback restores that exact package, reads back its active version and declared skill and hook surfaces, and records any limitation. A hook rollback also restores the previous trusted definition or leaves the replacement untrusted. Do not delete rollback material as part of successful cutover.
 
 ## Natural-use follow-up
 
