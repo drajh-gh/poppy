@@ -33,6 +33,14 @@ Changed target, content, or effect invalidates approval. Silence is not approval
 
 Approval is semantic, not an incantation. A direct affirmative answer to an exact current preview is valid; do not require the user to repeat targets, hashes, or prescribed wording unless an external system inherently requires it. Multiple named effects may be approved as one explicit bundle, while each still receives its own execution boundary and read-back. Reacquire approval only when the target, content, effect, material risk, or rollback changes.
 
+### Explicit current-task lifecycle marker
+
+Poppy Housekeeping may use its self-contained single current-task fast path without loading this reference when the user directly requests one lifecycle-marker rename of the calling Codex task and every entrypoint eligibility condition is already supported. The direct command is semantic approval for that exact reversible rename only; it is not evidence that the substantive lifecycle disposition is true. The native calling-task target is exact for this exception even when its internal task ID is resolved inside the orchestration turn.
+
+One concise informational preview may be followed immediately by fresh target/title/activity resolution, validation, at most one title mutation, and authoritative read-back in the same orchestration turn. Do not request duplicate approval when the target, lifecycle-title state, title-only effect, risk, and prior-title rollback remain unchanged. An already-correct lifecycle title, including an already-unmarked active title, is an idempotent read-back result rather than a reason to rewrite it.
+
+This exception does not cover a named other task, a batch, archive state, pinning, moving, sidebar organization, worktrees, trackers, automation, standing policies, ambiguous intent, missing or conflicting disposition evidence, unresolved target/title/activity drift, malformed or stacked markers, or any consequential or less-reversible effect. Those cases use the full gate. If authoritative read-back after the rename contradicts the intended result or reveals newer activity, report the observed effect as unverified or conflicted and stop; do not hide the contradiction or automatically broaden approval into a rollback.
+
 For an effectful helper or production repair, validate the approval contract first: exact target selection, schema and type assumptions, imports and runtime compatibility, prepare-only compilation or dry run, preservation guards, rollback behavior, and expected read-back. Human approval is the final gate to a prepared effect, not part of iterative harness debugging.
 
 ## User work and destructive actions

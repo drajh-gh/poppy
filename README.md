@@ -14,7 +14,7 @@ Poppy keeps adjacent kinds of work distinct:
 - Research closes a named external evidence gap.
 - Learn proposes the smallest durable lesson after an evidenced outcome.
 - Scribe keeps one bounded semantic checkpoint, reviews material drift, and proposes recurring improvements without becoming truth or memory.
-- Housekeeping maintains Codex task lifecycle metadata, archive eligibility, delegation hygiene, and workspace organization without deciding substantive project status.
+- Housekeeping maintains Codex task lifecycle metadata, archive eligibility, delegation hygiene, and workspace organization without deciding substantive project status. An explicitly requested marker for the calling task can use a tightly gated one-orchestration fast path when the disposition is already supported; other tasks, batches, archives, ambiguity, missing evidence, and drift retain the full safe path.
 
 Communication guidance is progressively loaded. It favors concrete, reader-ready prose and natural judgment while preserving accepted wording, evidence status, canonical terminology, and commitments. Style patterns remain contextual heuristics.
 

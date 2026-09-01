@@ -44,11 +44,11 @@ def pre_tool_use(event: dict) -> dict:
     if not isinstance(tool_input, dict):
         return deny("Housekeeping requires a structured task-tool input.")
 
-    task_id = tool_input.get("threadId")
-    if not isinstance(task_id, str) or not task_id.strip():
-        return deny("Housekeeping task mutations require an explicit non-empty threadId.")
-
     if tool == TITLE_TOOL:
+        task_id = tool_input.get("threadId")
+        implicit_current = "threadId" not in tool_input
+        if not implicit_current and (not isinstance(task_id, str) or not task_id.strip()):
+            return deny("Housekeeping title mutations require an explicit non-empty threadId or the native implicit calling-task target.")
         title = tool_input.get("title")
         if not isinstance(title, str) or not title.strip():
             return deny("Housekeeping titles require a non-empty meaningful base title.")
@@ -58,12 +58,16 @@ def pre_tool_use(event: dict) -> dict:
             return deny("Use one exact lifecycle prefix—✅ [D], ⏸️ [P], or 🚧 [B]—or no prefix for active work.")
         if match and MARKER_LIKE.match(match.group("base")):
             return deny("Housekeeping lifecycle markers cannot be stacked.")
+        target = "the native calling task" if implicit_current else "the explicit task ID"
         return context(
             "PreToolUse",
-            "Poppy Housekeeping: a title marker records an evidenced lifecycle disposition; it does not create one. Preserve the base title and confirm exact authority.",
+            f"Poppy Housekeeping: this title targets {target}. A marker records an evidenced lifecycle disposition; it does not create one. Preserve the base title and confirm exact authority.",
         )
 
     if tool == ARCHIVE_TOOL:
+        task_id = tool_input.get("threadId")
+        if not isinstance(task_id, str) or not task_id.strip():
+            return deny("Housekeeping archive mutations require an explicit non-empty threadId.")
         archived = tool_input.get("archived")
         if not isinstance(archived, bool):
             return deny("Housekeeping archive mutations require an explicit boolean archived value.")

@@ -136,6 +136,7 @@ REQUIRED_SCENARIOS = {
     "S37_TASK_HOUSEKEEPING",
     "S38_SCRIBE_CONTINUITY_AND_DRIFT",
     "S39_SCRIBE_RECURRING_IMPROVEMENT",
+    "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -192,6 +193,14 @@ REQUIRED_NEGATIVE_CASES = {
     "N51_SCRIBE_CHECKPOINT_NOT_AUTHORITY",
     "N52_SCRIBE_SECRET_AND_RETENTION",
     "N53_SCRIBE_ONE_TASK_REPETITION_NOT_LEARNING",
+    "N54_CROSS_TASK_FAST_PATH_EXCLUDED",
+    "N55_BATCH_FAST_PATH_EXCLUDED",
+    "N56_ARCHIVE_FAST_PATH_EXCLUDED",
+    "N57_AMBIGUOUS_DISPOSITION_FAST_PATH_EXCLUDED",
+    "N58_MISSING_EVIDENCE_FAST_PATH_EXCLUDED",
+    "N59_POST_MUTATION_DRIFT_FAILS_CLOSED",
+    "N60_STACKED_MARKER_FAST_PATH_REJECTED",
+    "N61_MALFORMED_MARKER_FAST_PATH_REJECTED",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -513,6 +522,17 @@ def hook_contract_check() -> dict:
     if invalid_title.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
         raise VerificationError("PreToolUse hook did not reject a stacked lifecycle marker")
 
+    malformed_title = execute_hook(
+        "housekeeping_hook.py",
+        {
+            "hook_event_name": "PreToolUse",
+            "tool_name": "mcp__codex_app__set_thread_title",
+            "tool_input": {"title": "✅ [X] Atlas review"},
+        }
+    )
+    if malformed_title.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
+        raise VerificationError("PreToolUse hook did not reject a malformed lifecycle marker")
+
     valid_title = execute_hook(
         "housekeeping_hook.py",
         {
@@ -523,6 +543,29 @@ def hook_contract_check() -> dict:
     )
     if "additionalContext" not in valid_title.get("hookSpecificOutput", {}):
         raise VerificationError("PreToolUse hook did not admit an exact lifecycle marker with context")
+
+    implicit_current_title = execute_hook(
+        "housekeeping_hook.py",
+        {
+            "hook_event_name": "PreToolUse",
+            "tool_name": "mcp__codex_app__set_thread_title",
+            "tool_input": {"title": "⏸️ [P] Atlas review"},
+        }
+    )
+    implicit_context = implicit_current_title.get("hookSpecificOutput", {}).get("additionalContext", "")
+    if "native calling task" not in implicit_context:
+        raise VerificationError("PreToolUse hook did not admit the native implicit current-task title target")
+
+    null_target_title = execute_hook(
+        "housekeeping_hook.py",
+        {
+            "hook_event_name": "PreToolUse",
+            "tool_name": "mcp__codex_app__set_thread_title",
+            "tool_input": {"threadId": None, "title": "⏸️ [P] Atlas review"},
+        }
+    )
+    if null_target_title.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
+        raise VerificationError("PreToolUse hook treated an explicit null title target as the native calling task")
 
     implicit_archive = execute_hook(
         "housekeeping_hook.py",
@@ -860,7 +903,7 @@ def hook_contract_check() -> dict:
         "name": "stateless Housekeeping and bounded Scribe hook contract",
         "status": "pass",
         "events": sorted(expected_events),
-        "representative_payloads": 23,
+        "representative_payloads": 26,
     }
 
 
@@ -930,6 +973,37 @@ def active_poppy_identity_contract_check() -> dict:
         )
     return {
         "name": "active Poppy package and repository identity separation",
+        "status": "pass",
+    }
+
+
+def housekeeping_fast_path_contract_check() -> dict:
+    housekeeping_skill = (ROOT / "skills" / "poppy-housekeeping" / "SKILL.md").read_text(encoding="utf-8")
+    root_skill = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8")
+    authority = (ROOT / "references" / "authority-and-effects.md").read_text(encoding="utf-8")
+    housekeeping_reference = (ROOT / "references" / "task-housekeeping.md").read_text(encoding="utf-8")
+    development = (ROOT / "docs" / "development.md").read_text(encoding="utf-8")
+    required_markers = {
+        "self-contained entrypoint": (housekeeping_skill, "## Use the single current-task fast path"),
+        "all lifecycle states": (housekeeping_skill, "active, completed, paused, or blocked state"),
+        "reference-load bypass": (housekeeping_skill, "Do not load [task housekeeping]"),
+        "one orchestration turn": (housekeeping_skill, "in one orchestration turn"),
+        "idempotent current state": (housekeeping_skill, "exact requested lifecycle title state is already present"),
+        "root exception": (root_skill, "self-contained single current-task fast path"),
+        "authority exception": (authority, "### Explicit current-task lifecycle marker"),
+        "formal eligibility": (housekeeping_reference, "## Single current-task fast path"),
+        "structural efficiency claim": (development, "fewer reference loads and model/tool round trips"),
+    }
+    missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
+    if missing:
+        raise VerificationError(
+            "Housekeeping current-task fast-path contract is incomplete: "
+            + ", ".join(sorted(missing))
+        )
+    if re.search(r"\b1\s*(?:-|–|to)\s*2\s+seconds?\b", development, re.IGNORECASE):
+        raise VerificationError("Development guidance must not claim a universal 1–2 second SLA")
+    return {
+        "name": "single current-task Housekeeping fast-path contract",
         "status": "pass",
     }
 
@@ -1128,6 +1202,7 @@ def scenario_check() -> dict:
         "S22_CLIENT_REPORT_READINESS_BOUNDARY": ["poppy-intake", "poppy-decide"],
         "S30_CLIENT_READY_ACCEPTANCE_RECORDING": ["poppy-acceptance"],
         "S37_TASK_HOUSEKEEPING": ["poppy-housekeeping"],
+        "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH": ["poppy-housekeeping"],
         "S38_SCRIBE_CONTINUITY_AND_DRIFT": ["poppy-scribe"],
         "S39_SCRIBE_RECURRING_IMPROVEMENT": ["poppy-scribe"],
     }
@@ -1422,6 +1497,7 @@ def main(argv: list[str] | None = None) -> int:
         skill_check(),
         hook_contract_check(),
         active_poppy_identity_contract_check(),
+        housekeeping_fast_path_contract_check(),
         linked_reference_check(paths),
         provenance_check(paths),
         boundary_check(paths),

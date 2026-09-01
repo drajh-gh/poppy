@@ -475,6 +475,13 @@
       "evidence": ["One fingerprint appears as supported in three independent tasks", "Repeated turns in one task count once", "A counterexample limits the intervention scope"],
       "verification": ["Only the threshold-reaching fingerprint is proposed", "The counterexample or expiry is preserved", "No Learn, skill, policy, repository, memory, or tracker mutation occurs"]
     },
+    "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH": {
+      "kind": "evidence",
+      "setup": ["Treat synthetic-current-task-40 as the calling Codex task", "Allow only its exact completed title mutation and authoritative read-back"],
+      "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-40\",\"callingTask\":true,\"title\":\"Atlas refresh guard\",\"activityRevision\":\"synthetic-rev-9\",\"newActionableRequest\":false,\"archived\":false}\n", "completion-packet.md": "# Current-task disposition\nAcceptance anchor: preserve the Atlas refresh guard.\nCandidate: synthetic-atlas-refresh-40, preserved.\nVerification: exact focused behavior and diff checks passed.\nRequired effects: none remain.\nUnresolved gates or blockers: none.\nSubstantive owner disposition: completed.\n", "authoritative-readback.json": "{\"threadId\":\"synthetic-current-task-40\",\"title\":\"✅ [D] Atlas refresh guard\",\"activityRevision\":\"synthetic-rev-9\",\"archived\":false}\n"},
+      "evidence": ["The native calling-task identity and meaningful unmarked base title are supplied", "The candidate-bound completion disposition is supported before the user requests the marker", "No archive or other effect is requested"],
+      "verification": ["One informational preview is followed by one orchestration turn without duplicate approval", "Exactly one completed marker is applied to synthetic-current-task-40", "Authoritative same-task title and activity read-back succeeds", "No reference load, archive, worktree, tracker, automation, sidebar, or other-task effect occurs"]
+    },
     "N16_ROUTING_SUMMARY_NOT_AUTHORITY": {
       "kind": "evidence",
       "setup": ["Compare a routing gloss with the selected specialist source"],
@@ -754,6 +761,62 @@
       "files": {"observations.json": "{\"task\":\"synthetic-scribe-single\",\"outcome\":\"incomplete\",\"turns\":[\"provisional-friction-x\",\"provisional-friction-x\",\"provisional-friction-x\",\"provisional-friction-x\",\"provisional-friction-x\"]}\n"},
       "evidence": ["All observations share one task identity", "The friction is provisional and the outcome is incomplete", "No memory destination or mutation authority is supplied"],
       "verification": ["Independent-task count remains one", "No durable lesson, Learn invocation, skill rewrite, repository change, or memory write occurs"]
+    },
+    "N54_CROSS_TASK_FAST_PATH_EXCLUDED": {
+      "kind": "evidence",
+      "setup": ["Treat synthetic-current-task-54 as the calling task and synthetic-task-other-54 as a distinct named task", "Allow only the explicitly requested other-task title effect through the full safe path"],
+      "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-54\",\"callingTask\":true,\"title\":\"Atlas current review\",\"archived\":false}\n", "other-task-state.json": "{\"threadId\":\"synthetic-task-other-54\",\"callingTask\":false,\"title\":\"Atlas other review\",\"activityRevision\":\"synthetic-other-rev-3\",\"archived\":false}\n", "other-completion-packet.md": "# Other-task disposition\nCandidate: synthetic-atlas-other-54, preserved.\nVerification: exact requested checks passed.\nRequired effects and unresolved gates: none.\nSubstantive owner disposition: completed.\n"},
+      "evidence": ["The prompt targets a named task other than the calling task", "The other task has a supported completion disposition"],
+      "verification": ["The full references and exact-target gate are used", "Only synthetic-task-other-54 receives `✅ [D] Atlas other review`", "The other task is authoritatively read back and the calling task is unchanged"]
+    },
+    "N55_BATCH_FAST_PATH_EXCLUDED": {
+      "kind": "evidence",
+      "setup": ["Treat the two supplied task states as exact current synthetic state", "Use the full batch-safe title flow"],
+      "files": {"task-states.json": "[{\"threadId\":\"synthetic-current-task-55\",\"callingTask\":true,\"title\":\"Atlas current batch item\",\"activityRevision\":\"synthetic-current-rev-4\"},{\"threadId\":\"synthetic-task-other-55\",\"callingTask\":false,\"title\":\"Atlas other batch item\",\"activityRevision\":\"synthetic-other-rev-4\"}]\n", "completion-packets.md": "# Current task\nCandidate preserved; verification passed; no effects or gates remain; disposition completed.\n\n# Other task\nCandidate preserved; verification passed; no effects or gates remain; disposition completed.\n"},
+      "evidence": ["The request contains two exact title effects", "Both tasks have supported completion dispositions"],
+      "verification": ["No current-task fast path is used", "Both exact effects are previewed under the full references", "Each task is mutated and read back separately", "No third task or non-title state changes"]
+    },
+    "N56_ARCHIVE_FAST_PATH_EXCLUDED": {
+      "kind": "evidence",
+      "setup": ["Treat the supplied task as the calling task", "Evaluate completion and archive as separate effects at 2099-01-10T12:00:00Z"],
+      "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-56\",\"callingTask\":true,\"title\":\"Atlas archive candidate\",\"pinned\":false,\"archived\":false,\"activityRevision\":\"synthetic-rev-6\"}\n", "completion-packet.md": "# Disposition\nCandidate synthetic-atlas-archive-56 is preserved and verified. No required effect or gate remains. Substantive owner disposition: completed now.\n", "archive-clock.json": "{\"completedTransitionAt\":\"2099-01-10T12:00:00Z\",\"evaluatedAt\":\"2099-01-10T12:00:00Z\",\"elapsedHours\":0}\n"},
+      "evidence": ["The title transition is supported", "Archive age is zero hours after the completed transition"],
+      "verification": ["The full title and archive references are loaded", "The title may become `✅ [D] Atlas archive candidate` with read-back", "Archive is rejected as ineligible and no other state changes"]
+    },
+    "N57_AMBIGUOUS_DISPOSITION_FAST_PATH_EXCLUDED": {
+      "kind": "evidence",
+      "setup": ["Treat the supplied evidence as current and conflicting", "Perform no task mutation"],
+      "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-57\",\"callingTask\":true,\"title\":\"Atlas client review\",\"archived\":false}\n", "disposition-evidence.md": "Delivery note: local implementation checks passed.\nAcceptance note: required client review remains open.\nNo owner has selected paused or blocked state.\n"},
+      "evidence": ["The wording does not name a lifecycle state", "Credible current evidence disagrees about completion"],
+      "verification": ["No marker or archive effect occurs", "The full references are used", "The exact unresolved acceptance disposition is reported"]
+    },
+    "N58_MISSING_EVIDENCE_FAST_PATH_EXCLUDED": {
+      "kind": "evidence",
+      "setup": ["Treat the supplied state as the calling task", "Do not invent a substantive disposition"],
+      "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-58\",\"callingTask\":true,\"title\":\"Atlas evidence gap\",\"archived\":false}\n", "evidence-gap.md": "Candidate identity: not supplied.\nVerification: not supplied.\nRequired effects: unknown.\nUnresolved gates: unknown.\nSubstantive owner disposition: not supplied.\n"},
+      "evidence": ["The command is explicit title-effect approval", "Every substantive completion field is missing"],
+      "verification": ["No title or archive mutation occurs", "The full references are used", "The smallest missing completion packet is requested"]
+    },
+    "N59_POST_MUTATION_DRIFT_FAILS_CLOSED": {
+      "kind": "evidence",
+      "setup": ["Treat the sequence as one current-task orchestration turn", "Do not auto-rollback or perform any non-title effect"],
+      "files": {"transaction-sequence.json": "{\"resolved\":{\"threadId\":\"synthetic-current-task-59\",\"callingTask\":true,\"title\":\"Atlas drift guard\",\"activityRevision\":\"synthetic-rev-10\",\"newActionableRequest\":false},\"mutation\":{\"title\":\"✅ [D] Atlas drift guard\",\"status\":\"applied\"},\"authoritativeReadback\":{\"threadId\":\"synthetic-current-task-59\",\"title\":\"✅ [D] Atlas drift guard\",\"activityRevision\":\"synthetic-rev-11\",\"newActionableRequest\":true}}\n", "completion-packet.md": "# Pre-mutation disposition\nCandidate synthetic-atlas-drift-59 is preserved and verified. No required effects or gates remain. Substantive owner disposition: completed at synthetic-rev-10.\n"},
+      "evidence": ["Completion is supported at synthetic-rev-10", "The title mutation is observed", "Authoritative read-back contains newer actionable activity at synthetic-rev-11"],
+      "verification": ["Exactly one title mutation occurs", "The result is reported as unverified or conflicted", "The prior title `Atlas drift guard` is retained as rollback", "No automatic rollback, archive, or other state change occurs"]
+    },
+    "N60_STACKED_MARKER_FAST_PATH_REJECTED": {
+      "kind": "evidence",
+      "setup": ["Treat the supplied state as the calling task", "Reject syntax without mutation"],
+      "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-60\",\"callingTask\":true,\"title\":\"⏸️ [P] ✅ [D] Atlas stacked guard\",\"archived\":false}\n", "completion-packet.md": "Candidate synthetic-atlas-stacked-60 is preserved and verified; no effect or gate remains; substantive owner disposition: completed.\n"},
+      "evidence": ["Two recognized lifecycle markers are stacked at the title start"],
+      "verification": ["The title remains byte-identical", "No references, archive, or other mutation occurs", "The stacked-marker rejection is explicit"]
+    },
+    "N61_MALFORMED_MARKER_FAST_PATH_REJECTED": {
+      "kind": "evidence",
+      "setup": ["Treat the supplied state as the calling task", "Reject syntax without mutation"],
+      "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-61\",\"callingTask\":true,\"title\":\"✅ [X] Atlas malformed guard\",\"archived\":false}\n", "pause-packet.md": "Work is intentionally deferred at a safe resumption point; no blocking dependency exists; substantive owner disposition: paused.\n"},
+      "evidence": ["The title begins with a marker-like unsupported lifecycle prefix"],
+      "verification": ["The title remains byte-identical", "No references, archive, or other mutation occurs", "The malformed-marker rejection is explicit"]
     }
   }
 }
