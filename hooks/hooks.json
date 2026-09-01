@@ -1,0 +1,47 @@
+{
+  "description": "Stateless Poppy Housekeeping lifecycle reminders and metadata guards.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(resume|compact)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/housekeeping_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\housekeeping_hook.py\"",
+            "timeout": 3,
+            "additionalContextLimit": 240
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/housekeeping_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\housekeeping_hook.py\"",
+            "timeout": 3,
+            "additionalContextLimit": 240
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/housekeeping_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\housekeeping_hook.py\"",
+            "timeout": 3,
+            "additionalContextLimit": 240
+          }
+        ]
+      }
+    ]
+  }
+}

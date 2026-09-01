@@ -10,7 +10,7 @@ Use the lowest-risk sufficient form:
 2. effect-free helper; or
 3. effectful wizard.
 
-Operations owns discovery of genuinely human-only steps and the target, stage, value, sensitivity, destination, and risk map. Delivery owns artifact selection, authoring, testing, recovery, cleanup, and handoff. Inspect available project and provider configuration before asking the user to restate facts.
+Poppy Coordinate owns discovery of genuinely human-only steps and the target, stage, value, sensitivity, destination, and risk map. Poppy Delivery owns artifact selection, authoring, testing, recovery, cleanup, and handoff. Inspect available project and provider configuration before asking the user to restate facts.
 
 An effectful artifact is a deferred effect bundle. Before authoring it, preview the intended targets and effects so the code cannot hide scope. Authoring authority does not authorize execution.
 
@@ -39,7 +39,7 @@ Retain a one-off helper only when authorized and useful. Otherwise follow the ap
 
 ## Provenance
 
-Adapted in original Poppy wording from Matt Pocock's MIT-licensed `wizard` guidance reviewed on 2026-08-27. The upstream executable template was not copied:
+Adapted in original Poppy wording from Matt Pocock's MIT-licensed `wizard` guidance pinned at revision `321658273cb1d20b76026717d027d505790106d4`. The upstream executable template was not copied:
 
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/wizard
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/wizard/SKILL.md
 

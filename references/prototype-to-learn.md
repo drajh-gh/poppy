@@ -37,7 +37,7 @@ Production implementation starts as a fresh Delivery decision. Rewrite or harden
 
 ## Provenance
 
-Adapted in original Poppy wording from Matt Pocock's MIT-licensed `prototype` guidance reviewed on 2026-08-27:
+Adapted in original Poppy wording from Matt Pocock's MIT-licensed `prototype` guidance pinned at revision `321658273cb1d20b76026717d027d505790106d4`:
 
-- https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype
+- https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/engineering/prototype/SKILL.md
 

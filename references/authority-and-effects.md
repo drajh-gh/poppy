@@ -13,6 +13,8 @@ An ordinary implementation request authorizes scoped, reversible working-tree ed
 
 Profiles, roles, confidence, conventions, and earlier broad consent may narrow action but never widen it.
 
+When a profile appears to permit an effect but the current request does not, state that current approval is missing or unverified. Any later approval must bind the exact target, effect, and preview; profile permission is never a substitute.
+
 Requested read-only investigation and plan preparation proceed without a separate approval ceremony. Complete safe preparation that does not itself cause the gated effect before asking the user to approve that effect.
 
 ## Consequential-effect gate

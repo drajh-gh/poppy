@@ -1,54 +1,65 @@
 # Project context and memory
 
-## Resolution order
+## Resolve only required context
 
-For substantive work, resolve the project using only bounded, already-nominated locations:
+Start with the current repository and its applicable instruction files. Stop when they establish the identity, scope, and source authority needed for the task.
 
-1. the current repository and its instruction files;
-2. the one matching entry in the user's local Poppy project index;
-3. a profile named in the conversation or project instructions; or
-4. `project-ops.json` at the repository root when present.
+Consult external project configuration only when it can change the result:
 
-When a project instruction nominates one exact external project-memory or vault root, treat a `project-ops.json` at that exact root as nominated too. Do not probe sibling vaults or infer a different project from directory names.
+1. one exact match in the user's local Poppy project index;
+2. a profile named in the conversation or project instructions; or
+3. project-ops.json at the repository root or at one exact project-memory root nominated by project instructions.
 
-The optional personal index lives at `poppy/projects.json` under the user's Codex home, outside repositories and plugin packages. It contains `version: 1` and a `projects` list. Each entry has `match.git_remote` or `match.repository_root` plus `profile`; every value is an exact string. Select only one exact match. Treat duplicate matches, malformed entries, or a missing file as unverified; never choose by a fuzzy directory-name match. The index nominates a profile but grants no effect authority. Do not create an `AGENTS.override.md` or copy the personal mapping into shared project files.
+Do not invoke project context merely because work is substantive or repository-backed. Do not search a user profile, vault collection, or drive for a project; infer identity from a directory name; probe sibling vaults; or create repository-local overrides or generated policy.
 
-Do not search an entire user profile, vault collection, or drive for a project. Do not create repository-local overrides or generated policy.
+The optional personal index lives at poppy/projects.json under the user's Codex home, outside repositories and plugin packages. It contains version 1 and a projects list. Each entry uses an exact match.git_remote or match.repository_root plus profile. Select at most one exact match. Duplicate matches, malformed entries, and missing required values leave the dependent claim unverified. The index nominates a profile; it grants no effect authority.
 
-## Backward-compatible profile read
+Project selection cannot justify itself. Establish one eligible selection signal before opening an external target; do not open a candidate profile, vault, sibling repository, or memory page to discover whether that target should have been selected. A task title, working-directory or package name, thematic similarity, adjacent task, or target found by search is not a project match.
 
-Treat the profile as configuration, never as authority to perform a new effect. Read only the fields needed for:
+After a missing, malformed, duplicate, or zero-result index match, stop external orientation unless a different eligible signal was already supplied. Name that signal before following it. A handoff qualifies only when it explicitly carries the exact repository root, Git remote, or profile identity; a delegating task, title, or summary alone does not. Otherwise leave external project identity, source authority, and memory context unverified while continuing any unrelated work the selected repository can support.
+
+## Resolve active Poppy from the task
+
+When the subject is Poppy's current, installed, or running behavior, the current repository is not sufficient context by itself. Start with the loaded root `SKILL.md` path exposed to the task, walk upward only within that package to the nearest ancestor `.codex-plugin/plugin.json`, and read the plugin ID, manifest version, declared skill root, and observed inventory. This identifies the package the task can actually use.
+
+Cache presence or version ordering is not activation evidence. Do not select a package because its directory name, manifest version, or modification time appears newest. Host-provided loaded-skill or enabled-plugin evidence outranks an unselected cache entry. A task created before an upgrade may remain bound to its older catalog; a claim about the newly active host package then requires a fresh task.
+
+Pin the active package and repository candidate separately. For the active package, record the task-scoped plugin ID, version, inventory, and digest or source mapping when available. For the repository, record the exact revision, working-tree state, manifest version, inventory, and candidate digest when available. Establish parity only through direct normalized file comparison, equal candidate digests, or an authoritative installation receipt that binds both identities. Otherwise mark parity unverified; when the evidence disagrees and provenance does not resolve it, mark the dependent claim conflicted.
+
+Use the active package for claims about what Poppy can do in the current task. Use the nominated repository candidate for implementation and source-history claims. Never silently substitute one for the other, and report a mismatch before a version-sensitive assessment continues.
+
+## Read profiles backward-compatibly
+
+Treat a profile as configuration, never authority for a new effect. Read only fields needed for:
 
 - project identity and sensitivity;
 - repository identity and default branch;
-- vault root, project root, `current.md`, and `index.md`;
+- vault root, project root, current page, and index page;
 - source-authority mappings; and
 - memory-write policy.
 
-For older profiles, these values may be represented by `project`, `sources.github`, `vault`, `authority`, and the applicable memory approval field. Unknown fields remain inert and unchanged. Validate types and ensure resolved memory pages stay inside the configured vault root.
+Older profiles may express these through project, sources.github, vault, authority, and an applicable memory approval field. Unknown fields remain inert. Validate required types and ensure every resolved memory path stays inside the configured vault root.
 
-Missing or malformed project identity permits read-only repository work only. Repository mutations and memory writes fail closed until identity and authority are confirmed.
+A selected repository plus applicable instructions can establish repository identity. A profile is required only when nominated or when the task depends on its source or memory configuration. Missing or malformed required identity or authority leaves the dependent mutation or claim unverified; it does not block unrelated read-only repository work. A profile never grants broader authority.
 
-## Two-page orientation
+## Orient only when current state matters
 
-For substantive work, read the configured `current.md` and project `index.md` once. Then follow only links relevant to the task. Do not repeatedly reload the same orientation pages unless the user changes the project or evidence changes materially. Tiny work skips orientation.
+Read configured current.md and index.md once only when cross-source current state, decisions, domain context, source authority, or memory continuity can materially change the answer or requested effect. Then follow only task-relevant links. Do not repeatedly reload unchanged orientation pages.
 
-Use source systems for current facts. Treat memory as compiled understanding with provenance, not as automatically current.
+Use source systems for current facts. Treat memory as compiled understanding with provenance, not as automatically current. Read only explicitly nominated glossaries, context maps, decisions, or architecture records. Code is authoritative for current implementation, not automatically for intended behavior or domain meaning.
 
-When the nominated project memory is an Obsidian vault, it is still simply Poppy's external project memory. Read its applicable `AGENTS.md`, then the configured current and index pages once. Follow a source map or other linked page only when the task requires it. Respect freshness, sensitivity, aliases, translations, and source ownership. Raw receipts are immutable evidence; compiled wiki pages may be refreshed from stronger sources. Do not create a bridge, scan the vault broadly, infer domain boundaries from folders, or touch human-owned inbox or daily notes unless explicitly asked.
+For a nominated Obsidian vault, read its applicable instructions before its configured current and index pages. Respect freshness, sensitivity, aliases, translations, links, and source ownership. Raw receipts are immutable evidence. Compiled pages may be refreshed only from stronger sources with the required authority. Do not scan the vault broadly or touch human-owned inbox or daily notes unless explicitly asked.
 
-Read only explicitly nominated domain glossaries, context maps, decisions, or architecture records. Code is authoritative for current implementation, not automatically for intended behavior or domain meaning.
-
-## Memory writes
+## Write memory sparingly
 
 Write durable memory only when all are true:
 
-- evidence changed future-useful understanding;
-- the profile permits the exact write;
-- the target page is inside the configured project memory root;
-- the update preserves provenance and source authority; and
-- the request is not read-only, diagnosis-only, review-only, or trivial.
+- a completed evidenced outcome changed future-useful understanding;
+- the exact write is authorized by the request and project policy;
+- the target is inside the configured project-memory root;
+- provenance and source authority can be preserved; and
+- the work is not trivial, read-only, review-only, diagnosis-only, proposed, conflicted, or unverified.
 
-Keep tracker state in the tracker. Memory may summarize a decision, rationale, risk, or lesson and link to authoritative sources; it must not become a second backlog.
+Tracker state remains in the tracker. Memory may preserve rationale, a decision, risk, or lesson and link to authoritative sources; it must not become a second backlog.
 
-For an authorized Obsidian write, prefer the existing canonical compiled page, preserve its frontmatter and links, cite the source evidence, append the vault's knowledge log when its rules require that, and read back the changed surface. Never invent `CONTEXT.md`, an ADR directory, a glossary, or a new memory silo merely because a session produced useful reasoning.
+Prefer the existing canonical compiled page. Preserve frontmatter, links, freshness, provenance, aliases, translations, immutable receipts, and any required knowledge log. Preview the exact write, obtain approval, write only that target, and read the changed surface back. Never invent a memory silo because a session produced useful reasoning.

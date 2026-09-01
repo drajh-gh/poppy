@@ -1,36 +1,39 @@
-# Project operations
+# Coordination and operations
 
-## Operational view
+## Coordinate a selected outcome
 
-Build project health from authoritative evidence about outcomes, scope, schedule, budget, capacity, quality, risks, decisions, and commitments. Missing evidence leaves the affected claim unverified; it never becomes a healthy default.
+Coordination begins from a selected outcome or decision-ready operational question. It determines priority, sequencing, responsibility, commitments, work-item shape, and stakeholder action without silently changing intended product behavior.
 
-Lead with the decision or action the user needs. Separate:
+Use sources authoritative for each claim about schedule, budget, capacity, quality, risks, decisions, and commitments. Missing evidence leaves the affected claim unverified; it never becomes a healthy default.
 
-- what changed;
+Lead with the action or decision needed. Keep separate:
+
+- observed change and source;
 - why it matters;
-- decisions or commitments due;
-- risks and dependencies;
-- recommended next actions; and
+- recommendation;
+- supported decision or commitment, including owner and date;
+- proposed owner, action, or timing;
+- risks and dependencies; and
 - evidence gaps.
 
-## Finance
+Use the project's vocabulary and read relevant history before asking questions. Do not invent tracker labels or a universal state machine. Return unsettled product behavior, policy, architecture direction, or observable acceptance to Poppy Decide.
 
-Keep estimate, contracted scope, budget, actuals, invoicing, capacity, and forecast distinct. State units, dates, and source authority. Never infer profitability or remaining budget from incomplete inputs.
+## Priorities, readiness, and finance
 
-## Meetings and communication
+Assess priority and readiness from the selected outcome, dependencies, access, authority, verification, risk, schedule, budget, and capacity evidence. Distinguish needs-evidence, needs-decision, ready-for-specification, and ready-for-implementation descriptively.
 
-Convert meeting evidence into explicit decisions, commitments, owners, dates, risks, open questions, and an audience-appropriate draft. Preserve uncertainty in poor transcripts. Drafting is not sending. Do not send or schedule without exact effect approval and read-back verification.
+Keep estimate, contracted scope, budget, actuals, invoicing, capacity, and forecast distinct. State units, dates, and source authority. Never infer profitability, remaining budget, or available capacity from incomplete inputs.
 
-When the user supplies or asks Poppy to retrieve communication precedent, treat its stable language, length, structure, tone, terminology, and commitment style as acceptance conditions. Lead with the usable draft, keep it as concise as the precedent and request require, and include only evidenced commitments; place reconciliation notes after the draft when they materially help.
+## Meetings and stakeholder communication
 
-Keep the working response language distinct from the language and register of a requested stakeholder artifact. A general instruction such as "reply in English" governs the analysis unless it explicitly replaces an earlier request for a Slovenian, formal, or otherwise audience-specific draft.
+Turn meeting evidence into decisions, commitments, owners, dates, risks, open questions, and an audience-appropriate draft. Preserve uncertainty in incomplete or poor transcripts.
 
-## Source boundaries
+Treat supplied communication precedent—language, length, structure, tone, terminology, and commitment style—as acceptance evidence where applicable. Include only evidenced commitments. Drafting is not sending or scheduling.
 
-Trackers remain authoritative for item state; repositories for code; approved commercial sources for financial facts; and meeting artifacts for what was discussed. Durable memory synthesizes context and rationale without duplicating the tracker.
+Keep proposed next action distinct from observed progress. A recommended owner or requested deadline is not an assignment or promise. Urgency may prioritize a bounded action; it does not establish a completed handoff or successful remedy. Do not invent a promise to send future findings or confirmation.
 
-## Decisions and incoming work
+## Source and effect boundaries
 
-For a decision interview or a large uncertain effort, read [decision discovery](decision-discovery.md). For terminology or boundary ambiguity, read [domain modeling](domain-modeling.md). For issue, request, or pull-request intake, read [work intake](work-intake.md). For a procedure that depends on human-only values or provider steps, read [human-guided procedures](human-guided-procedures.md).
+Trackers are authoritative for item state; repositories for code; approved commercial sources for financial facts; meeting artifacts for what was discussed; and nominated project sources for current project facts. Durable memory may preserve rationale but must not duplicate tracker state.
 
-Use the project's own workflow vocabulary. Read available history before asking questions, recommend before mutation, and distinguish needs-evidence, needs-decision, ready-for-specification, and ready-for-implementation outcomes without inventing tracker labels or a universal state machine.
+Before a tracker write, message, calendar event, financial change, baseline change, provider mutation, or another external effect, preview the exact target and effect, obtain applicable approval, perform only the named effect, and read back the authoritative destination. Stop and reconcile on partial failure.
