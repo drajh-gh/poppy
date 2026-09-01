@@ -14,6 +14,10 @@ Do not invoke project context merely because work is substantive or repository-b
 
 The optional personal index lives at poppy/projects.json under the user's Codex home, outside repositories and plugin packages. It contains version 1 and a projects list. Each entry uses an exact match.git_remote or match.repository_root plus profile. Select at most one exact match. Duplicate matches, malformed entries, and missing required values leave the dependent claim unverified. The index nominates a profile; it grants no effect authority.
 
+Project selection cannot justify itself. Establish one eligible selection signal before opening an external target; do not open a candidate profile, vault, sibling repository, or memory page to discover whether that target should have been selected. A task title, working-directory or package name, thematic similarity, adjacent task, or target found by search is not a project match.
+
+After a missing, malformed, duplicate, or zero-result index match, stop external orientation unless a different eligible signal was already supplied. Name that signal before following it. A handoff qualifies only when it explicitly carries the exact repository root, Git remote, or profile identity; a delegating task, title, or summary alone does not. Otherwise leave external project identity, source authority, and memory context unverified while continuing any unrelated work the selected repository can support.
+
 ## Resolve active Poppy from the task
 
 When the subject is Poppy's current, installed, or running behavior, the current repository is not sufficient context by itself. Start with the loaded root `SKILL.md` path exposed to the task, walk upward only within that package to the nearest ancestor `.codex-plugin/plugin.json`, and read the plugin ID, manifest version, declared skill root, and observed inventory. This identifies the package the task can actually use.

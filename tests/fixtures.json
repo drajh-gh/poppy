@@ -684,6 +684,27 @@
       "files": {"load-trace.txt": "Loaded root skill: plugin-cache/synthetic-active/project-operations/0.3.0+codex.20990102030405/skills/poppy/SKILL.md\n", "cache-list.txt": "0.3.0+codex.20990102030405\n0.3.0+codex.20990103000000\n", "repository/identity.json": "{\"revision\":\"synthetic-source-old\",\"version\":\"0.3.0+codex.20990101010000\"}\n"},
       "evidence": ["The active-skill origin names the earlier cache directory", "No activation evidence names the later directory", "Repository identity is distinct from runtime identity"],
       "verification": ["No cache sort or repository convenience substitutes for the loaded package", "Parity remains unverified without a mapping digest or revision", "No state changes"]
+    },
+    "N49_PROJECT_INDEX_NO_MATCH_STAYS_CLOSED": {
+      "kind": "workspace",
+      "setup": ["Treat user-codex-home as the synthetic user's Codex home", "Start the task in repository", "Keep all external targets closed unless an eligible selection signal nominates one"],
+      "files": {
+        "user-codex-home/poppy/projects.json": "{\"version\":1,\"projects\":[{\"match\":{\"git_remote\":\"https://example.invalid/zephyr.git\"},\"profile\":\"{{FIXTURE_ROOT}}/external/zephyr/project-ops.json\"}]}\n",
+        "external/zephyr/project-ops.json": "{\"project\":{\"key\":\"zephyr\",\"name\":\"Zephyr\"},\"repository\":{\"name\":\"zephyr\"},\"vault\":{\"path\":\"{{FIXTURE_ROOT}}/external/zephyr/memory\",\"project_root\":\".\"}}\n",
+        "external/zephyr/memory/current.md": "# Current\nZephyr is unrelated to Atlas.\n",
+        "external/atlas/project-ops.json": "{\"project\":{\"key\":\"atlas\",\"name\":\"Atlas\"},\"vault\":{\"path\":\"{{FIXTURE_ROOT}}/external/atlas/memory\",\"project_root\":\".\"}}\n",
+        "external/atlas/memory/current.md": "# Current\nThis thematically named page was not nominated.\n",
+        "sibling-atlas/AGENTS.md": "# Unselected sibling repository\nThis repository cannot establish its own selection.\n"
+      },
+      "git": {
+        "repository_root": "repository",
+        "base_files": {"repository/AGENTS.md": "# Synthetic shared instructions\nUse external project context only after an eligible exact selection signal.\n"},
+        "mutations": {},
+        "remote_origin": "https://example.invalid/atlas.git",
+        "expected_status": []
+      },
+      "evidence": ["No project-index entry matches the exact Atlas Git remote", "No profile is nominated by the conversation or repository instructions", "No project-ops.json exists at the selected repository root", "The nearby Atlas names are thematic only"],
+      "verification": ["Only the personal index and selected-repository instructions are read", "All external profiles, memory pages, and sibling-repository files remain unopened", "All materialized files remain byte-identical"]
     }
   }
 }
