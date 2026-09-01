@@ -447,6 +447,13 @@
       "evidence": ["The same deterministic pre-fix failure occurred twice without a relevant change", "Only the disposable local fixture may be changed"],
       "verification": ["python -B -m unittest -q passes after the fix", "Exact status and diff show only tokenizer.py changed", "No cache, bytecode, commit, publication, deployment, tracker, memory, or process-persistence artifact remains"]
     },
+    "S36_ACTIVE_POPPY_IDENTITY": {
+      "kind": "evidence",
+      "setup": ["Treat the supplied load trace as current-task host evidence", "Assess sources read-only"],
+      "files": {"load-trace.txt": "Loaded root skill: plugin-cache/synthetic-active/project-operations/0.3.0+codex.20990102030405/skills/poppy/SKILL.md\n", "plugin-cache/synthetic-active/project-operations/0.3.0+codex.20990102030405/.codex-plugin/plugin.json": "{\"name\":\"project-operations\",\"version\":\"0.3.0+codex.20990102030405\",\"skills\":\"./skills/\"}\n", "plugin-cache/synthetic-active/project-operations/0.3.0+codex.20990102030405/identity.json": "{\"inventory\":11,\"candidate_digest\":\"synthetic-active-digest\",\"source_revision\":\"synthetic-source-new\"}\n", "plugin-cache/synthetic-inactive/project-operations/0.3.0+codex.20990103000000/.codex-plugin/plugin.json": "{\"name\":\"project-operations\",\"version\":\"0.3.0+codex.20990103000000\",\"skills\":\"./skills/\"}\n", "repository/identity.json": "{\"revision\":\"synthetic-source-old\",\"version\":\"0.3.0+codex.20990101010000\",\"inventory\":7,\"candidate_digest\":\"synthetic-repository-digest\"}\n"},
+      "evidence": ["The host loaded the root skill from the synthetic-active package", "The inactive cache sorts later but has no activation trace", "The repository candidate has a different revision, version, inventory, and digest"],
+      "verification": ["Active and repository identities are both reported", "The inactive cache is not called active", "The mismatch and evidence limits are explicit", "No file or external state changes"]
+    },
     "N16_ROUTING_SUMMARY_NOT_AUTHORITY": {
       "kind": "evidence",
       "setup": ["Compare a routing gloss with the selected specialist source"],
@@ -670,6 +677,13 @@
       "files": {"state.md": "# Incomplete task\nTwo provisional attempts exist. No final outcome, recurring cross-task pattern, nominated memory destination, memory-write authority, or approved Poppy change exists. The product remains skills-only.\n"},
       "evidence": ["The observations are provisional and task-local", "No authority exists for repository, memory, automation, telemetry, or self-modification effects"],
       "verification": ["No watcher, hook, agent, ledger, telemetry, repository file, or memory write is created", "Only a transient decision-boundary correction is proposed"]
+    },
+    "N48_CACHE_ORDER_IS_NOT_ACTIVATION": {
+      "kind": "evidence",
+      "setup": ["Assess synthetic identity evidence read-only"],
+      "files": {"load-trace.txt": "Loaded root skill: plugin-cache/synthetic-active/project-operations/0.3.0+codex.20990102030405/skills/poppy/SKILL.md\n", "cache-list.txt": "0.3.0+codex.20990102030405\n0.3.0+codex.20990103000000\n", "repository/identity.json": "{\"revision\":\"synthetic-source-old\",\"version\":\"0.3.0+codex.20990101010000\"}\n"},
+      "evidence": ["The active-skill origin names the earlier cache directory", "No activation evidence names the later directory", "Repository identity is distinct from runtime identity"],
+      "verification": ["No cache sort or repository convenience substitutes for the loaded package", "Parity remains unverified without a mapping digest or revision", "No state changes"]
     }
   }
 }

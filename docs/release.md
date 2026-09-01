@@ -32,7 +32,7 @@ Before personal installation, present the exact committed candidate, version, di
 
 A fresh task after installation must establish:
 
-- active plugin ID, version, source revision, digest algorithm, and digest;
+- the loaded root `SKILL.md` path and its nearest package manifest before recording the active plugin ID, version, source revision, digest algorithm, and digest;
 - exactly the declared Poppy skill inventory and no active v2 or removed skill identities;
 - explicit Poppy invocation in one fresh task;
 - automatic activation and routine non-activation only when trigger behavior changed;
@@ -41,7 +41,9 @@ A fresh task after installation must establish:
 - installation under the user's plugin environment for Codex Desktop and CLI; and
 - the exact preserved rollback package can be restored.
 
-Retain the raw machine-readable traces for checks actually run. If a pre-existing task keeps a stale skill catalog, record it as a host lifecycle limitation rather than adding version checks or installation narration to Poppy. ChatGPT and other hosts remain unverified unless separately tested. Any later plugin, root, authority, profile, delegation, or assurance change invalidates this proof.
+The loaded-skill origin proves the package selected for that task. A cache directory, even one with a lexically greater version or later modification time, is not activation evidence. Bind the loaded package to the committed source candidate through its normalized digest or direct file mapping, and keep the active-package and repository identities separate in the read-back.
+
+Retain the raw machine-readable traces for checks actually run. If a pre-existing task keeps a stale skill catalog, record it as a host lifecycle limitation, do not claim the newer package is active there, and keep installation narration out of unrelated work. ChatGPT and other hosts remain unverified unless separately tested. Any later plugin, root, authority, profile, delegation, or assurance change invalidates this proof.
 
 ## Rollback
 

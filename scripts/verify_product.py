@@ -124,6 +124,7 @@ REQUIRED_SCENARIOS = {
     "S33_VISIBLE_POPPY_SIGNATURE",
     "S34_TRANSIENT_COURSE_CORRECTION",
     "S35_VERIFICATION_AVOIDS_GENERATED_ARTIFACTS",
+    "S36_ACTIVE_POPPY_IDENTITY",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -174,6 +175,7 @@ REQUIRED_NEGATIVE_CASES = {
     "N45_SIGNATURE_ARTIFACT_BOUNDARY",
     "N46_BLIND_RETRY_IS_NOT_PROGRESS",
     "N47_PROCESS_OBSERVATIONS_STAY_TRANSIENT",
+    "N48_CACHE_ORDER_IS_NOT_ACTIVATION",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -399,6 +401,30 @@ def skill_check() -> dict:
                 f"Supporting skill must be root-routed and test-invokable: {name}"
             )
     return {"name": "skill frontmatter", "status": "pass", "count": len(EXPECTED_SKILLS)}
+
+
+def active_poppy_identity_contract_check() -> dict:
+    root_skill = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8")
+    context_skill = (ROOT / "skills" / "poppy-context" / "SKILL.md").read_text(encoding="utf-8")
+    context_reference = (ROOT / "references" / "project-context.md").read_text(encoding="utf-8")
+    release_policy = (ROOT / "docs" / "release.md").read_text(encoding="utf-8")
+    required_markers = {
+        "root routing": (root_skill, "loaded root `SKILL.md`"),
+        "active anchor": (context_skill, "loaded root `SKILL.md`"),
+        "manifest resolution": (context_reference, "nearest ancestor `.codex-plugin/plugin.json`"),
+        "cache ordering boundary": (context_reference, "Cache presence or version ordering is not activation evidence."),
+        "separate candidate identities": (context_reference, "Pin the active package and repository candidate separately"),
+        "installation proof": (release_policy, "loaded root `SKILL.md` path"),
+    }
+    missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
+    if missing:
+        raise VerificationError(
+            "Active Poppy identity contract is incomplete: " + ", ".join(sorted(missing))
+        )
+    return {
+        "name": "active Poppy package and repository identity separation",
+        "status": "pass",
+    }
 
 
 def linked_reference_check(paths: list[Path]) -> dict:
@@ -884,6 +910,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest_check(),
         inventory_check(paths),
         skill_check(),
+        active_poppy_identity_contract_check(),
         linked_reference_check(paths),
         provenance_check(paths),
         boundary_check(paths),

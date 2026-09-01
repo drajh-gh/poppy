@@ -14,6 +14,16 @@ Do not invoke project context merely because work is substantive or repository-b
 
 The optional personal index lives at poppy/projects.json under the user's Codex home, outside repositories and plugin packages. It contains version 1 and a projects list. Each entry uses an exact match.git_remote or match.repository_root plus profile. Select at most one exact match. Duplicate matches, malformed entries, and missing required values leave the dependent claim unverified. The index nominates a profile; it grants no effect authority.
 
+## Resolve active Poppy from the task
+
+When the subject is Poppy's current, installed, or running behavior, the current repository is not sufficient context by itself. Start with the loaded root `SKILL.md` path exposed to the task, walk upward only within that package to the nearest ancestor `.codex-plugin/plugin.json`, and read the plugin ID, manifest version, declared skill root, and observed inventory. This identifies the package the task can actually use.
+
+Cache presence or version ordering is not activation evidence. Do not select a package because its directory name, manifest version, or modification time appears newest. Host-provided loaded-skill or enabled-plugin evidence outranks an unselected cache entry. A task created before an upgrade may remain bound to its older catalog; a claim about the newly active host package then requires a fresh task.
+
+Pin the active package and repository candidate separately. For the active package, record the task-scoped plugin ID, version, inventory, and digest or source mapping when available. For the repository, record the exact revision, working-tree state, manifest version, inventory, and candidate digest when available. Establish parity only through direct normalized file comparison, equal candidate digests, or an authoritative installation receipt that binds both identities. Otherwise mark parity unverified; when the evidence disagrees and provenance does not resolve it, mark the dependent claim conflicted.
+
+Use the active package for claims about what Poppy can do in the current task. Use the nominated repository candidate for implementation and source-history claims. Never silently substitute one for the other, and report a mismatch before a version-sensitive assessment continues.
+
 ## Read profiles backward-compatibly
 
 Treat a profile as configuration, never authority for a new effect. Read only fields needed for:

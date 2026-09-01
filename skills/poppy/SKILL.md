@@ -39,6 +39,8 @@ Use these nearest boundaries when routing:
 
 A sequential handoff does not require a new task or subagent. Compose another skill only when it can change the current result, and read that skill before relying on it. A routing summary is not authority.
 
+When Poppy itself is the subject of a current-state discussion, assessment, capability claim, source comparison, or version-sensitive recommendation, route Poppy Context before relying on a repository checkout. Anchor running behavior to the loaded root `SKILL.md` for the current task and pin the repository candidate separately; neither source silently substitutes for the other.
+
 Use [delegation and continuity](../../references/delegation-and-continuity.md) only for delegation, worktree transfer, handoff, compaction, or a material phase transition.
 
 ## Correct course quietly
