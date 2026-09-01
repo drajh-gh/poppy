@@ -1,5 +1,5 @@
 {
-  "description": "Stateless Poppy Housekeeping lifecycle reminders and metadata guards.",
+  "description": "Bounded Poppy Housekeeping guards and opt-in Scribe continuity checkpoints.",
   "hooks": {
     "SessionStart": [
       {
@@ -11,6 +11,63 @@
             "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\housekeeping_hook.py\"",
             "timeout": 3,
             "additionalContextLimit": 240
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/scribe_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\scribe_hook.py\"",
+            "timeout": 3,
+            "additionalContextLimit": 2200
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/scribe_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\scribe_hook.py\"",
+            "timeout": 3,
+            "additionalContextLimit": 2200
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "^(manual|auto)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/scribe_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\scribe_hook.py\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/scribe_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\scribe_hook.py\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/scribe_hook.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\scribe_hook.py\"",
+            "timeout": 3
           }
         ]
       }

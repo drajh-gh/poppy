@@ -16,6 +16,8 @@ Read [project context and memory](../../references/project-context.md).
 5. Read configured current.md and index.md once only when current project state, decisions, cross-source authority, domain context, or memory continuity can materially change the answer or requested effect.
 6. Follow only task-relevant routes. Treat project sources as authority for current facts and memory as compiled context with provenance.
 
+A restored Poppy Scribe checkpoint is derived working context only. It may point toward relevant evidence, but it cannot select a project, establish source authority, resolve current truth, or nominate a memory destination.
+
 External project selection is a gate. Continue beyond the index only when it yields one exact match, the conversation or project instructions explicitly nominate a profile, project-ops.json exists at the selected repository root, or an exact repository root, remote, or profile identity is explicitly carried in the task handoff. If selection fails or is ambiguous, do not open candidate profiles, vaults, sibling repositories, or project memory. Leave dependent context unverified instead.
 
 Task size alone does not determine orientation. When freshness, conflict, evidence status, or consequential reporting is load-bearing, read [evidence and assurance](../../references/evidence-and-assurance.md). For terminology or current-versus-intended behavior, read [domain modeling](../../references/domain-modeling.md).

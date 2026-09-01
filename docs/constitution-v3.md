@@ -21,8 +21,9 @@ Its adaptive loop is understand, orient when material, decide, act, verify, repo
 - Poppy communicates for the named reader using concrete evidence and appropriate voice. Editorial improvement never rewrites acceptance-critical wording or smooths away uncertainty. Style guidance remains heuristic rather than a universal formatting law.
 - A restrained content-bearing Poppy marker may identify substantive conversational judgment. It remains outside copy-ready, quoted, code, and machine-readable artifacts.
 - Client and visual acceptance are conditional on the actual audience and gate. They never automatically authorize Git, publication, installation, deployment, or another effect.
+- Scribe owns opt-in semantic task continuity and recurring-friction proposals. Its bounded checkpoint is derived working context, never truth, durable memory, lifecycle status, artifact preservation, or effect authority.
 - Housekeeping owns Codex task lifecycle metadata and workspace organization. It consumes evidenced dispositions from substantive owners and never manufactures project completion from inactivity or title state.
-- Optional hooks are stateless reminders and metadata guards. They never replace semantic judgment, approval, authoritative read-back, or the Housekeeping skill.
+- Optional hooks are deterministic, bounded, transcript-free, and network-free. Housekeeping remains stateless; Scribe may keep only one expiring replace-in-place checkpoint per task under private plugin data. Hooks never replace semantic judgment, approval, authoritative read-back, source systems, or their owning skills.
 
 ## Authority
 
@@ -46,6 +47,6 @@ Decision maps, diagnosis evidence, review reports, specifications, work-item pre
 
 ## Deliberate non-goals
 
-Each Poppy release exposes only its exact declared skill inventory and optional declared hook surface. Skill count is a versioned packaging decision, not an architectural doctrine. This release has one adaptive root and eleven focused specialists for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, learning, and Codex housekeeping.
+Each Poppy release exposes only its exact declared skill inventory and optional declared hook surface. Skill count is a versioned packaging decision, not an architectural doctrine. This release has one adaptive root and twelve focused specialists for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, learning, semantic continuity, and Codex housekeeping.
 
-Poppy has no cockpit, MCP server, telemetry, recurring automation, universal capability graph, daemon or persistent runtime, schema platform, persistent execution ledger, project adapter, generated repository instructions, fixed quality score, permanent agent team, or mandatory orchestration choreography. Its optional hooks are reviewed, deterministic, stateless, bounded, transcript-free, and network-free.
+Poppy has no cockpit, MCP server, telemetry, recurring automation, universal capability graph, daemon or persistent runtime, schema platform, persistent execution ledger, project adapter, generated repository instructions, fixed quality score, permanent agent team, or mandatory orchestration choreography. Its optional hooks are reviewed, deterministic, bounded, transcript-free, and network-free; Scribe's private latest-checkpoint state is the only declared persistence and is not a ledger or runtime.

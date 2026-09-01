@@ -48,6 +48,8 @@ Read configured current.md and index.md once only when cross-source current stat
 
 Use source systems for current facts. Treat memory as compiled understanding with provenance, not as automatically current. Read only explicitly nominated glossaries, context maps, decisions, or architecture records. Code is authoritative for current implementation, not automatically for intended behavior or domain meaning.
 
+A restored Poppy Scribe checkpoint is compiled task working context, not a source-authority or memory surface. Use it to locate questions and primary evidence, then reconcile load-bearing claims against those sources. It cannot select a profile, resolve a conflict, establish current project state, or authorize a memory write.
+
 For a nominated Obsidian vault, read its applicable instructions before its configured current and index pages. Respect freshness, sensitivity, aliases, translations, links, and source ownership. Raw receipts are immutable evidence. Compiled pages may be refreshed only from stronger sources with the required authority. Do not scan the vault broadly or touch human-owned inbox or daily notes unless explicitly asked.
 
 ## Write memory sparingly

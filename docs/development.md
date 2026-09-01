@@ -1,6 +1,6 @@
 # Development
 
-Poppy v3 is a documentation-and-skills product with an optional stateless hook helper. Python is required only for deterministic verification, synthetic fixture materialization, and bounded hook execution.
+Poppy v3 is a documentation-and-skills product with optional bounded hook helpers. Python is required only for deterministic verification, synthetic fixture materialization, and bounded hook execution.
 
 Use the [agent skill authoring and review reference](agent-skill-authoring-reference.md) when creating, updating, or assessing a skill. It complements the repository rules and product constitution; it does not replace them.
 
@@ -8,7 +8,7 @@ Use the [agent skill authoring and review reference](agent-skill-authoring-refer
 
 1. Work from an exact base in an isolated branch or worktree.
 2. Preserve pre-existing changes and keep one writer per target.
-3. Keep product content project-agnostic, synthetic, machine-path-free, and confined to declared skills plus optional stateless hooks.
+3. Keep product content project-agnostic, synthetic, machine-path-free, and confined to declared skills plus optional bounded hooks. Housekeeping stays stateless; Scribe state stays private, latest-only, expiring, and outside Git.
 4. Validate every changed skill, every reference directly reachable from the declared entrypoints, and every changed hook against representative event payloads.
 5. Validate JSON and fixture parity with python scripts/materialize_scenario.py --verify-catalog.
 6. Run git diff --check and python scripts/verify_product.py sequentially.
@@ -44,7 +44,7 @@ Record exact baseline and candidate revisions, package versions, digest algorith
 
 For a latency or response-efficiency claim, separately approve the evaluation cost, then use at least five interleaved pairs on each route named by that claim. Report paired input and output tokens, loaded bytes, response characters, tool calls, turns, median latency, dispersion, outliers, cache state, and task success. Do not infer general speed from summed duration. When efficiency is not an acceptance item, its absence remains unverified and does not block a quality-only candidate.
 
-Test only trigger and non-trigger behavior affected by the change. After a separately approved installation, always verify the installed version, digest, exact declared skill inventory, declared hook hash and trust status, and explicit activation in one fresh task. Add automatic activation, routine non-activation, or pre-upgrade task checks only when the change touches those behaviors. Retain raw machine-readable traces for checks actually run. If the host retains stale task catalogs, document that lifecycle limitation rather than adding version narration to Poppy.
+Test only trigger and non-trigger behavior affected by the change. For Scribe, include explicit activation, ordinary non-activation, checkpoint replacement, resume or compaction restoration, redaction, expiry, forget, one-continuation protection, and the three-independent-task improvement threshold. After a separately approved installation, always verify the installed version, digest, exact declared skill inventory, declared hook hash and trust status, and explicit activation in one fresh task. Add other automatic activation or pre-upgrade task checks only when the change touches those behaviors. Retain raw machine-readable traces for checks actually run. If the host retains stale task catalogs, document that lifecycle limitation rather than adding version narration to Poppy.
 
 For an ownership-routing change that does not claim broad superiority, use the grading-only routing expectations and at most three candidate-only fresh-task smokes within 30 elapsed minutes. Do not add a baseline arm, blind judge, performance study, or automatic expansion. After a correction, rerun only the failed case and remain inside the same cap.
 

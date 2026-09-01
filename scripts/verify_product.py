@@ -6,9 +6,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -33,6 +35,7 @@ EXPECTED_SKILLS = {
     "poppy-assure",
     "poppy-learn",
     "poppy-housekeeping",
+    "poppy-scribe",
 }
 
 EXPECTED_REFERENCES = {
@@ -61,6 +64,7 @@ EXPECTED_REFERENCES = {
     "work-intake.md",
     "work-items.md",
     "task-housekeeping.md",
+    "scribe-checkpoints.md",
 }
 
 REFERENCE_OWNERS = {
@@ -89,6 +93,7 @@ REFERENCE_OWNERS = {
     "work-intake.md": "poppy-intake",
     "work-items.md": "poppy-coordinate",
     "task-housekeeping.md": "poppy-housekeeping",
+    "scribe-checkpoints.md": "poppy-scribe",
 }
 
 REQUIRED_SCENARIOS = {
@@ -129,6 +134,8 @@ REQUIRED_SCENARIOS = {
     "S35_VERIFICATION_AVOIDS_GENERATED_ARTIFACTS",
     "S36_ACTIVE_POPPY_IDENTITY",
     "S37_TASK_HOUSEKEEPING",
+    "S38_SCRIBE_CONTINUITY_AND_DRIFT",
+    "S39_SCRIBE_RECURRING_IMPROVEMENT",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -182,6 +189,9 @@ REQUIRED_NEGATIVE_CASES = {
     "N48_CACHE_ORDER_IS_NOT_ACTIVATION",
     "N49_PROJECT_INDEX_NO_MATCH_STAYS_CLOSED",
     "N50_HOUSEKEEPING_ARCHIVE_FAILS_CLOSED",
+    "N51_SCRIBE_CHECKPOINT_NOT_AUTHORITY",
+    "N52_SCRIBE_SECRET_AND_RETENTION",
+    "N53_SCRIBE_ONE_TASK_REPETITION_NOT_LEARNING",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -195,6 +205,7 @@ EXPECTED_SOURCE_FILES = {
     "docs/release.md",
     "hooks/hooks.json",
     "hooks/housekeeping_hook.py",
+    "hooks/scribe_hook.py",
     "references/authority-and-effects.md",
     "references/architecture-assessment.md",
     "references/client-acceptance.md",
@@ -218,6 +229,7 @@ EXPECTED_SOURCE_FILES = {
     "references/specification.md",
     "references/test-first-delivery.md",
     "references/task-housekeeping.md",
+    "references/scribe-checkpoints.md",
     "references/work-intake.md",
     "references/work-items.md",
     "scripts/materialize_scenario.py",
@@ -234,6 +246,7 @@ EXPECTED_SOURCE_FILES = {
     "skills/poppy-learn/SKILL.md",
     "skills/poppy-housekeeping/SKILL.md",
     "skills/poppy-research/SKILL.md",
+    "skills/poppy-scribe/SKILL.md",
     "tests/fixtures.json",
     "tests/scenarios.json",
 }
@@ -371,28 +384,32 @@ def manifest_check() -> dict:
     }
 
 
-def execute_hook(event: dict) -> dict:
+def execute_hook(script_name: str, event: dict, plugin_data: Path | None = None) -> dict:
+    environment = os.environ.copy()
+    if plugin_data is not None:
+        environment["PLUGIN_DATA"] = str(plugin_data)
     completed = subprocess.run(
-        [sys.executable, str(ROOT / "hooks" / "housekeeping_hook.py")],
+        [sys.executable, str(ROOT / "hooks" / script_name)],
         cwd=ROOT,
         input=json.dumps(event, ensure_ascii=False),
         text=True,
         capture_output=True,
         encoding="utf-8",
         timeout=5,
+        env=environment,
     )
     if completed.returncode != 0:
         raise VerificationError(
-            f"Housekeeping hook exited {completed.returncode}: {completed.stderr.strip()}"
+            f"{script_name} exited {completed.returncode}: {completed.stderr.strip()}"
         )
     try:
         result = json.loads(completed.stdout)
     except json.JSONDecodeError as exc:
         raise VerificationError(
-            f"Housekeeping hook returned invalid JSON: {completed.stdout!r}"
+            f"{script_name} returned invalid JSON: {completed.stdout!r}"
         ) from exc
     if not isinstance(result, dict):
-        raise VerificationError("Housekeeping hook output must be a JSON object")
+        raise VerificationError(f"{script_name} output must be a JSON object")
     return result
 
 
@@ -402,47 +419,65 @@ def hook_contract_check() -> dict:
     if set(config) != {"description", "hooks"} or not config["description"].strip():
         raise VerificationError("Hook config metadata is incomplete")
     hooks = config["hooks"]
-    expected_events = {"SessionStart", "PreToolUse", "PostToolUse"}
+    expected_events = {
+        "SessionStart",
+        "SessionEnd",
+        "UserPromptSubmit",
+        "PreCompact",
+        "Stop",
+        "PreToolUse",
+        "PostToolUse",
+    }
     if set(hooks) != expected_events:
         raise VerificationError(
             f"Hook event inventory mismatch: expected {sorted(expected_events)}, got {sorted(hooks)}"
         )
-    expected_matchers = {
-        "SessionStart": "^(resume|compact)$",
-        "PreToolUse": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
-        "PostToolUse": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
+    expected_groups = {
+        "SessionStart": {
+            "matcher": "^(resume|compact)$",
+            "handlers": [("housekeeping_hook.py", 240), ("scribe_hook.py", 2200)],
+        },
+        "SessionEnd": {"matcher": None, "handlers": [("scribe_hook.py", None)]},
+        "UserPromptSubmit": {"matcher": None, "handlers": [("scribe_hook.py", 2200)]},
+        "PreCompact": {"matcher": "^(manual|auto)$", "handlers": [("scribe_hook.py", None)]},
+        "Stop": {"matcher": None, "handlers": [("scribe_hook.py", None)]},
+        "PreToolUse": {
+            "matcher": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
+            "handlers": [("housekeeping_hook.py", 240)],
+        },
+        "PostToolUse": {
+            "matcher": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
+            "handlers": [("housekeeping_hook.py", 240)],
+        },
     }
     for event_name, groups in hooks.items():
         if not isinstance(groups, list) or len(groups) != 1:
             raise VerificationError(f"Hook event must have one matcher group: {event_name}")
         group = groups[0]
-        expected_group_fields = {"matcher", "hooks"}
+        expected = expected_groups[event_name]
+        expected_group_fields = {"hooks"} | ({"matcher"} if expected["matcher"] is not None else set())
         if set(group) != expected_group_fields:
             raise VerificationError(f"Hook matcher group fields invalid for {event_name}")
-        if group["matcher"] != expected_matchers[event_name]:
+        if expected["matcher"] is not None and group["matcher"] != expected["matcher"]:
             raise VerificationError(f"Hook matcher is not narrowly pinned for {event_name}")
         handlers = group["hooks"]
-        if not isinstance(handlers, list) or len(handlers) != 1:
-            raise VerificationError(f"Hook event must have one command handler: {event_name}")
-        handler = handlers[0]
-        required_handler_fields = {
-            "type",
-            "command",
-            "commandWindows",
-            "timeout",
-            "additionalContextLimit",
-        }
-        if set(handler) != required_handler_fields:
-            raise VerificationError(f"Hook handler fields invalid for {event_name}")
-        if (
-            handler["type"] != "command"
-            or handler["timeout"] != 3
-            or "$PLUGIN_ROOT/hooks/housekeeping_hook.py" not in handler["command"]
-            or "%PLUGIN_ROOT%\\hooks\\housekeeping_hook.py" not in handler["commandWindows"]
-        ):
-            raise VerificationError(f"Hook handler is not bounded and plugin-relative for {event_name}")
-        if handler["additionalContextLimit"] != 240:
-            raise VerificationError(f"Hook context limit is not bounded for {event_name}")
+        if not isinstance(handlers, list) or len(handlers) != len(expected["handlers"]):
+            raise VerificationError(f"Hook handler inventory changed for {event_name}")
+        for handler, (script_name, context_limit) in zip(handlers, expected["handlers"]):
+            required_handler_fields = {"type", "command", "commandWindows", "timeout"}
+            if context_limit is not None:
+                required_handler_fields.add("additionalContextLimit")
+            if set(handler) != required_handler_fields:
+                raise VerificationError(f"Hook handler fields invalid for {event_name}")
+            if (
+                handler["type"] != "command"
+                or handler["timeout"] != 3
+                or f"$PLUGIN_ROOT/hooks/{script_name}" not in handler["command"]
+                or f"%PLUGIN_ROOT%\\hooks\\{script_name}" not in handler["commandWindows"]
+            ):
+                raise VerificationError(f"Hook handler is not bounded and plugin-relative for {event_name}")
+            if context_limit is not None and handler["additionalContextLimit"] != context_limit:
+                raise VerificationError(f"Hook context limit is not bounded for {event_name}")
 
     script = (ROOT / "hooks" / "housekeeping_hook.py").read_text(encoding="utf-8")
     forbidden_runtime_tokens = (
@@ -462,12 +497,13 @@ def hook_contract_check() -> dict:
             + ", ".join(found)
         )
 
-    resume = execute_hook({"hook_event_name": "SessionStart", "source": "resume"})
+    resume = execute_hook("housekeeping_hook.py", {"hook_event_name": "SessionStart", "source": "resume"})
     resume_context = resume.get("hookSpecificOutput", {}).get("additionalContext", "")
     if "Poppy Housekeeping" not in resume_context or "Clear the marker" not in resume_context:
         raise VerificationError("SessionStart hook does not preserve reopen semantics")
 
     invalid_title = execute_hook(
+        "housekeeping_hook.py",
         {
             "hook_event_name": "PreToolUse",
             "tool_name": "mcp__codex_app__set_thread_title",
@@ -478,6 +514,7 @@ def hook_contract_check() -> dict:
         raise VerificationError("PreToolUse hook did not reject a stacked lifecycle marker")
 
     valid_title = execute_hook(
+        "housekeeping_hook.py",
         {
             "hook_event_name": "PreToolUse",
             "tool_name": "mcp__codex_app__set_thread_title",
@@ -488,6 +525,7 @@ def hook_contract_check() -> dict:
         raise VerificationError("PreToolUse hook did not admit an exact lifecycle marker with context")
 
     implicit_archive = execute_hook(
+        "housekeeping_hook.py",
         {
             "hook_event_name": "PreToolUse",
             "tool_name": "mcp__codex_app__set_thread_archived",
@@ -498,6 +536,7 @@ def hook_contract_check() -> dict:
         raise VerificationError("PreToolUse hook did not require an exact archive target")
 
     post_title = execute_hook(
+        "housekeeping_hook.py",
         {
             "hook_event_name": "PostToolUse",
             "tool_name": "mcp__codex_app__set_thread_title",
@@ -508,11 +547,320 @@ def hook_contract_check() -> dict:
     if "read the authoritative task title back" not in post_title.get("hookSpecificOutput", {}).get("additionalContext", ""):
         raise VerificationError("PostToolUse hook does not require title read-back")
 
+    scribe_script = (ROOT / "hooks" / "scribe_hook.py").read_text(encoding="utf-8")
+    forbidden_scribe_tokens = ("transcript_path", "urllib", "requests", "socket", "subprocess")
+    found = [token for token in forbidden_scribe_tokens if token in scribe_script]
+    if found:
+        raise VerificationError(
+            "Scribe hook must remain transcript-free and network-free: " + ", ".join(found)
+        )
+    required_scribe_tokens = ("PLUGIN_DATA", "os.replace", "RETENTION_DAYS = 7", "MAX_STATE_BYTES")
+    missing = [token for token in required_scribe_tokens if token not in scribe_script]
+    if missing:
+        raise VerificationError(
+            "Scribe hook lacks bounded private-state controls: " + ", ".join(missing)
+        )
+
+    def marker(checkpoint: dict) -> str:
+        payload = {"action": "checkpoint", "checkpoint": checkpoint}
+        return (
+            "Visible synthetic answer.\n<!-- poppy-scribe:v1\n"
+            + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+            + "\npoppy-scribe:end -->"
+        )
+
+    def checkpoint(intent: str, fingerprint: str = "fixture-contract-not-read-before-edit") -> dict:
+        return {
+            "mode": "quiet",
+            "intent": intent,
+            "decisions": [
+                {
+                    "statement": "Keep legacy inputs compatible",
+                    "status": "user-confirmed",
+                    "rationale": "Synthetic acceptance anchor",
+                    "evidence": "user decision",
+                }
+            ],
+            "evidence": [
+                {
+                    "claim": "Focused unit behavior passes",
+                    "status": "supported",
+                    "source": "synthetic focused check",
+                    "freshness": "current turn",
+                }
+            ],
+            "changes": [
+                {
+                    "target": "src/import_guard.py",
+                    "state": "locally-verified",
+                    "summary": "Guard added",
+                    "verification": "focused check passed",
+                }
+            ],
+            "questions": [
+                {
+                    "question": "Does the downstream client accept the legacy shape?",
+                    "dependency": "client fixture",
+                    "owner": "delivery owner",
+                }
+            ],
+            "next_step": {
+                "action": "Read the client fixture",
+                "owner": "delivery owner",
+                "authority": "read-only",
+                "stop_condition": "client shape is supported or contradicted",
+            },
+            "attention": None,
+            "friction": [
+                {
+                    "fingerprint": fingerprint,
+                    "summary": "The governing fixture was not read before editing",
+                    "evidence_status": "supported",
+                }
+            ],
+            "redactions": [],
+        }
+
+    with tempfile.TemporaryDirectory(prefix="poppy-scribe-verify-") as temporary:
+        plugin_data = Path(temporary)
+        secret = "sk-" + ("x" * 24)
+        first = checkpoint("Add a local import guard without publishing " + secret)
+        stop_first = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "Stop",
+                "session_id": "synthetic-session-1",
+                "turn_id": "synthetic-turn-1",
+                "last_assistant_message": marker(first),
+                "stop_hook_active": False,
+            },
+            plugin_data,
+        )
+        if stop_first.get("decision") == "block":
+            raise VerificationError("Valid Scribe checkpoint marker was not accepted")
+        state_files = sorted((plugin_data / "scribe" / "checkpoints").glob("*.json"))
+        if len(state_files) != 1:
+            raise VerificationError("Scribe did not create exactly one latest checkpoint")
+        state_text = state_files[0].read_text(encoding="utf-8")
+        state = json.loads(state_text)
+        if secret in state_text or "[redacted]" not in state_text or state.get("sequence") != 1:
+            raise VerificationError("Scribe redaction or initial sequence contract failed")
+
+        scribe_resume = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "SessionStart",
+                "source": "resume",
+                "session_id": "synthetic-session-1",
+            },
+            plugin_data,
+        )
+        resume_context = scribe_resume.get("hookSpecificOutput", {}).get("additionalContext", "")
+        if (
+            "non-authoritative" not in resume_context
+            or secret in resume_context
+            or len(resume_context) > 2200
+        ):
+            raise VerificationError("Scribe restore did not preserve authority or redaction boundaries")
+
+        prompt_result = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "session_id": "synthetic-session-1",
+                "prompt": "Continue with the current task.",
+            },
+            plugin_data,
+        )
+        prompt_context = prompt_result.get("hookSpecificOutput", {}).get("additionalContext", "")
+        if (
+            "append exactly one hidden" not in prompt_context
+            or "derived working context" not in prompt_context
+            or len(prompt_context) > 2200
+        ):
+            raise VerificationError("Active Scribe prompt did not hydrate the checkpoint contract")
+        persisted_text = "".join(
+            path.read_text(encoding="utf-8")
+            for path in (plugin_data / "scribe").rglob("*.json")
+        )
+        if "Continue with the current task." in persisted_text or "synthetic-session-1" in persisted_text:
+            raise VerificationError("Scribe persisted a raw prompt or unhashed task identity")
+
+        precompact = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "PreCompact",
+                "trigger": "auto",
+                "session_id": "synthetic-session-1",
+            },
+            plugin_data,
+        )
+        if "in-flight" not in precompact.get("systemMessage", ""):
+            raise VerificationError("Scribe did not mark an in-flight compaction")
+
+        review = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "session_id": "synthetic-session-1",
+                "prompt": "What changed, and what is unverified?",
+            },
+            plugin_data,
+        )
+        if "Use review mode" not in review.get("hookSpecificOutput", {}).get("additionalContext", ""):
+            raise VerificationError("Scribe did not select review mode for a checkpoint review")
+
+        missing_marker = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "Stop",
+                "session_id": "synthetic-session-1",
+                "last_assistant_message": "Visible answer without checkpoint.",
+                "stop_hook_active": False,
+            },
+            plugin_data,
+        )
+        if missing_marker.get("decision") != "block":
+            raise VerificationError("Scribe did not request one missing-marker continuation")
+        second_missing = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "Stop",
+                "session_id": "synthetic-session-1",
+                "last_assistant_message": "Still missing.",
+                "stop_hook_active": True,
+            },
+            plugin_data,
+        )
+        if second_missing.get("decision") == "block":
+            raise VerificationError("Scribe created an unbounded Stop continuation loop")
+
+        second = checkpoint("Add a local import guard and inspect the client fixture")
+        execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "Stop",
+                "session_id": "synthetic-session-1",
+                "turn_id": "synthetic-turn-2",
+                "last_assistant_message": marker(second),
+            },
+            plugin_data,
+        )
+        state = json.loads(state_files[0].read_text(encoding="utf-8"))
+        if state.get("sequence") != 2:
+            raise VerificationError("Scribe did not replace and increment the latest checkpoint")
+        execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "Stop",
+                "session_id": "synthetic-session-1",
+                "last_assistant_message": "<!-- poppy-scribe:v1\n{bad}\npoppy-scribe:end -->",
+            },
+            plugin_data,
+        )
+        if json.loads(state_files[0].read_text(encoding="utf-8")).get("sequence") != 2:
+            raise VerificationError("Malformed Scribe marker overwrote the prior checkpoint")
+
+        execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "Stop",
+                "session_id": "synthetic-session-expired",
+                "last_assistant_message": marker(checkpoint("Expiring synthetic checkpoint")),
+            },
+            plugin_data,
+        )
+        expiring_files = [
+            path
+            for path in (plugin_data / "scribe" / "checkpoints").glob("*.json")
+            if "Expiring synthetic checkpoint" in path.read_text(encoding="utf-8")
+        ]
+        if len(expiring_files) != 1:
+            raise VerificationError("Scribe expiry fixture was not created exactly once")
+        expired_state = json.loads(expiring_files[0].read_text(encoding="utf-8"))
+        expired_state["expires_at"] = "2000-01-01T00:00:00Z"
+        expiring_files[0].write_text(
+            json.dumps(expired_state, ensure_ascii=True, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        execute_hook(
+            "scribe_hook.py",
+            {"hook_event_name": "SessionEnd", "reason": "other"},
+            plugin_data,
+        )
+        if expiring_files[0].exists():
+            raise VerificationError("Scribe SessionEnd did not prune an expired checkpoint")
+
+        for number in (2, 3):
+            execute_hook(
+                "scribe_hook.py",
+                {
+                    "hook_event_name": "Stop",
+                    "session_id": f"synthetic-session-{number}",
+                    "turn_id": f"synthetic-turn-{number}",
+                    "last_assistant_message": marker(checkpoint(f"Synthetic task {number}")),
+                },
+                plugin_data,
+            )
+        improve = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "session_id": "synthetic-session-4",
+                "prompt": "Poppy Scribe Improve: report recurring friction patterns.",
+            },
+            plugin_data,
+        )
+        improve_context = improve.get("hookSpecificOutput", {}).get("additionalContext", "")
+        if (
+            "fixture-contract-not-read-before-edit" not in improve_context
+            or '"independent_sessions":3' not in improve_context
+            or "Use improve mode" not in improve_context
+            or len(improve_context) > 2200
+        ):
+            raise VerificationError("Scribe improvement threshold did not count independent sessions")
+
+        ordinary = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "session_id": "synthetic-session-ordinary",
+                "prompt": "Make a routine scoped edit.",
+            },
+            plugin_data,
+        )
+        if ordinary:
+            raise VerificationError("Scribe activated without an explicit request or existing checkpoint")
+
+        forget_prompt = execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "session_id": "synthetic-session-1",
+                "prompt": "Poppy Scribe, forget this task.",
+            },
+            plugin_data,
+        )
+        if "action forget" not in forget_prompt.get("hookSpecificOutput", {}).get("additionalContext", ""):
+            raise VerificationError("Scribe forget request did not select the forget marker")
+        forget = "<!-- poppy-scribe:v1\n{\"action\":\"forget\"}\npoppy-scribe:end -->"
+        execute_hook(
+            "scribe_hook.py",
+            {
+                "hook_event_name": "Stop",
+                "session_id": "synthetic-session-1",
+                "last_assistant_message": forget,
+            },
+            plugin_data,
+        )
+        if state_files[0].exists():
+            raise VerificationError("Scribe forget did not remove the task checkpoint")
+
     return {
-        "name": "stateless Housekeeping hook contract",
+        "name": "stateless Housekeeping and bounded Scribe hook contract",
         "status": "pass",
         "events": sorted(expected_events),
-        "representative_payloads": 5,
+        "representative_payloads": 23,
     }
 
 
@@ -780,6 +1128,8 @@ def scenario_check() -> dict:
         "S22_CLIENT_REPORT_READINESS_BOUNDARY": ["poppy-intake", "poppy-decide"],
         "S30_CLIENT_READY_ACCEPTANCE_RECORDING": ["poppy-acceptance"],
         "S37_TASK_HOUSEKEEPING": ["poppy-housekeeping"],
+        "S38_SCRIBE_CONTINUITY_AND_DRIFT": ["poppy-scribe"],
+        "S39_SCRIBE_RECURRING_IMPROVEMENT": ["poppy-scribe"],
     }
     for case_id, expected in required_boundaries.items():
         if sequences.get(case_id) != expected:

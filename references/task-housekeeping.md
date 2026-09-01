@@ -81,16 +81,18 @@ Do not automatically move, pin, unpin, merge, archive, delete, or rename finding
 
 ## Hooks and scheduled runs
 
-The bundled hook helper is deterministic and stateless:
+The bundled Housekeeping hook helper is deterministic and stateless:
 
 - `SessionStart` on resume or compaction reminds the agent to reconcile a stale marker before new actionable work;
 - `PreToolUse` rejects malformed task-title lifecycle markers and task mutations without an exact task ID, then reminds the agent that semantic eligibility still belongs to Housekeeping;
 - `PostToolUse` reminds the agent to perform authoritative read-back after title or archive mutations.
 
-The helper reads only the event JSON from standard input. It performs no file, transcript, network, task, project, or plugin-data access and persists nothing. Tool coverage is not universal, matching hooks can run concurrently, and non-managed hooks run only after the user reviews and trusts their exact definition. Therefore hooks cannot establish lifecycle truth or replace effect approval.
+The Housekeeping helper reads only the event JSON from standard input. It performs no file, transcript, network, task, project, or plugin-data access and persists nothing. Tool coverage is not universal, matching hooks can run concurrently, and non-managed hooks run only after the user reviews and trusts their exact definition. Therefore hooks cannot establish lifecycle truth or replace effect approval.
+
+The separate opt-in Scribe helper may persist one bounded expiring semantic checkpoint per task under private plugin data. It remains transcript-free and network-free, and its reconstructed state is never lifecycle evidence. Housekeeping must not infer a marker, completion, archive eligibility, or authority from a Scribe checkpoint.
 
 When Housekeeping requests or audits a delegate handoff, require an explicit `Status: complete|paused|blocked`, `Evidence:` or `Evidence limits:`, and `Next action:`. Do not bundle a `SubagentStop` handler: its matcher can filter agent type but not active Poppy ownership, so it would affect unrelated tasks.
 
-Do not add a universal `Stop`, `UserPromptSubmit`, or `SessionEnd` handler for housekeeping: those events are too broad, ignore useful matchers, or cannot reliably steer immediate task lifecycle state. Prefer small targeted hooks and native task reads.
+Do not use the declared universal Scribe handlers for housekeeping: those events are too broad, ignore useful matchers, or cannot reliably steer immediate task lifecycle state. Keep Housekeeping on its targeted events and native task reads.
 
 A separately approved once-daily scheduler may invoke Housekeeping to evaluate the archive policy. Its visible prompt should name the exact policy: inspect current Codex tasks, consider only unpinned exact-`✅ [D]` tasks older than seven full days, reread each candidate, archive only under the standing authorization, verify every archived task, and report skips or failures. Creating, changing, pausing, or deleting that scheduler is a separate automation effect; the plugin does not create one during installation.

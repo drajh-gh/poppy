@@ -8,6 +8,8 @@ Capture the smallest reusable statement, its scope, decisive evidence, and any c
 
 Retry counts, provisional risks, self-review notes, course-correction observations, and assurance packets are working context. Repetition within one task does not establish a recurring durable lesson.
 
+Poppy Scribe may identify a recurring friction candidate only when the same supported fingerprint appears across at least three independent task checkpoints. That threshold makes a review worthwhile; it does not prove a durable lesson or authorize any change. Learn still requires a completed evidenced outcome, representative examples, scope, a counterexample or expiry condition, and the destination-specific authority below.
+
 Classify before choosing a destination:
 
 - a project fact, rationale, or domain lesson belongs in nominated project memory when policy and authority permit;

@@ -4,9 +4,9 @@ This repository is the canonical, project-agnostic source for Poppy v3.
 
 ## Product boundary
 
-- Keep the plugin installable from the repository root and expose only skills plus the declared optional stateless trusted hooks.
-- Keep the release's exact declared skill inventory: `poppy`, `poppy-context`, `poppy-intake`, `poppy-decide`, `poppy-coordinate`, `poppy-research`, `poppy-diagnose`, `poppy-delivery`, `poppy-acceptance`, `poppy-assure`, `poppy-learn`, and `poppy-housekeeping`. The count is not a product principle; an inventory change requires a distinct ownership contract, routing evidence, verifier update, and rollback coverage.
-- Keep hooks deterministic, stateless, bounded, transcript-free, network-free, and subordinate to skill policy and native effect authority.
+- Keep the plugin installable from the repository root and expose only skills plus the declared optional trusted hooks.
+- Keep the release's exact declared skill inventory: `poppy`, `poppy-context`, `poppy-intake`, `poppy-decide`, `poppy-coordinate`, `poppy-research`, `poppy-diagnose`, `poppy-delivery`, `poppy-acceptance`, `poppy-assure`, `poppy-learn`, `poppy-housekeeping`, and `poppy-scribe`. The count is not a product principle; an inventory change requires a distinct ownership contract, routing evidence, verifier update, and rollback coverage.
+- Keep hooks deterministic, bounded, transcript-free, network-free, and subordinate to skill policy and native effect authority. Housekeeping remains stateless. Scribe may keep only one size-capped, replace-in-place, expiring semantic checkpoint per task under private plugin data; it may not create telemetry, an append-only ledger, durable memory, or authoritative project state.
 - Do not add a cockpit, MCP server, telemetry, recurring automation, graph registry, daemon or persistent runtime, schema platform, execution ledger, project adapter, generated repository instructions, or repository-local installation.
 - Keep real project names, vault contents, runtime records, credentials, machine paths, installed plugin copies, and live configuration out of Git.
 - Use only clearly synthetic identifiers in tests and examples.

@@ -1,6 +1,6 @@
 ---
 name: poppy
-description: Evidence-aware partner for project context, intake, decisions, coordination, diagnosis, delivery, acceptance, assurance, research, learning, and Codex housekeeping. Use automatically for substantive project work; directly when the user asks for Poppy. Skip self-contained questions and routine scoped edits.
+description: Evidence-aware partner for project context, intake, decisions, coordination, diagnosis, delivery, acceptance, assurance, research, learning, semantic task continuity, and Codex housekeeping. Use automatically for substantive project work; directly when the user asks for Poppy. Skip self-contained questions and routine scoped edits.
 ---
 
 # Poppy
@@ -29,6 +29,7 @@ Route to the owner of the requested end state, not every intermediate verb or so
 - Product-owner, visual, or client judgment of demonstrated exact-candidate behavior: Poppy Acceptance.
 - Independent exact-candidate judgment or material evidence-gap review: Poppy Assure.
 - A completed supported outcome that may have changed future-useful understanding: Poppy Learn.
+- A requested semantic checkpoint, continuity review, handoff reconstruction, drift review, or recurring cross-task improvement signal: Poppy Scribe.
 - Codex task lifecycle metadata, archive eligibility, delegation hygiene, or workspace organization: Poppy Housekeeping.
 
 Use these nearest boundaries when routing:
@@ -37,6 +38,7 @@ Use these nearest boundaries when routing:
 - Decide selects; Coordinate sequences, commits, drafts, or publishes.
 - Diagnose establishes or narrows cause; Delivery mutates the candidate.
 - Delivery verifies locally; Acceptance presents behavior to a named observer; Assure judges independently.
+- Scribe reconstructs derived working context; Context resolves authoritative sources, Learn evaluates durable lessons, and artifact owners preserve exact candidates.
 - Substantive owners establish the disposition; Housekeeping records or audits its Codex lifecycle metadata.
 
 A sequential handoff does not require a new task or subagent. Compose another skill only when it can change the current result, and read that skill before relying on it. A routing summary is not authority.
@@ -51,7 +53,7 @@ At a material failure, proposed retry, consequential action, or completion claim
 
 Do not repeat a materially unchanged action as progress. Select one testable premise and the smallest probe that can distinguish it, or report an evidence-established blocker. Before long-running or model-based evaluation, set the decision question, cases, maximum calls and elapsed time, and stop condition; never automatically expand past it.
 
-Keep process observations transient. Only a later completed supported outcome may reach Poppy Learn, and an actual memory write also requires Poppy Context's exact destination, authority, provenance, and read-back gate.
+Keep process observations transient unless the user explicitly enables Poppy Scribe's bounded latest-checkpoint contract. Scribe may retain compact friction fingerprints, but only a later completed supported outcome may reach Poppy Learn, and an actual memory write also requires Poppy Context's exact destination, authority, provenance, and read-back gate.
 
 ## Preserve control
 

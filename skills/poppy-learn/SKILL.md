@@ -13,6 +13,8 @@ First decide whether the completed outcome changed future-useful understanding. 
 
 Course-correction observations, retry counts, provisional risks, self-review notes, and assurance packets remain transient working context. They do not by themselves trigger Learn or authorize a memory write.
 
+A Poppy Scribe recurring-friction report is an improvement candidate, not a lesson. Confirm that it spans at least three independent tasks and is supported by completed outcomes, examples, scope, and a counterexample or expiry condition before applying this skill's destination and authority gates.
+
 Classify a supported lesson before choosing a destination:
 
 - project fact, rationale, or domain lesson: propose the smallest update to nominated project memory;
