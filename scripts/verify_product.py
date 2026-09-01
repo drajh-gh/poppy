@@ -384,6 +384,15 @@ def manifest_check() -> dict:
         raise VerificationError("Manifest package identity, skills path, or hooks path is invalid")
     if not re.fullmatch(r"0\.3\.0\+codex\.\d{14}", manifest["version"]):
         raise VerificationError(f"Manifest version is not a v3 local candidate: {manifest['version']}")
+    default_prompts = manifest.get("interface", {}).get("defaultPrompt")
+    if (
+        not isinstance(default_prompts, list)
+        or not 1 <= len(default_prompts) <= 3
+        or any(not isinstance(prompt, str) or not prompt.strip() for prompt in default_prompts)
+    ):
+        raise VerificationError(
+            "Manifest interface.defaultPrompt must contain one to three non-empty strings"
+        )
     component_fields = {"skills", "mcpServers", "apps", "ui", "commands", "hooks"}
     exposed = component_fields.intersection(manifest)
     if exposed != {"skills", "hooks"}:
