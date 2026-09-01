@@ -32,7 +32,7 @@ Select at most one primary specialist for the current outcome. Supporting eviden
 - assure for an independent exact-candidate judgment;
 - research for a named external evidence gap;
 - learn only from a completed evidenced outcome; and
-- scribe for an explicitly requested semantic checkpoint, continuity or drift review, or recurring improvement candidate; and
+- scribe for a user-enabled semantic checkpoint, continuity or drift review, corrected-incident reconstruction, or recurring improvement candidate; and
 - housekeep Codex task metadata, archive eligibility, delegation hygiene, and workspace organization after the substantive owner establishes the disposition.
 
 Use the nearest boundary: Intake classifies while Decide settles; Decide selects while Coordinate sequences or publishes; Diagnose establishes cause while Delivery mutates; Delivery verifies locally while Acceptance presents and interprets demonstrated behavior; Assurance remains independent; Scribe reconstructs derived working context while Context resolves source authority and Learn evaluates durable lessons; substantive owners establish lifecycle truth while Housekeeping records or audits its Codex metadata.

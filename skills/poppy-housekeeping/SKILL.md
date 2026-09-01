@@ -54,4 +54,4 @@ Start with the smallest authoritative task or project listing. Read individual t
 
 Keep pinned tasks protected. Suggest sidebar moves, title normalization, consolidation, and automation changes unless the user authorized those exact effects. Never treat task history as the durable artifact store, delete a worktree, or release a candidate owner merely because a task was marked or archived.
 
-Treat the bundled Housekeeping hooks as stateless reminders and syntax guards, not as semantic authority. The separate Scribe helper may restore derived working context, but it cannot establish lifecycle truth. Housekeeping must still inspect current evidence and native task state.
+Treat the bundled Housekeeping hooks as stateless reminders and syntax guards, not as semantic authority. Any Scribe summary present in current task context is derived working context and cannot establish lifecycle truth. Housekeeping must still inspect current evidence and native task state.

@@ -1,6 +1,6 @@
 # Poppy v3
 
-Poppy is a personal Codex plugin for moving from project ambiguity to a verified and organized result without turning every request into a workflow. Its focused skills stay near-invisible during ordinary work, while optional bounded hooks provide lifecycle guards and opt-in semantic continuity.
+Poppy is a personal Codex plugin for moving from project ambiguity to a verified and organized result without turning every request into a workflow. Its focused skills stay near-invisible during ordinary work, while optional bounded hooks provide lifecycle guards.
 
 Poppy keeps adjacent kinds of work distinct:
 
@@ -13,20 +13,20 @@ Poppy keeps adjacent kinds of work distinct:
 - Acceptance presents exact-candidate behavior to a named observer; Assurance supplies an independent read-only verdict.
 - Research closes a named external evidence gap.
 - Learn proposes the smallest durable lesson after an evidenced outcome.
-- Scribe keeps one bounded semantic checkpoint, reviews material drift, and proposes recurring improvements without becoming truth or memory.
+- Scribe keeps a bounded conversation checkpoint, reviews material drift or a corrected mistake, and proposes recurring improvements without becoming truth or memory.
 - Housekeeping maintains Codex task lifecycle metadata, archive eligibility, delegation hygiene, and workspace organization without deciding substantive project status. An explicitly requested marker for the calling task can use a tightly gated one-orchestration fast path when the disposition is already supported; other tasks, batches, archives, ambiguity, missing evidence, and drift retain the full safe path.
 
 Communication guidance is progressively loaded. It favors concrete, reader-ready prose and natural judgment while preserving accepted wording, evidence status, canonical terminology, and commitments. Style patterns remain contextual heuristics.
 
 At material failures, retries, consequential actions, and completion claims, Poppy quietly checks whether the next step can add evidence and still matches the request, candidate, gates, authority, and declared budget. It changes course or surfaces the exact blocker without creating a watcher, attempt ledger, telemetry stream, or automatic memory. Long or model-based evaluation is bounded before it starts and never resumes or expands itself beyond that boundary.
 
-Poppy is deliberately small. There is no cockpit, telemetry service, recurring automation, universal capability graph, daemon or persistent runtime, schema platform, persistent execution ledger, project adapter, or repository-local installation. Hook helpers are deterministic, bounded, transcript-free, and network-free. Housekeeping remains stateless; opt-in Scribe may replace one size-capped checkpoint per task in private plugin data for seven days.
+Poppy is deliberately small. There is no cockpit, telemetry service, recurring automation, universal capability graph, daemon or persistent runtime, schema platform, persistent execution ledger, project adapter, or repository-local installation. Hook helpers are deterministic, bounded, transcript-free, network-free, and limited to Housekeeping lifecycle guards. Scribe remains conversation-bound until Codex provides a verified non-rendered transport.
 
 ## Product map
 
 - .codex-plugin/plugin.json — the skill-and-hook manifest.
 - skills/ — one adaptive root and twelve focused specialists in the exact declared release inventory.
-- hooks/ — reviewed lifecycle guards and opt-in Scribe continuity; installation never implies trust.
+- hooks/ — reviewed Housekeeping lifecycle guards; installation never implies trust.
 - references/ — progressively loaded behavioral guidance.
 - tests/scenarios.json and tests/fixtures.json — synthetic acceptance contracts.
 - scripts/verify_product.py — deterministic structure, catalog, hook-contract, boundary, ancestry, and candidate-identity gate.
@@ -35,14 +35,16 @@ Poppy is deliberately small. There is no cockpit, telemetry service, recurring a
 
 ## Using Scribe
 
-Scribe combines four outcomes in one opt-in loop: it records the latest material working state, navigates resumes and handoffs, critiques one material drift or evidence problem, and proposes learning candidates only after supported recurrence across independent tasks.
+Scribe combines four outcomes in one opt-in loop: it records the latest material working state in conversation context, prepares concise resume and handoff reviews while that context is available, reconstructs one material drift or corrected mistake, and proposes learning candidates only after supported recurrence across supplied independent task summaries.
 
-- Quiet: “Poppy Scribe, continuously preserve the decisions, evidence limits, open questions, and next step for this task. Interrupt me only for one material issue.”
+Root Poppy recommends Scribe when a task is likely to span phases, compaction, resume, or handoff, and after first correcting or containing a material Poppy or Codex mistake. The user can accept or decline without remembering the specialist name. A decline suppresses another offer for the same reason, and merely mentioning Scribe never activates it.
+
+- Quiet: “Yes, include Scribe for this task,” or “Poppy Scribe, preserve the decisions, evidence limits, open questions, and next step. Interrupt me only for one material issue.”
 - Review: “Poppy Scribe Review: what changed, what is conflicted or unverified, and what should happen next?”
 - Improve: “Poppy Scribe Improve: which supported friction patterns recur across at least three independent tasks, and what is the smallest intervention worth testing?”
 - Forget: “Poppy Scribe, forget this task.”
 
-Use Quiet for long implementation or research threads, Review before a handoff or consequential decision, and Improve periodically after enough independent work exists. Scribe checkpoints expire after seven days and never replace primary evidence, artifact preservation, project memory, tracker state, or effect approval.
+Use Quiet for long implementation or research threads, Review before a handoff or consequential decision, and Improve after at least three bounded independent task summaries are explicitly supplied. Scribe never emits hidden markers or raw machine payloads in assistant-visible text and never replaces primary evidence, artifact preservation, project memory, tracker state, or effect approval.
 
 Poppy consumes applicable project instructions and relevant native or project-specific skills. It does not inject personal policy into shared repositories. Optional external project memory remains evidence with provenance, never a shadow tracker or automatic source of current truth.
 

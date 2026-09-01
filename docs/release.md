@@ -39,7 +39,7 @@ A fresh task after installation must establish:
 - pre-existing-task catalog behavior only when upgrade lifecycle behavior is an acceptance item;
 - no active Poppy MCP server, app, cockpit, telemetry, recurring automation, daemon, persistent runtime, or repository-local installation;
 - the exact hook definition is either explicitly trusted after review or reported as installed but inactive; installation alone never proves hook execution;
-- when Scribe hooks are trusted, private state is latest-only, size-capped, expiring, transcript-free, network-free, and removable through the forget contract;
+- Scribe has no declared stateful hook, remains conversation-bound, and emits no raw checkpoint payload in assistant-visible text;
 - installation under the user's plugin environment for Codex Desktop and CLI; and
 - the exact preserved rollback package can be restored.
 
