@@ -19,6 +19,22 @@ Before marking completed, the substantive owner must supply the acceptance ancho
 
 When a marked task receives new actionable work, remove its marker before routing the new outcome. Do not clear a marker for a status question, navigation request, archive audit, or another metadata-only interaction. If completed work is challenged with evidence that may invalidate it, reopen the task while the claim is assessed.
 
+## Single current-task fast path
+
+The Housekeeping entrypoint contains the complete executable fast-path contract so an eligible request does not need this reference or `authority-and-effects.md`. Eligibility requires all of the following:
+
+- exact current task only: the target is the calling Codex task resolved through native current-task identity, never a named other task or a title/list-order inference;
+- explicit request: the user directly requests active, completed, paused, or blocked state, which semantically approves only the exact reversible title rename;
+- supported disposition: the current context already supplies the substantive owner's candidate-bound evidence required by the lifecycle contract, and the user command alone does not manufacture that evidence;
+- well-formed title: the current title has a non-empty meaningful base and at most one exact recognized leading marker;
+- informational preview: state the current-task target, requested state, title-only scope, evidence, authoritative read-back, and prior-title rollback without seeking duplicate confirmation;
+- one orchestration turn: freshly resolve the exact current task/title/activity, validate the transition, apply at most one marker, and authoritatively read the same task back; and
+- isolated effect: no archive, pin, move, sidebar, worktree, tracker, automation, project, or other task state changes.
+
+An already-correct lifecycle title state, including an already-unmarked active title, is an idempotent read-back success when the disposition and activity remain current. Reject empty, malformed, or stacked markers without normalization or mutation.
+
+Fall back to the full safe path and load both references for a named other task, batch, archive, ambiguous lifecycle intent, missing or conflicting evidence, unavailable exact current-task resolution, standing policy, consequential or less-reversible effect, or target/title/activity drift detected before mutation. On post-mutation drift or contradictory read-back, leave the observed mutation in place, report the lifecycle effect as unverified or conflicted, retain the prior title as rollback, and stop without broadening the authorized effect.
+
 ## Safe title mutation
 
 Use a fresh task listing or task read to resolve the exact task ID and current title. Strip at most one recognized leading lifecycle prefix, preserve the remaining base title, and add the selected prefix exactly once. Reject an empty base title, malformed marker, or stacked marker.
@@ -32,7 +48,7 @@ Preview:
 - read-back method; and
 - rollback title.
 
-After mutation, read the task or fresh listing and compare the exact title. If the target changed, disappeared, or gained new actionable activity, stop and reassess rather than applying a stale transition.
+Recheck the target, title, and activity immediately before mutation and stop without changing it if any has drifted. After mutation, read the task or fresh listing and compare the exact title and activity; if they contradict the intended result, report the observed effect as unverified or conflicted and follow the applicable rollback authority. The current-task fast path never auto-rolls back.
 
 ## Archive policy
 
@@ -84,7 +100,7 @@ Do not automatically move, pin, unpin, merge, archive, delete, or rename finding
 The bundled Housekeeping hook helper is deterministic and stateless:
 
 - `SessionStart` on resume or compaction reminds the agent to reconcile a stale marker before new actionable work;
-- `PreToolUse` rejects malformed task-title lifecycle markers and task mutations without an exact task ID, then reminds the agent that semantic eligibility still belongs to Housekeeping;
+- `PreToolUse` rejects malformed task-title lifecycle markers, admits either the native implicit calling-task target or an explicit ID for title changes, requires an exact task ID for archives, and reminds the agent that semantic eligibility still belongs to Housekeeping;
 - `PostToolUse` reminds the agent to perform authoritative read-back after title or archive mutations.
 
 The Housekeeping helper reads only the event JSON from standard input. It performs no file, transcript, network, task, project, or plugin-data access and persists nothing. Tool coverage is not universal, matching hooks can run concurrently, and non-managed hooks run only after the user reviews and trusts their exact definition. Therefore hooks cannot establish lifecycle truth or replace effect approval.

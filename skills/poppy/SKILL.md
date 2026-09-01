@@ -61,7 +61,7 @@ Keep process observations transient unless the user explicitly enables Poppy Scr
 - Profiles and confidence may narrow authority; they never expand it.
 - Missing, stale, inaccessible, malformed, or insufficient evidence leaves the affected claim unverified. Credible unresolved disagreement leaves it conflicted.
 - An ordinary change request permits scoped reversible working-tree edits and targeted verification, not commits, pushes, pull requests, tracker changes, messages, deployments, production or financial actions, destructive operations, publication, installation, or memory writes unless the request includes that exact effect.
-- Before an external or difficult-to-recover effect, read [authority and effects](../../references/authority-and-effects.md). Require a named target and effect, concrete preview, exact approval, authoritative read-back, and rollback.
+- Before an external or difficult-to-recover effect, read [authority and effects](../../references/authority-and-effects.md). Require a named target and effect, concrete preview, exact approval, authoritative read-back, and rollback. The only reference-load exception is Poppy Housekeeping's self-contained single current-task fast path for an explicitly requested, reversible lifecycle-marker rename of the calling task; any missing eligibility condition or any other effect returns to this general rule.
 - Before consequential reporting, independent verification, or exact-candidate review, read [evidence and assurance](../../references/evidence-and-assurance.md).
 - Keep tracker state and durable memory distinct.
 
