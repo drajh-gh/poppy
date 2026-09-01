@@ -1,6 +1,6 @@
 {
   "name": "project-operations",
-  "version": "0.3.0+codex.20260901215303",
+  "version": "0.3.0+codex.20260901215749",
   "description": "Poppy is a personal Codex partner with focused skills and bounded lifecycle hooks for verified delivery, semantic continuity, and organized closure.",
   "author": {
     "name": "David Rajh"
@@ -21,7 +21,7 @@
     "defaultPrompt": [
       "Poppy, turn this rough idea into a recommendation, then implement the selected outcome.",
       "Poppy, diagnose this defect and verify the fix.",
-      "Poppy, tell me what this project needs next, give me the decision-ready version, and include Scribe when continuity or later improvement analysis would help."
+      "Poppy, tell me what needs doing next, make it decision-ready, and include Scribe when continuity or later analysis would help."
     ]
   }
 }

@@ -388,10 +388,16 @@ def manifest_check() -> dict:
     if (
         not isinstance(default_prompts, list)
         or not 1 <= len(default_prompts) <= 3
-        or any(not isinstance(prompt, str) or not prompt.strip() for prompt in default_prompts)
+        or any(
+            not isinstance(prompt, str)
+            or not prompt.strip()
+            or len(prompt) > 128
+            for prompt in default_prompts
+        )
     ):
         raise VerificationError(
-            "Manifest interface.defaultPrompt must contain one to three non-empty strings"
+            "Manifest interface.defaultPrompt must contain one to three non-empty strings "
+            "of at most 128 characters each"
         )
     component_fields = {"skills", "mcpServers", "apps", "ui", "commands", "hooks"}
     exposed = component_fields.intersection(manifest)
