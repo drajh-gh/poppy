@@ -13,6 +13,12 @@ ARCHIVE_TOOL = "mcp__codex_app__set_thread_archived"
 EXACT_MARKER = re.compile(r"^(?:✅ \[D\]|⏸️ \[P\]|🚧 \[B\]) (?P<base>\S.*)$")
 MARKER_LIKE = re.compile(r"^(?:✅|⏸️|🚧|\[(?:D|P|B)\])", re.IGNORECASE)
 STACKED_MARKER = re.compile(r"^(?:✅ \[D\]|⏸️ \[P\]|🚧 \[B\]) (?:✅ \[D\]|⏸️ \[P\]|🚧 \[B\]) ")
+CURRENT_TASK_LIFECYCLE_REQUEST = re.compile(
+    r"\s*(?:poppy[\s,:-]+)?mark\s+(?:this|the\s+current)\s+"
+    r"(?:thread|task)\s+(?:as\s+)?(?:done|complete|completed|active|paused|blocked)\s*[.!?]?\s*",
+    re.IGNORECASE,
+)
+SAFE_TASK_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 
 
 def emit(payload: dict) -> None:
@@ -36,6 +42,24 @@ def deny(reason: str) -> dict:
             "permissionDecisionReason": reason,
         }
     }
+
+
+def user_prompt_submit(event: dict) -> dict:
+    prompt = event.get("prompt")
+    if not isinstance(prompt, str) or CURRENT_TASK_LIFECYCLE_REQUEST.fullmatch(prompt) is None:
+        return {}
+
+    task_id = event.get("session_id")
+    if not isinstance(task_id, str) or SAFE_TASK_ID.fullmatch(task_id.strip()) is None:
+        return context(
+            "UserPromptSubmit",
+            "Poppy Housekeeping: exact current-task ID unavailable. Do not list tasks, probe the workspace, or mutate; fail closed now.",
+        )
+
+    return context(
+        "UserPromptSubmit",
+        f"Poppy Housekeeping exact current task ID: {task_id.strip()}. Use it for read/title/read; do not list tasks or infer identity.",
+    )
 
 
 def pre_tool_use(event: dict) -> dict:
@@ -112,6 +136,8 @@ def main() -> int:
                 "Poppy Housekeeping: if resumed or compacted work has a lifecycle marker, reconcile it against the newest actionable scope. Clear the marker before new substantive work; status-only or metadata-only activity does not reopen the task.",
             )
         )
+    elif name == "UserPromptSubmit":
+        emit(user_prompt_submit(event))
     elif name == "PreToolUse":
         emit(pre_tool_use(event))
     elif name == "PostToolUse":

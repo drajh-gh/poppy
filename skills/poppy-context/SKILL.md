@@ -34,6 +34,8 @@ When Poppy itself is the subject of a current-state discussion, assessment, capa
 
 A pre-upgrade task may still be running an older loaded package. Report that task-scoped fact and require fresh-task host evidence before claiming a newer package is active. Never use the current working directory or an arbitrary repository checkout as a substitute for active-package evidence.
 
+When a separately requested Codex task is wholly scoped to the already selected project, resolve its native placement from the exact Codex project inventory: retain the exact `projectId` and repository flag, never a name, title, directory-theme, or recency guess. This identity may select the task's project target; it does not authorize task creation or any later project effect. Cross-project or unresolved work does not inherit the current task's project.
+
 ## Fail closed where required
 
 An already selected repository plus applicable instructions may establish repository identity. A profile is required only when nominated or when the task depends on its source or memory configuration.

@@ -24,17 +24,17 @@ When a marked task receives new actionable work, remove its marker before routin
 The Housekeeping entrypoint contains the complete executable fast-path contract so an eligible request does not need this reference or `authority-and-effects.md`. Eligibility requires all of the following:
 
 - narrow lifecycle language: an unqualified request to mark the calling task `done` means the completed title marker only; it does not request archive and must not introduce archive language;
-- exact current task only: the target is the calling Codex task resolved through native current-task identity, never a named other task or a title/list-order inference;
+- exact current task only: a bounded `UserPromptSubmit` hook supplies the current Codex `session_id` as the exact task ID for the matching lifecycle request, never a named other task or a title/list-order inference;
 - explicit request: the user directly requests active, completed, paused, or blocked state, which semantically approves only the exact reversible title rename;
 - supported disposition: the current context already supplies the substantive owner's candidate-bound evidence required by the lifecycle contract, and the user command alone does not manufacture that evidence;
 - well-formed title: the current title has a non-empty meaningful base and at most one exact recognized leading marker;
 - informational preview: state the current-task target, requested state, title-only scope, evidence, authoritative read-back, and that the guarded call will resolve and retain the exact prior title as rollback, without seeking duplicate confirmation or first listing tasks solely to populate the preview;
-- one orchestration turn: in one composed outer tool call, freshly resolve the exact current task/title/activity, validate the transition, apply at most one marker, and authoritatively read the same task back; and
+- one orchestration turn: in exactly one `functions.exec` code-mode call, read the supplied exact task ID, validate its title/activity and transition, apply at most one marker to that same ID, and authoritatively read it back; and
 - isolated effect: no archive, pin, move, sidebar, worktree, tracker, automation, project, or other task state changes.
 
 An already-correct lifecycle title state, including an already-unmarked active title, is an idempotent read-back success when the disposition and activity remain current. Reject empty, malformed, or stacked markers without normalization or mutation.
 
-Do not make a preliminary native task call solely to learn the title for the informational preview. The single guarded orchestration resolves the prior title before mutation, fails closed on any invalid or drifted state, returns that title as rollback, and performs the authoritative read-back.
+Do not call `list_threads`, probe the workspace, or make a preliminary native task call. The single guarded code-mode orchestration reads the supplied exact task ID, resolves the prior title before mutation, fails closed on any invalid or drifted state, returns that title as rollback, and performs the authoritative read-back. If the prompt hook could not supply a non-empty task ID, stop immediately without reference loading or discovery.
 
 Fall back to the full safe path and load both references for a named other task, batch, archive, ambiguous lifecycle intent, missing or conflicting evidence, unavailable exact current-task resolution, standing policy, consequential or less-reversible effect, or target/title/activity drift detected before mutation. On post-mutation drift or contradictory read-back, leave the observed mutation in place, report the lifecycle effect as unverified or conflicted, retain the prior title as rollback, and stop without broadening the authorized effect.
 
@@ -103,6 +103,7 @@ Do not automatically move, pin, unpin, merge, archive, delete, or rename finding
 The bundled Housekeeping hook helper is deterministic and stateless:
 
 - `SessionStart` on resume or compaction reminds the agent to reconcile a stale marker before new actionable work;
+- `UserPromptSubmit` adds the host-supplied current Codex `session_id` only for a narrowly matched explicit current-task lifecycle request, returns no context for ordinary prompts, and fails closed without listing or probing when the ID is absent or malformed;
 - `PreToolUse` rejects malformed task-title lifecycle markers, admits either the native implicit calling-task target or an explicit ID for title changes, requires an exact task ID for archives, and reminds the agent that semantic eligibility still belongs to Housekeeping;
 - `PostToolUse` reminds the agent to perform authoritative read-back after title or archive mutations.
 
@@ -112,6 +113,6 @@ Scribe is conversation-bound in this release and has no separate hook helper. An
 
 When Housekeeping requests or audits a delegate handoff, require an explicit `Status: complete|paused|blocked`, `Evidence:` or `Evidence limits:`, and `Next action:`. Do not bundle a `SubagentStop` handler: its matcher can filter agent type but not active Poppy ownership, so it would affect unrelated tasks.
 
-Keep Housekeeping on its targeted events and native task reads. Do not add universal handlers as a substitute for semantic eligibility or current-task identity.
+Codex invokes `UserPromptSubmit` handlers for every prompt, so the helper itself performs the semantic match and emits `{}` outside the narrow lifecycle request. Keep that path bounded and prompt-content-free in its output. Do not use universal context as a substitute for semantic eligibility.
 
 A separately approved once-daily scheduler may invoke Housekeeping to evaluate the archive policy. Its visible prompt should name the exact policy: inspect current Codex tasks, consider only unpinned exact-`✅ [D]` tasks older than seven full days, reread each candidate, archive only under the standing authorization, verify every archived task, and report skips or failures. Creating, changing, pausing, or deleting that scheduler is a separate automation effect; the plugin does not create one during installation.

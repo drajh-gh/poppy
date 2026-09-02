@@ -137,6 +137,7 @@ REQUIRED_SCENARIOS = {
     "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH",
     "S41_ROOT_RECOMMENDS_SCRIBE_FOR_CONTINUITY",
     "S42_ROOT_RECOMMENDS_SCRIBE_AFTER_CORRECTION",
+    "S43_PROJECT_SCOPED_TASK_PLACEMENT",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -204,6 +205,7 @@ REQUIRED_NEGATIVE_CASES = {
     "N62_SCRIBE_MENTION_IS_NOT_ACTIVATION",
     "N63_SCRIBE_DECLINE_SUPPRESSES_REPEAT",
     "N64_SCRIBE_VISIBLE_PAYLOAD_FORBIDDEN",
+    "N65_CROSS_PROJECT_TASK_STAYS_PROJECTLESS",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -441,7 +443,7 @@ def hook_contract_check() -> dict:
     if set(config) != {"description", "hooks"} or not config["description"].strip():
         raise VerificationError("Hook config metadata is incomplete")
     hooks = config["hooks"]
-    expected_events = {"SessionStart", "PreToolUse", "PostToolUse"}
+    expected_events = {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse"}
     if set(hooks) != expected_events:
         raise VerificationError(
             f"Hook event inventory mismatch: expected {sorted(expected_events)}, got {sorted(hooks)}"
@@ -450,6 +452,10 @@ def hook_contract_check() -> dict:
         "SessionStart": {
             "matcher": "^(resume|compact)$",
             "handlers": [("housekeeping_hook.py", 240)],
+        },
+        "UserPromptSubmit": {
+            "matcher": None,
+            "handlers": [("housekeeping_hook.py", 160)],
         },
         "PreToolUse": {
             "matcher": "^mcp__codex_app__(set_thread_title|set_thread_archived)$",
@@ -511,6 +517,44 @@ def hook_contract_check() -> dict:
     resume_context = resume.get("hookSpecificOutput", {}).get("additionalContext", "")
     if "Poppy Housekeeping" not in resume_context or "Clear the marker" not in resume_context:
         raise VerificationError("SessionStart hook does not preserve reopen semantics")
+
+    current_prompt = execute_hook(
+        "housekeeping_hook.py",
+        {
+            "hook_event_name": "UserPromptSubmit",
+            "session_id": "synthetic-current-task-40",
+            "prompt": "Poppy mark this thread as done.",
+        },
+    )
+    current_prompt_context = current_prompt.get("hookSpecificOutput", {}).get("additionalContext", "")
+    if (
+        "synthetic-current-task-40" not in current_prompt_context
+        or "do not list tasks" not in current_prompt_context
+        or len(current_prompt_context) > 160
+    ):
+        raise VerificationError("UserPromptSubmit hook did not supply bounded exact current-task context")
+
+    ordinary_prompt = execute_hook(
+        "housekeeping_hook.py",
+        {
+            "hook_event_name": "UserPromptSubmit",
+            "session_id": "synthetic-current-task-41",
+            "prompt": "Explain the supplied Atlas fixture.",
+        },
+    )
+    if ordinary_prompt != {}:
+        raise VerificationError("UserPromptSubmit hook added context to an ordinary non-lifecycle prompt")
+
+    missing_identity = execute_hook(
+        "housekeeping_hook.py",
+        {
+            "hook_event_name": "UserPromptSubmit",
+            "prompt": "Mark the current task completed.",
+        },
+    )
+    missing_identity_context = missing_identity.get("hookSpecificOutput", {}).get("additionalContext", "")
+    if "ID unavailable" not in missing_identity_context or "Do not list tasks" not in missing_identity_context:
+        raise VerificationError("UserPromptSubmit hook did not fail closed when current-task identity was absent")
 
     invalid_title = execute_hook(
         "housekeeping_hook.py",
@@ -646,7 +690,7 @@ def hook_contract_check() -> dict:
         "name": "stateless Housekeeping hook and conversation-bound Scribe contract",
         "status": "pass",
         "events": sorted(expected_events),
-        "representative_payloads": 8,
+        "representative_payloads": 11,
     }
 
 
@@ -733,14 +777,15 @@ def housekeeping_fast_path_contract_check() -> dict:
         "self-contained entrypoint": (housekeeping_skill, "## Use the single current-task fast path"),
         "all lifecycle states": (housekeeping_skill, "active, completed, paused, or blocked state"),
         "reference-load bypass": (housekeeping_skill, "Do not load [task housekeeping]"),
-        "one orchestration turn": (housekeeping_skill, "in one orchestration turn"),
-        "one composed outer tool call": (housekeeping_skill, "one composed outer tool call"),
-        "no preliminary native task call": (housekeeping_skill, "Do not make a preliminary native task call solely to populate the preview"),
+        "prompt hook identity": (housekeeping_skill, "A bounded `UserPromptSubmit` hook supplies the exact current Codex task ID"),
+        "one code-mode call": (housekeeping_skill, "Use exactly one `functions.exec` code-mode call"),
+        "no task listing": (housekeeping_skill, "Do not call `list_threads`, probe the workspace"),
+        "missing identity stop": (housekeeping_skill, "state the unavailable current-task identity once and stop immediately"),
         "idempotent current state": (housekeeping_skill, "exact requested lifecycle title state is already present"),
         "root exception": (root_skill, "self-contained single current-task fast path"),
         "authority exception": (authority, "### Explicit current-task lifecycle marker"),
         "formal eligibility": (housekeeping_reference, "## Single current-task fast path"),
-        "structural efficiency claim": (development, "use one composed effect call without a preliminary native task listing"),
+        "structural efficiency claim": (development, "use one `functions.exec` read/rename/read transaction without `list_threads` or workspace discovery"),
     }
     missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
     if missing:
@@ -759,8 +804,9 @@ def housekeeping_fast_path_contract_check() -> dict:
     required_assertions = {
         "Uses the catalog-visible title-only meaning of done and does not introduce archive language",
         "Loads Root Poppy and Poppy Housekeeping together in one bounded skill-read call",
-        "Gives one concise title-only informational preview without a preliminary native task listing or duplicate approval",
-        "Composes fresh current-task resolution, transition validation, exactly one rename, and authoritative same-task read-back in one outer tool call",
+        "Receives synthetic-current-task-40 as the exact current task ID from bounded prompt context",
+        "Gives one concise title-only informational preview without task listing, workspace probing, or duplicate approval",
+        "Uses exactly one functions.exec call to read, validate, apply at most one rename, and authoritatively read back synthetic-current-task-40",
     }
     missing_assertions = required_assertions.difference(fast_path["observable_assertions"])
     if missing_assertions:
@@ -770,6 +816,52 @@ def housekeeping_fast_path_contract_check() -> dict:
         )
     return {
         "name": "single current-task Housekeeping fast-path contract",
+        "status": "pass",
+    }
+
+
+def project_task_placement_contract_check() -> dict:
+    root_skill = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8")
+    context_skill = (ROOT / "skills" / "poppy-context" / "SKILL.md").read_text(encoding="utf-8")
+    delegation = (ROOT / "references" / "delegation-and-continuity.md").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    scenarios = json.loads((ROOT / "tests" / "scenarios.json").read_text(encoding="utf-8"))
+    required_markers = {
+        "root exact identity": (root_skill, "preserve that exact Codex project identity"),
+        "root local placement": (root_skill, "Use the saved project directly for read-only, connector, or non-repository work"),
+        "root worktree placement": (root_skill, "Use an isolated project worktree for repository-writing work"),
+        "root projectless boundary": (root_skill, "Reserve `projectless` for work that is genuinely projectless, cross-project, or still unresolved"),
+        "root read-back": (root_skill, "read back the returned task's `projectId`"),
+        "context inventory": (context_skill, "retain the exact `projectId` and repository flag"),
+        "formal placement contract": (delegation, "## Preserve semantic project placement"),
+        "provisional identity limit": (delegation, "only a provisional client task ID"),
+        "product surface": (readme, "work wholly scoped to an already resolved project retains that exact project identity"),
+    }
+    missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
+    if missing:
+        raise VerificationError(
+            "Project-scoped task-placement contract is incomplete: " + ", ".join(sorted(missing))
+        )
+
+    by_id = {item["id"]: item for item in [*scenarios["scenarios"], *scenarios["negative_cases"]]}
+    positive = by_id.get("S43_PROJECT_SCOPED_TASK_PLACEMENT")
+    negative = by_id.get("N65_CROSS_PROJECT_TASK_STAYS_PROJECTLESS")
+    positive_assertions = {
+        "Uses exact project-synthetic-atlas from native project inventory for both wholly Atlas-scoped tasks",
+        "Creates the read-only connector task in the saved project local environment",
+        "Creates the repository-writing task in an isolated worktree because the saved project is Git-backed",
+        "Reads back each exact returned task projectId and reports any mismatch or provisional-ID limitation without claiming success",
+    }
+    negative_assertions = {
+        "Does not inherit either parent project into the cross-project task",
+        "Uses a projectless target and does not fabricate or guess a project ID",
+    }
+    if positive is None or not positive_assertions.issubset(set(positive["observable_assertions"])):
+        raise VerificationError("Project-scoped task-placement regression is incomplete")
+    if negative is None or not negative_assertions.issubset(set(negative["observable_assertions"])):
+        raise VerificationError("Cross-project task-placement negative control is incomplete")
+    return {
+        "name": "semantic project placement for created Codex tasks",
         "status": "pass",
     }
 
@@ -973,6 +1065,7 @@ def scenario_check() -> dict:
         "S39_SCRIBE_RECURRING_IMPROVEMENT": ["poppy-scribe"],
         "S41_ROOT_RECOMMENDS_SCRIBE_FOR_CONTINUITY": ["root-direct"],
         "S42_ROOT_RECOMMENDS_SCRIBE_AFTER_CORRECTION": ["root-direct"],
+        "S43_PROJECT_SCOPED_TASK_PLACEMENT": ["root-direct"],
     }
     for case_id, expected in required_boundaries.items():
         if sequences.get(case_id) != expected:
@@ -1266,6 +1359,7 @@ def main(argv: list[str] | None = None) -> int:
         hook_contract_check(),
         active_poppy_identity_contract_check(),
         housekeeping_fast_path_contract_check(),
+        project_task_placement_contract_check(),
         linked_reference_check(paths),
         provenance_check(paths),
         boundary_check(paths),
