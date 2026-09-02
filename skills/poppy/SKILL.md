@@ -31,7 +31,7 @@ For an unqualified request to mark the calling Codex task done, treat `done` as 
 - Product-owner, visual, or client judgment of demonstrated exact-candidate behavior: Poppy Acceptance.
 - Independent exact-candidate judgment or material evidence-gap review: Poppy Assure.
 - A completed supported outcome that may have changed future-useful understanding: Poppy Learn.
-- A user-enabled semantic checkpoint, continuity review, handoff reconstruction, drift review, incident reconstruction, or recurring cross-task improvement signal: Poppy Scribe.
+- A user-enabled semantic checkpoint, continuity review, handoff reconstruction, drift review, explicitly approved operational incident, or cross-task improvement signal: Poppy Scribe.
 - Codex task lifecycle metadata, archive eligibility, delegation hygiene, or workspace organization: Poppy Housekeeping.
 
 Use these nearest boundaries when routing:
@@ -59,7 +59,7 @@ At a material failure, proposed retry, consequential action, or completion claim
 
 Do not repeat a materially unchanged action as progress. Select one testable premise and the smallest probe that can distinguish it, or report an evidence-established blocker. Before long-running or model-based evaluation, set the decision question, cases, maximum calls and elapsed time, and stop condition; never automatically expand past it.
 
-Keep process observations transient unless the user enables Poppy Scribe for the current task. Scribe may retain compact friction fingerprints in current conversation context, but only a later completed supported outcome may reach Poppy Learn, and an actual memory write also requires Poppy Context's exact destination, authority, provenance, and read-back gate.
+Keep process observations transient unless the user enables Poppy Scribe for the current task. Scribe may retain compact friction fingerprints in current conversation context. When the user explicitly requests a visible incident artifact, Scribe may use Poppy Context to validate one exact configured project-vault target, then preview, obtain approval, write the bounded semantic record, and read it back. The artifact remains operational evidence rather than canonical memory. Only a later completed supported outcome may reach Poppy Learn, and any durable learning write still requires Poppy Context's exact destination, authority, provenance, and read-back gate.
 
 ## Recommend Scribe when it can change later work
 
@@ -69,7 +69,7 @@ After a material Poppy or Codex mistake, user correction, scope or authority dri
 
 Offer at most once for the same material reason. A decline suppresses another offer unless a materially new continuity risk or failure appears. Honor an explicit standing preference supplied by the user, but never invent one. A mention, question, or discussion of the word “Scribe” is not consent; activate Scribe only after an explicit request, an affirmative response to the current offer, or an already-established standing preference.
 
-Scribe is conversation-bound unless the host provides a verified non-rendered transport. Never emit raw JSON, HTML comments, hidden markers, or another machine payload in assistant-visible text, and never claim that formatting makes a checkpoint private.
+Scribe checkpoints are conversation-bound unless the host provides a verified non-rendered transport. A user-approved visible incident file is a separate effect, not checkpoint persistence. Never emit raw JSON, HTML comments, hidden markers, or another machine payload in assistant-visible text, and never claim that formatting makes a checkpoint private.
 
 ## Preserve control
 

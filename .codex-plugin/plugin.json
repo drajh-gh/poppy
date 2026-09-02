@@ -1,7 +1,7 @@
 {
   "name": "project-operations",
-  "version": "0.3.0+codex.20260902132554",
-  "description": "Poppy is a personal Codex partner with focused skills and bounded lifecycle hooks for verified delivery, semantic continuity, and organized closure.",
+  "version": "0.3.0+codex.20260902152413",
+  "description": "Poppy is a personal Codex partner with focused skills for verified delivery, semantic continuity, authorized operational learning, and organized closure.",
   "author": {
     "name": "David Rajh"
   },
@@ -10,7 +10,7 @@
   "interface": {
     "displayName": "Poppy",
     "shortDescription": "Quiet project and delivery partner.",
-    "longDescription": "Poppy preserves the user's outcome, routes one focused owner for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, learning, semantic continuity, or Codex housekeeping, acts within explicit authority, and verifies consequential claims. Root Poppy recommends Scribe when continuity risk or a material correction makes later analysis useful. Optional bounded hooks provide lifecycle guards only.",
+    "longDescription": "Poppy preserves the user's outcome, routes one focused owner for context, intake, decisions, coordination, research, diagnosis, delivery, acceptance, assurance, learning, semantic continuity, authorized operational evidence, or Codex housekeeping, acts within explicit authority, and verifies consequential claims. Root Poppy recommends Scribe when continuity risk or a material correction makes later analysis useful. Optional bounded hooks provide lifecycle guards only.",
     "developerName": "David Rajh",
     "category": "Productivity",
     "capabilities": [

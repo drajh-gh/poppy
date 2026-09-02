@@ -23,7 +23,7 @@ Its adaptive loop is understand, orient when material, decide, act, verify, repo
 - Client and visual acceptance are conditional on the actual audience and gate. They never automatically authorize Git, publication, installation, deployment, or another effect.
 - Scribe owns user-enabled semantic task continuity, corrected-incident reconstruction, and recurring-friction proposals. Root recommends it when continuity risk or a material correction makes later analysis useful. Its bounded conversation checkpoint is derived working context, never truth, durable memory, lifecycle status, artifact preservation, or effect authority.
 - Housekeeping owns Codex task lifecycle metadata and workspace organization. It consumes evidenced dispositions from substantive owners and never manufactures project completion from inactivity or title state.
-- Optional hooks are deterministic, bounded, transcript-free, and network-free. Housekeeping remains stateless. Scribe remains conversation-bound until a verified non-rendered transport exists and never uses assistant-visible markup as private storage. Hooks never replace semantic judgment, approval, authoritative read-back, source systems, or their owning skills.
+- Optional hooks are deterministic, bounded, transcript-free, and network-free. Housekeeping remains stateless. Scribe checkpoints remain conversation-bound until a verified non-rendered transport exists and never use assistant-visible markup as private storage. A visible user-approved incident file is a separate profile-confined effect, never a hook. Hooks never replace semantic judgment, approval, authoritative read-back, source systems, or their owning skills.
 
 ## Authority
 

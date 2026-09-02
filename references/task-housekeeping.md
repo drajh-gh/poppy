@@ -109,7 +109,7 @@ The bundled Housekeeping hook helper is deterministic and stateless:
 
 The Housekeeping helper reads only the event JSON from standard input. It performs no file, transcript, network, task, project, or plugin-data access and persists nothing. Tool coverage is not universal, matching hooks can run concurrently, and non-managed hooks run only after the user reviews and trusts their exact definition. Therefore hooks cannot establish lifecycle truth or replace effect approval.
 
-Scribe is conversation-bound in this release and has no separate hook helper. Any Scribe summary present in current task context remains derived working context, never lifecycle evidence. Housekeeping must not infer a marker, completion, archive eligibility, or authority from it.
+Scribe checkpoints are conversation-bound in this release and Scribe has no separate hook helper. Any Scribe summary or visible incident artifact remains derived operational context, never lifecycle evidence. Housekeeping must not infer a marker, completion, archive eligibility, or authority from it.
 
 When Housekeeping requests or audits a delegate handoff, require an explicit `Status: complete|paused|blocked`, `Evidence:` or `Evidence limits:`, and `Next action:`. Do not bundle a `SubagentStop` handler: its matcher can filter agent type but not active Poppy ownership, so it would affect unrelated tasks.
 

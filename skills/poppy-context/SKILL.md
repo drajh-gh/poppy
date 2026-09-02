@@ -11,10 +11,11 @@ Read [project context and memory](../../references/project-context.md).
 
 1. Start from the current repository and applicable instruction files.
 2. Stop there when they establish the scope and authority needed for the task.
-3. Consult only an exact project-index match, nominated profile, or root project-ops.json when external project evidence, source authority, or memory configuration can change the result.
+3. Consult only an exact project-index match, nominated profile, or root project-ops.json when external project evidence, source authority, memory configuration, or an explicitly requested Scribe artifact can change the result.
 4. Validate only the identity, repository, sensitivity, source-authority, vault, and memory fields the task needs. Unknown legacy fields remain inert.
-5. Read configured current.md and index.md once only when current project state, decisions, cross-source authority, domain context, or memory continuity can materially change the answer or requested effect.
-6. Follow only task-relevant routes. Treat project sources as authority for current facts and memory as compiled context with provenance.
+5. Read configured current and knowledge-map pages once only when current project state, decisions, cross-source authority, domain context, or memory continuity can materially change the answer or requested effect. Prefer `vault.knowledge_map`; accept `vault.index` only as a backward-compatible alias.
+6. For an explicitly requested Scribe artifact, validate only the exact configured Scribe home, incident, signal, review, improvement, and template paths required by the effect. Every resolved path must stay inside the nominated vault root.
+7. Follow only task-relevant routes. Treat project sources as authority for current facts and memory as compiled context with provenance.
 
 A Poppy Scribe summary present in current task context is derived working context only. It may point toward relevant evidence, but it cannot select a project, establish source authority, resolve current truth, or nominate a memory destination.
 
