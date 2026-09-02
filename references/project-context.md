@@ -36,7 +36,7 @@ Treat a profile as configuration, never authority for a new effect. Read only fi
 
 - project identity and sensitivity;
 - repository identity and default branch;
-- vault root, project root, current page, and index page;
+- vault root, optional home, project root, current page, and knowledge-map page, with `index` accepted only as a legacy alias;
 - source-authority mappings; and
 - memory-write policy.
 
@@ -46,13 +46,15 @@ A selected repository plus applicable instructions can establish repository iden
 
 ## Orient only when current state matters
 
-Read configured current.md and index.md once only when cross-source current state, decisions, domain context, source authority, or memory continuity can materially change the answer or requested effect. Then follow only task-relevant links. Do not repeatedly reload unchanged orientation pages.
+Read configured current and knowledge-map pages once only when cross-source current state, decisions, domain context, source authority, or memory continuity can materially change the answer or requested effect. Prefer `vault.knowledge_map`; use `vault.index` only for a profile that has not migrated. Then follow only task-relevant links. Do not repeatedly reload unchanged orientation pages.
 
 Use source systems for current facts. Treat memory as compiled understanding with provenance, not as automatically current. Read only explicitly nominated glossaries, context maps, decisions, or architecture records. Code is authoritative for current implementation, not automatically for intended behavior or domain meaning.
 
 A Poppy Scribe summary present in current task context is compiled working context, not a source-authority or memory surface. Use it to locate questions and primary evidence, then reconcile load-bearing claims against those sources. It cannot select a profile, resolve a conflict, establish current project state, or authorize a memory write.
 
-For a nominated Obsidian vault, read its applicable instructions before its configured current and index pages. Respect freshness, sensitivity, aliases, translations, links, and source ownership. Raw receipts are immutable evidence. Compiled pages may be refreshed only from stronger sources with the required authority. Do not scan the vault broadly or touch human-owned inbox or daily notes unless explicitly asked.
+For a nominated Obsidian vault, read its applicable instructions before its configured current and knowledge-map pages. Respect freshness, sensitivity, aliases, translations, links, and source ownership. Raw receipts are immutable evidence. Compiled pages may be refreshed only from stronger sources with the required authority. Do not scan the vault broadly or touch human-owned inbox or daily notes unless explicitly asked.
+
+When the user explicitly requests a Scribe artifact, read only the profile's exact `scribe` fields required for that record. Resolve the target from the nominated vault root plus the configured incident, signal, review, improvement, or template path; reject absolute child paths, traversal, links or junctions escaping the vault, malformed configuration, ambiguous project selection, and a target under a human-owned path. Profile configuration narrows the destination but never supplies write approval.
 
 ## Write memory sparingly
 

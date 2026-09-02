@@ -139,6 +139,7 @@ REQUIRED_SCENARIOS = {
     "S42_ROOT_RECOMMENDS_SCRIBE_AFTER_CORRECTION",
     "S43_PROJECT_SCOPED_TASK_PLACEMENT",
     "S44_SOURCE_FIRST_POPPY_HOTFIX_RELEASE",
+    "S45_SCRIBE_VISIBLE_INCIDENT_ARTIFACT",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -663,13 +664,19 @@ def hook_contract_check() -> dict:
             and "A decline suppresses another offer unless a materially new reason appears" in scribe_reference
         ),
         "conversation-bound transport": (
-            "Scribe is conversation-bound" in root_skill
+            "Scribe checkpoints are conversation-bound" in root_skill
             and "Current Codex hooks do not expose a verified non-rendered model-to-hook payload channel" in scribe_reference
             and "Formatting is not a privacy boundary" in scribe_reference
         ),
         "bounded improvement input": (
-            "at least three explicitly supplied independent task summaries" in scribe_skill
+            "at least three independent task identities" in scribe_skill
             and "at least three independent tasks" in scribe_reference
+        ),
+        "authorized visible incident artifact": (
+            "An incident file is an explicit local artifact effect" in scribe_skill
+            and "Obtain approval after that preview" in scribe_skill
+            and "Write one file, read it back" in scribe_reference
+            and "compatibility envelope is an ingestion receipt, not reflection evidence" in scribe_reference
         ),
     }
     missing_contracts = [name for name, present in required_contracts.items() if not present]
@@ -689,7 +696,7 @@ def hook_contract_check() -> dict:
             )
 
     return {
-        "name": "stateless Housekeeping hook and conversation-bound Scribe contract",
+        "name": "stateless Housekeeping hook and bounded Scribe checkpoint-and-artifact contract",
         "status": "pass",
         "events": sorted(expected_events),
         "representative_payloads": 11,
@@ -1083,6 +1090,7 @@ def scenario_check() -> dict:
             "poppy-coordinate",
             "poppy-context",
         ],
+        "S45_SCRIBE_VISIBLE_INCIDENT_ARTIFACT": ["poppy-scribe"],
     }
     for case_id, expected in required_boundaries.items():
         if sequences.get(case_id) != expected:
