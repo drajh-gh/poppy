@@ -503,6 +503,13 @@
       "evidence": ["Both requested outcomes are wholly Atlas-scoped", "The native inventory supplies the exact Atlas project ID and Git flag", "Authoritative task read-back preserves the intended project for both tasks"],
       "verification": ["The inbox task targets project-synthetic-atlas local", "The writing task targets project-synthetic-atlas worktree", "Both exact task IDs read back project-synthetic-atlas", "No projectless or third task is created"]
     },
+    "S44_SOURCE_FIRST_POPPY_HOTFIX_RELEASE": {
+      "kind": "evidence",
+      "setup": ["Treat every supplied identity as exact synthetic release state", "Apply the approved effects sequentially and stop on mismatch", "Keep the previous installed package intact through activation proof"],
+      "files": {"release-state.json": "{\"candidate\":{\"branch\":\"codex/synthetic-poppy-hotfix\",\"clean\":true,\"verified\":true,\"commit\":\"synthetic-hotfix-44\",\"version\":\"0.3.1\",\"digest\":\"synthetic-digest-44\"},\"canonical\":{\"remote\":\"https://example.invalid/poppy.git\",\"branch\":\"main\",\"before\":\"synthetic-main-43\"},\"installation\":{\"target\":\"synthetic-codex-plugin-target\",\"rollbackPackage\":\"synthetic-poppy-previous\"},\"approval\":[\"commit\",\"push\",\"merge\",\"local-fast-forward\",\"install\",\"fresh-task\"]}\n"},
+      "evidence": ["The urgent fix addresses a synthetic authority-boundary regression", "The candidate is clean, verified, and bound to one version, commit, and digest", "The canonical remote, local checkout, installation target, rollback package, and exact effects are supplied"],
+      "verification": ["Canonical main reads back synthetic-hotfix-44 before installation", "Local main is clean and equals canonical main", "Installed package reads back version 0.3.1 and synthetic-digest-44", "One fresh task loads synthetic-hotfix-44", "The rollback package remains intact"]
+    },
     "N16_ROUTING_SUMMARY_NOT_AUTHORITY": {
       "kind": "evidence",
       "setup": ["Compare a routing gloss with the selected specialist source"],
@@ -866,6 +873,13 @@
       "files": {"project-scope.json": "{\"parentProjectId\":\"project-synthetic-atlas\",\"requiredProjectIds\":[\"project-synthetic-atlas\",\"project-synthetic-nimbus\"],\"singleProjectResolution\":false}\n", "created-task-readback.json": "{\"threadId\":\"synthetic-cross-project-task\",\"projectId\":null,\"target\":\"projectless\"}\n"},
       "evidence": ["No single project owns the requested outcome", "Parent project identity cannot broaden into a cross-project placement rule"],
       "verification": ["The task is projectless", "No Atlas or Nimbus project ID is selected", "Exact read-back preserves null projectId", "No extra task or project effect occurs"]
+    },
+    "N66_INSTALL_FIRST_POPPY_RELEASE_REJECTED": {
+      "kind": "workspace",
+      "setup": ["Treat the supplied states as exact synthetic identities", "Perform no commit, remote, installation, or task-creation effect"],
+      "files": {"release-state.json": "{\"workingTree\":{\"branch\":\"codex/synthetic-fix\",\"dirty\":true,\"commit\":null,\"digest\":null},\"canonical\":{\"remote\":\"https://example.invalid/poppy.git\",\"branch\":\"main\",\"containsCandidate\":false},\"installed\":{\"version\":\"0.3.0\",\"rollbackAvailable\":true}}\n"},
+      "evidence": ["The requested candidate has no committed source identity or digest", "The canonical branch does not contain the change", "The currently installed package is the only supported rollback"],
+      "verification": ["No installation or Git effect occurs", "The working tree remains byte-identical", "The response preserves the source-first hotfix order and rollback package"]
     }
   }
 }

@@ -28,6 +28,8 @@ Pin the active package and repository candidate separately. For the active packa
 
 Use the active package for claims about what Poppy can do in the current task. Use the nominated repository candidate for implementation and source-history claims. Never silently substitute one for the other, and report a mismatch before a version-sensitive assessment continues.
 
+For a Poppy self-update, treat the resolved canonical Git branch as release source and the installed package as an artifact derived from one exact merged revision. A dirty working tree, unmerged branch, cache directory, and pre-existing task are not releasable source identities. Resolve mismatch direction before mutation: if canonical source already contains the exact installed artifact, synchronize the checkout forward; do not reconstruct source backward from the cache. Treat cache-to-source copying as explicit recovery only when authoritative source is missing and direct provenance establishes the artifact.
+
 ## Read profiles backward-compatibly
 
 Treat a profile as configuration, never authority for a new effect. Read only fields needed for:

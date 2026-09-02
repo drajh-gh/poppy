@@ -13,7 +13,9 @@ Use the [agent skill authoring and review reference](agent-skill-authoring-refer
 5. Validate JSON and fixture parity with python scripts/materialize_scenario.py --verify-catalog.
 6. Run git diff --check and python scripts/verify_product.py sequentially.
 7. For a separately authorized committed candidate, run python scripts/verify_product.py --require-clean.
-8. Keep behavioral evaluation and assurance evidence private outside Git.
+8. Under separate effect authority, merge the exact verified commit into the canonical GitHub branch, read it back, and fast-forward the canonical local checkout.
+9. Install only from that exact merged revision, retain the previous package for rollback, and prove the active package in a fresh task. Never install first and plan to synchronize Git later.
+10. Keep behavioral evaluation and assurance evidence private outside Git.
 
 The verifier enforces exact inventory, skill frontmatter, entrypoint reachability, hook shape and representative deterministic behavior, product boundaries, scenario schema, fixture materialization, syntax, source ancestry, and optional cleanliness. It deliberately does not match long lists of incidental phrases or pretend that static prose proves live model behavior.
 
