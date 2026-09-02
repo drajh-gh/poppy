@@ -726,16 +726,21 @@ def housekeeping_fast_path_contract_check() -> dict:
     authority = (ROOT / "references" / "authority-and-effects.md").read_text(encoding="utf-8")
     housekeeping_reference = (ROOT / "references" / "task-housekeeping.md").read_text(encoding="utf-8")
     development = (ROOT / "docs" / "development.md").read_text(encoding="utf-8")
+    scenarios = json.loads((ROOT / "tests" / "scenarios.json").read_text(encoding="utf-8"))
     required_markers = {
+        "catalog-visible title-only guard": (housekeeping_skill, "means only the reversible completed title marker—never archive"),
+        "root and Housekeeping co-load": (root_skill, "load Root Poppy and Poppy Housekeeping together in one bounded read"),
         "self-contained entrypoint": (housekeeping_skill, "## Use the single current-task fast path"),
         "all lifecycle states": (housekeeping_skill, "active, completed, paused, or blocked state"),
         "reference-load bypass": (housekeeping_skill, "Do not load [task housekeeping]"),
         "one orchestration turn": (housekeeping_skill, "in one orchestration turn"),
+        "one composed outer tool call": (housekeeping_skill, "one composed outer tool call"),
+        "no preliminary native task call": (housekeeping_skill, "Do not make a preliminary native task call solely to populate the preview"),
         "idempotent current state": (housekeeping_skill, "exact requested lifecycle title state is already present"),
         "root exception": (root_skill, "self-contained single current-task fast path"),
         "authority exception": (authority, "### Explicit current-task lifecycle marker"),
         "formal eligibility": (housekeeping_reference, "## Single current-task fast path"),
-        "structural efficiency claim": (development, "fewer reference loads and model/tool round trips"),
+        "structural efficiency claim": (development, "use one composed effect call without a preliminary native task listing"),
     }
     missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
     if missing:
@@ -745,6 +750,24 @@ def housekeeping_fast_path_contract_check() -> dict:
         )
     if re.search(r"\b1\s*(?:-|–|to)\s*2\s+seconds?\b", development, re.IGNORECASE):
         raise VerificationError("Development guidance must not claim a universal 1–2 second SLA")
+    fast_path = next(
+        (scenario for scenario in scenarios["scenarios"] if scenario["id"] == "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH"),
+        None,
+    )
+    if fast_path is None or fast_path["prompt"] != "Poppy mark this thread as done.":
+        raise VerificationError("Housekeeping fast-path regression must use the observed current-task prompt")
+    required_assertions = {
+        "Uses the catalog-visible title-only meaning of done and does not introduce archive language",
+        "Loads Root Poppy and Poppy Housekeeping together in one bounded skill-read call",
+        "Gives one concise title-only informational preview without a preliminary native task listing or duplicate approval",
+        "Composes fresh current-task resolution, transition validation, exactly one rename, and authoritative same-task read-back in one outer tool call",
+    }
+    missing_assertions = required_assertions.difference(fast_path["observable_assertions"])
+    if missing_assertions:
+        raise VerificationError(
+            "Housekeeping fast-path regression is missing assertions: "
+            + ", ".join(sorted(missing_assertions))
+        )
     return {
         "name": "single current-task Housekeeping fast-path contract",
         "status": "pass",

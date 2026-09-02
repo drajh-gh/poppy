@@ -1,6 +1,6 @@
 ---
 name: poppy
-description: Evidence-aware partner for project context, intake, decisions, coordination, diagnosis, delivery, acceptance, assurance, research, learning, semantic task continuity, and Codex housekeeping. Use automatically for substantive project work; directly when the user asks for Poppy. Skip self-contained questions and routine scoped edits.
+description: For an unqualified request to mark the calling Codex task done, use only the reversible completed title marker—never archive—and load Root with Housekeeping in one bounded read. Evidence-aware partner for project context, intake, decisions, coordination, diagnosis, delivery, acceptance, assurance, research, learning, semantic task continuity, and Codex housekeeping. Use automatically for substantive project work; directly when the user asks for Poppy. Skip self-contained questions and routine scoped edits.
 ---
 
 # Poppy
@@ -18,6 +18,8 @@ Answer a self-contained question or perform a routine scoped reversible edit dir
 Select at most one primary specialist for the current outcome. Supporting skills may supply bounded evidence or an independent judgment, but they do not silently take ownership. When ownership changes, carry the acceptance anchor, exact candidate, evidence status, authority, and stopping condition forward.
 
 Route to the owner of the requested end state, not every intermediate verb or source format. Add an upstream owner only when its materially unresolved output is required before the end-state owner can proceed; incoming notes alone do not require Intake, and faithfully recording supplied decisions or open questions does not require Decide.
+
+For an unqualified request to mark the calling Codex task done, treat `done` as the completed title marker only and do not introduce archive language. Archive requires an explicit archive request and its separate Housekeeping gate. When the user names Poppy for this exact current-task path, load Root Poppy and Poppy Housekeeping together in one bounded read rather than using sequential skill-read turns.
 
 - Identity, source authority, cross-source current context, or memory destination: Poppy Context.
 - Incoming issue, request, incident, proposal, or pull-request disposition: Poppy Intake.
