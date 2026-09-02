@@ -19,7 +19,7 @@ Select at most one primary specialist for the current outcome. Supporting skills
 
 Route to the owner of the requested end state, not every intermediate verb or source format. Add an upstream owner only when its materially unresolved output is required before the end-state owner can proceed; incoming notes alone do not require Intake, and faithfully recording supplied decisions or open questions does not require Decide.
 
-For an unqualified request to mark the calling Codex task done, treat `done` as the completed title marker only and do not introduce archive language. Archive requires an explicit archive request and its separate Housekeeping gate. When the user names Poppy for this exact current-task path, load Root Poppy and Poppy Housekeeping together in one bounded read rather than using sequential skill-read turns.
+For an unqualified request to mark the calling Codex task done, treat `done` as the completed title marker only and do not introduce archive language. Archive requires an explicit archive request and its separate Housekeeping gate. When the user names Poppy for this exact current-task path, load Root Poppy and Poppy Housekeeping together in one bounded read rather than using sequential skill-read turns. Use only the exact current-task ID supplied in developer context by the bounded Housekeeping prompt hook; never discover the calling task through a task listing, title, directory, recency, or other heuristic.
 
 - Identity, source authority, cross-source current context, or memory destination: Poppy Context.
 - Incoming issue, request, incident, proposal, or pull-request disposition: Poppy Intake.
@@ -47,7 +47,9 @@ A sequential handoff does not require a new task or subagent. Compose another sk
 
 When Poppy itself is the subject of a current-state discussion, assessment, capability claim, source comparison, or version-sensitive recommendation, route Poppy Context before relying on a repository checkout. Anchor running behavior to the loaded root `SKILL.md` for the current task and pin the repository candidate separately; neither source silently substitutes for the other.
 
-Use [delegation and continuity](../../references/delegation-and-continuity.md) only for delegation, worktree transfer, handoff, compaction, or a material phase transition.
+Use [delegation and continuity](../../references/delegation-and-continuity.md) only for delegation, separate user-visible task creation, worktree transfer, handoff, compaction, or a material phase transition.
+
+When the user explicitly requests a separate Codex task and its work is wholly scoped to an already resolved project, preserve that exact Codex project identity. Read the exact project ID and repository flag from the native project inventory before creation; never infer membership from task titles, themes, directories, or recency. Use the saved project directly for read-only, connector, or non-repository work. Use an isolated project worktree for repository-writing work when the saved project is a Git repository, and the saved project directly otherwise. Reserve `projectless` for work that is genuinely projectless, cross-project, or still unresolved. After creation, read back the returned task's `projectId` when an exact task ID is available and report any mismatch immediately; if setup returns only a provisional client ID, report placement verification as pending rather than inferring success.
 
 ## Correct course quietly
 

@@ -477,10 +477,10 @@
     },
     "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH": {
       "kind": "evidence",
-      "setup": ["Treat synthetic-current-task-40 as the calling Codex task", "Treat unqualified done as title-only and do not introduce archive language", "Allow only its exact completed title mutation and authoritative read-back"],
+      "setup": ["Treat synthetic-current-task-40 as the exact calling Codex task ID supplied by bounded prompt context", "Treat unqualified done as title-only and do not introduce archive language", "Allow only its exact completed title mutation and authoritative read-back"],
       "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-40\",\"callingTask\":true,\"title\":\"Atlas refresh guard\",\"activityRevision\":\"synthetic-rev-9\",\"newActionableRequest\":false,\"archived\":false}\n", "completion-packet.md": "# Current-task disposition\nAcceptance anchor: preserve the Atlas refresh guard.\nCandidate: synthetic-atlas-refresh-40, preserved.\nVerification: exact focused behavior and diff checks passed.\nRequired effects: none remain.\nUnresolved gates or blockers: none.\nSubstantive owner disposition: completed.\n", "authoritative-readback.json": "{\"threadId\":\"synthetic-current-task-40\",\"title\":\"✅ [D] Atlas refresh guard\",\"activityRevision\":\"synthetic-rev-9\",\"archived\":false}\n"},
-      "evidence": ["The native calling-task identity and meaningful unmarked base title are supplied", "The candidate-bound completion disposition is supported before the user requests the marker", "No archive or other effect is requested"],
-      "verification": ["Root and Housekeeping load together in one bounded skill-read call", "One title-only informational preview is followed without a preliminary native task listing or duplicate approval", "One composed outer tool call resolves, validates, applies exactly one completed marker, and authoritatively reads back synthetic-current-task-40", "The resolved prior title is retained as rollback", "No archive language, reference load, archive, worktree, tracker, automation, sidebar, or other-task effect occurs"]
+      "evidence": ["The bounded prompt hook supplies the exact calling-task ID synthetic-current-task-40 and the meaningful unmarked base title is available from its authoritative read", "The candidate-bound completion disposition is supported before the user requests the marker", "No archive or other effect is requested"],
+      "verification": ["Root and Housekeeping load together in one bounded skill-read call", "One title-only informational preview is followed without task listing, workspace probing, or duplicate approval", "Exactly one functions.exec call reads, validates, applies exactly one completed marker, and authoritatively reads back synthetic-current-task-40", "The resolved prior title is retained as rollback", "No archive language, reference load, archive, worktree, tracker, automation, sidebar, or other-task effect occurs"]
     },
     "S41_ROOT_RECOMMENDS_SCRIBE_FOR_CONTINUITY": {
       "kind": "evidence",
@@ -495,6 +495,13 @@
       "files": {"status-correction.json": "{\"expected\":\"Claim locally verified only after the focused check runs\",\"previousClaim\":\"locally-verified\",\"observed\":\"focused check never ran\",\"correctedStatus\":\"unverified\",\"consequence\":\"completion claim was unsupported\",\"candidateCause\":\"unverified\"}\n"},
       "evidence": ["The prior locally-verified claim is directly contradicted", "The cause of the mistake is not established", "The user has not enabled Scribe"],
       "verification": ["Status is corrected to unverified before the offer", "The offer names a compact redacted incident reconstruction and asks once for consent", "No transcript, Scribe activation, hook state, or project mutation occurs"]
+    },
+    "S43_PROJECT_SCOPED_TASK_PLACEMENT": {
+      "kind": "evidence",
+      "setup": ["Treat project-synthetic-atlas as the exact native project selected for the calling task", "Permit exactly two user-owned task creations", "Perform no connector or repository work inside the behavior task"],
+      "files": {"project-inventory.json": "{\"projects\":[{\"projectId\":\"project-synthetic-atlas\",\"name\":\"Atlas\",\"isGitRepository\":true},{\"projectId\":\"project-synthetic-nimbus\",\"name\":\"Nimbus\",\"isGitRepository\":true}]}\n", "created-task-readback.json": "[{\"threadId\":\"synthetic-atlas-inbox-task\",\"projectId\":\"project-synthetic-atlas\",\"environment\":\"local\"},{\"threadId\":\"synthetic-atlas-fix-task\",\"projectId\":\"project-synthetic-atlas\",\"environment\":\"worktree\"}]\n"},
+      "evidence": ["Both requested outcomes are wholly Atlas-scoped", "The native inventory supplies the exact Atlas project ID and Git flag", "Authoritative task read-back preserves the intended project for both tasks"],
+      "verification": ["The inbox task targets project-synthetic-atlas local", "The writing task targets project-synthetic-atlas worktree", "Both exact task IDs read back project-synthetic-atlas", "No projectless or third task is created"]
     },
     "N16_ROUTING_SUMMARY_NOT_AUTHORITY": {
       "kind": "evidence",
@@ -852,6 +859,13 @@
       "files": {"host-transport.json": "{\"stopReceivesRenderedAssistantMessage\":true,\"stopCanRewriteAssistantMessage\":false,\"privateModelToHookPayload\":false}\n"},
       "evidence": ["The proposed payload would be part of the rendered assistant message", "No verified non-rendered transport is supplied"],
       "verification": ["No HTML comment, JSON checkpoint, hidden marker, or private-state claim appears", "Scribe remains conversation-bound"]
+    },
+    "N65_CROSS_PROJECT_TASK_STAYS_PROJECTLESS": {
+      "kind": "evidence",
+      "setup": ["Treat the requested task as inseparably cross-project", "Permit exactly one user-owned task creation", "Do not select a project by parent membership"],
+      "files": {"project-scope.json": "{\"parentProjectId\":\"project-synthetic-atlas\",\"requiredProjectIds\":[\"project-synthetic-atlas\",\"project-synthetic-nimbus\"],\"singleProjectResolution\":false}\n", "created-task-readback.json": "{\"threadId\":\"synthetic-cross-project-task\",\"projectId\":null,\"target\":\"projectless\"}\n"},
+      "evidence": ["No single project owns the requested outcome", "Parent project identity cannot broaden into a cross-project placement rule"],
+      "verification": ["The task is projectless", "No Atlas or Nimbus project ID is selected", "Exact read-back preserves null projectId", "No extra task or project effect occurs"]
     }
   }
 }

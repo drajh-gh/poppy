@@ -10,6 +10,18 @@ When many similar independent items are proposed for delegation, test one repres
 
 A separate user-visible task is for durable user ownership, a distinct authority boundary, or later independent continuation. It is not the default internal work packet.
 
+## Preserve semantic project placement
+
+Creating a separate user-visible Codex task is an explicit user-owned effect. When the request authorizes it and the child outcome is wholly scoped to a project already resolved in current context, retain that exact Codex project identity even when the child work uses connectors or does not modify the repository.
+
+Before creation, read the native project inventory and bind the target to its exact `projectId` and `isGitRepository` value. Do not infer project membership from a task title, thematic similarity, current directory, list order, or recency.
+
+- Read-only, connector, and other non-repository work uses the saved project directly with the local project environment.
+- Repository-writing work uses an isolated project worktree when the saved project is a Git repository; a non-Git project uses the saved project directly.
+- `projectless` is only for genuinely projectless, cross-project, or unresolved work. The parent task's project never wins merely because one part of the new task resembles it.
+
+After creation, use the exact returned task ID to read back `projectId` and compare it with the intended target. Report a mismatch immediately and do not describe placement as verified. When worktree setup returns only a provisional client task ID, do not pass it to task-ID tools or infer the final placement; report verification as pending until the host exposes the exact task ID.
+
 - Keep one writer per target.
 - A delegated writer uses an isolated worktree and an explicit file boundary.
 - Other delegates remain read-only.

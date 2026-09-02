@@ -15,6 +15,7 @@ Poppy keeps adjacent kinds of work distinct:
 - Learn proposes the smallest durable lesson after an evidenced outcome.
 - Scribe keeps a bounded conversation checkpoint, reviews material drift or a corrected mistake, and proposes recurring improvements without becoming truth or memory.
 - Housekeeping maintains Codex task lifecycle metadata, archive eligibility, delegation hygiene, and workspace organization without deciding substantive project status. An explicitly requested marker for the calling task can use a tightly gated one-orchestration fast path when the disposition is already supported; other tasks, batches, archives, ambiguity, missing evidence, and drift retain the full safe path.
+- When the user requests a separate Codex task, work wholly scoped to an already resolved project retains that exact project identity: read-only or connector work uses the saved project directly, repository-writing work uses an isolated project worktree, and genuinely projectless, cross-project, or unresolved work remains projectless.
 
 Communication guidance is progressively loaded. It favors concrete, reader-ready prose and natural judgment while preserving accepted wording, evidence status, canonical terminology, and commitments. Style patterns remain contextual heuristics.
 
