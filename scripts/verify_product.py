@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -440,6 +441,52 @@ def execute_hook(script_name: str, event: dict) -> dict:
     return result
 
 
+def execute_windows_hook_launcher(command: str, event: dict) -> list[dict]:
+    if os.name != "nt":
+        return []
+    environment = dict(os.environ)
+    environment["PLUGIN_ROOT"] = str(ROOT)
+    results: list[dict] = []
+    shells: list[tuple[str, list[str] | str, bool]] = [
+        ("cmd.exe", command, True),
+        (
+            "powershell.exe",
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", command],
+            False,
+        ),
+    ]
+    for shell_name, shell, use_shell in shells:
+        completed = subprocess.run(
+            shell,
+            shell=use_shell,
+            cwd=ROOT,
+            env=environment,
+            input=json.dumps(event, ensure_ascii=False),
+            text=True,
+            capture_output=True,
+            encoding="utf-8",
+            timeout=5,
+        )
+        if completed.returncode != 0:
+            raise VerificationError(
+                f"Windows hook launcher failed under {shell_name} with "
+                f"exit {completed.returncode}: {completed.stderr.strip()}"
+            )
+        try:
+            result = json.loads(completed.stdout)
+        except json.JSONDecodeError as exc:
+            raise VerificationError(
+                f"Windows hook launcher returned invalid JSON under {shell_name}: "
+                f"{completed.stdout!r}"
+            ) from exc
+        if not isinstance(result, dict):
+            raise VerificationError(
+                f"Windows hook launcher output must be an object under {shell_name}"
+            )
+        results.append(result)
+    return results
+
+
 def hook_contract_check() -> dict:
     config_path = ROOT / "hooks" / "hooks.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
@@ -492,7 +539,13 @@ def hook_contract_check() -> dict:
                 handler["type"] != "command"
                 or handler["timeout"] != 3
                 or f"$PLUGIN_ROOT/hooks/{script_name}" not in handler["command"]
-                or f"%PLUGIN_ROOT%\\hooks\\{script_name}" not in handler["commandWindows"]
+                or not handler["commandWindows"].startswith(
+                    "powershell.exe -NoProfile -NonInteractive -Command "
+                )
+                or "[Environment]::GetEnvironmentVariable('PLUGIN_ROOT')" not in handler["commandWindows"]
+                or f"'hooks\\{script_name}'" not in handler["commandWindows"]
+                or "%PLUGIN_ROOT%" in handler["commandWindows"]
+                or "$env:PLUGIN_ROOT" in handler["commandWindows"]
             ):
                 raise VerificationError(f"Hook handler is not bounded and plugin-relative for {event_name}")
             if context_limit is not None and handler["additionalContextLimit"] != context_limit:
@@ -536,6 +589,25 @@ def hook_contract_check() -> dict:
         or len(current_prompt_context) > 160
     ):
         raise VerificationError("UserPromptSubmit hook did not supply bounded exact current-task context")
+
+    prompt_handler = hooks["UserPromptSubmit"][0]["hooks"][0]
+    for result in execute_windows_hook_launcher(
+        prompt_handler["commandWindows"],
+        {
+            "hook_event_name": "UserPromptSubmit",
+            "session_id": "synthetic-current-task-40",
+            "prompt": "Poppy, mark this task as done.",
+        },
+    ):
+        launcher_context = result.get("hookSpecificOutput", {}).get("additionalContext", "")
+        if (
+            "synthetic-current-task-40" not in launcher_context
+            or "do not list tasks" not in launcher_context
+            or len(launcher_context) > 160
+        ):
+            raise VerificationError(
+                "Windows hook launcher did not preserve bounded exact current-task context"
+            )
 
     ordinary_prompt = execute_hook(
         "housekeeping_hook.py",
