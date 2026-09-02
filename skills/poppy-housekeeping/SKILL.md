@@ -1,11 +1,15 @@
 ---
 name: poppy-housekeeping
-description: Maintain Codex task lifecycle metadata, titles, archive eligibility, delegation hygiene, and workspace organization. Use behind Poppy when work itself is resumed, paused, blocked, completed, audited, or archived; directly invokable for focused testing. Do not use for substantive project-status judgment.
+description: An unqualified request to mark the calling Codex task done means only the reversible completed title marker—never archive. When Poppy is named, load Root and Housekeeping together in one bounded read. Maintain Codex task lifecycle metadata, titles, archive eligibility, delegation hygiene, and workspace organization. Use behind Poppy when work itself is resumed, paused, blocked, completed, audited, or archived; directly invokable for focused testing. Do not use for substantive project-status judgment.
 ---
 
 # Poppy Housekeeping
 
 Keep Codex work easy to find, resume, and safely retire without turning organization into a second project system.
+
+## Interpret current-task done before the first update
+
+An unqualified request to mark the calling Codex task done is title-only. Do not promise, propose, contemplate, or introduce archive language in the first process update or later execution unless the user explicitly requests archive. When Root Poppy also applies, load Root and Housekeeping together in one bounded read before relying on either contract.
 
 ## Own metadata, not truth
 
@@ -30,9 +34,9 @@ After this skill is loaded, use this self-contained path only when every conditi
 - the title has a meaningful base and either no marker or one exact recognized leading marker; and
 - the only effect is this task's lifecycle title. No archive, pin, move, worktree, tracker, automation, project, or other task state may change.
 
-Give one concise informational preview naming the calling task, requested state, title-only scope, supporting disposition, authoritative read-back, and prior-title rollback. Do not ask for a second confirmation: the direct request already approved that exact effect.
+Give one concise informational preview naming the calling task, requested state, title-only scope, supporting disposition, authoritative read-back, and resolved prior-title rollback. Do not introduce archive language or ask for a second confirmation: the direct request already approved that exact effect. The preview may state that the guarded call will resolve and retain the exact prior title as rollback; it need not preload that title.
 
-Then, in one orchestration turn, compose the available native Codex task calls to freshly resolve the calling task and current title/activity, validate the unchanged transition, apply at most one exact prefix, and read the exact title and activity back from the resolved task ID. Prefer the native implicit calling-task title target when it prevents heuristic task selection. If the exact requested lifecycle title state is already present and no activity drift exists, perform no mutation and finish from authoritative read-back.
+Do not make a preliminary native task call solely to populate the preview. Perform this in one orchestration turn and one composed outer tool call: use the available native Codex task calls to freshly resolve the calling task and current title/activity, validate the unchanged transition, apply at most one exact prefix, and read the exact title and activity back from the resolved task ID. Return the resolved prior title, requested title, and read-back state from that call. Prefer the native implicit calling-task title target when it prevents heuristic task selection. If the exact requested lifecycle title state is already present and no activity drift exists, perform no mutation and finish from authoritative read-back.
 
 Fail closed before mutation if the target, title, activity, evidence, or requested transition is ambiguous, missing, contradictory, or has drifted. If post-mutation read-back shows a title mismatch or newer contradictory activity, stop, report the observed mutation and the unverified or conflicted lifecycle result, and retain the exact prior title as rollback; do not silently claim success or automatically roll back. Reject a malformed, empty, or stacked title immediately without normalizing or mutating it.
 

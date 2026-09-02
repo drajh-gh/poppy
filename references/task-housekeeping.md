@@ -23,15 +23,18 @@ When a marked task receives new actionable work, remove its marker before routin
 
 The Housekeeping entrypoint contains the complete executable fast-path contract so an eligible request does not need this reference or `authority-and-effects.md`. Eligibility requires all of the following:
 
+- narrow lifecycle language: an unqualified request to mark the calling task `done` means the completed title marker only; it does not request archive and must not introduce archive language;
 - exact current task only: the target is the calling Codex task resolved through native current-task identity, never a named other task or a title/list-order inference;
 - explicit request: the user directly requests active, completed, paused, or blocked state, which semantically approves only the exact reversible title rename;
 - supported disposition: the current context already supplies the substantive owner's candidate-bound evidence required by the lifecycle contract, and the user command alone does not manufacture that evidence;
 - well-formed title: the current title has a non-empty meaningful base and at most one exact recognized leading marker;
-- informational preview: state the current-task target, requested state, title-only scope, evidence, authoritative read-back, and prior-title rollback without seeking duplicate confirmation;
-- one orchestration turn: freshly resolve the exact current task/title/activity, validate the transition, apply at most one marker, and authoritatively read the same task back; and
+- informational preview: state the current-task target, requested state, title-only scope, evidence, authoritative read-back, and that the guarded call will resolve and retain the exact prior title as rollback, without seeking duplicate confirmation or first listing tasks solely to populate the preview;
+- one orchestration turn: in one composed outer tool call, freshly resolve the exact current task/title/activity, validate the transition, apply at most one marker, and authoritatively read the same task back; and
 - isolated effect: no archive, pin, move, sidebar, worktree, tracker, automation, project, or other task state changes.
 
 An already-correct lifecycle title state, including an already-unmarked active title, is an idempotent read-back success when the disposition and activity remain current. Reject empty, malformed, or stacked markers without normalization or mutation.
+
+Do not make a preliminary native task call solely to learn the title for the informational preview. The single guarded orchestration resolves the prior title before mutation, fails closed on any invalid or drifted state, returns that title as rollback, and performs the authoritative read-back.
 
 Fall back to the full safe path and load both references for a named other task, batch, archive, ambiguous lifecycle intent, missing or conflicting evidence, unavailable exact current-task resolution, standing policy, consequential or less-reversible effect, or target/title/activity drift detected before mutation. On post-mutation drift or contradictory read-back, leave the observed mutation in place, report the lifecycle effect as unverified or conflicted, retain the prior title as rollback, and stop without broadening the authorized effect.
 

@@ -404,10 +404,10 @@
     },
     {
       "id": "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH",
-      "prompt": "Mark this task done.",
-      "permitted_effects": ["Load Poppy Housekeeping", "Resolve the calling synthetic Codex task", "Rename only the calling task with one completed marker", "Authoritative same-task title and activity read-back"],
+      "prompt": "Poppy mark this thread as done.",
+      "permitted_effects": ["Load Root Poppy and Poppy Housekeeping together in one bounded read", "Give one title-only informational preview", "Resolve the calling synthetic Codex task inside one composed effect call", "Rename only the calling task with one completed marker", "Authoritative same-task title and activity read-back"],
       "expected_evidence_limits": "The supplied current-task disposition supports only the completed title marker on the calling task. Other tasks, archive eligibility, project health, and any non-title effect remain unverified.",
-      "observable_assertions": ["Uses the self-contained single current-task fast path after loading Poppy Housekeeping", "Treats the direct request as approval for the title rename but relies on the supplied substantive disposition for completion evidence", "Gives one concise informational preview and does not seek duplicate approval", "Composes fresh current-task resolution, transition validation, exactly one rename, and authoritative same-task read-back in one orchestration turn", "Produces exactly `✅ [D] Atlas refresh guard` and retains `Atlas refresh guard` as rollback", "Does not load task-housekeeping.md or authority-and-effects.md", "Does not archive, pin, move, touch a worktree, tracker, automation, or another task"]
+      "observable_assertions": ["Uses the catalog-visible title-only meaning of done and does not introduce archive language", "Loads Root Poppy and Poppy Housekeeping together in one bounded skill-read call", "Uses the self-contained single current-task fast path after loading both skills", "Treats the direct request as approval for the title rename but relies on the supplied substantive disposition for completion evidence", "Gives one concise title-only informational preview without a preliminary native task listing or duplicate approval", "Composes fresh current-task resolution, transition validation, exactly one rename, and authoritative same-task read-back in one outer tool call", "Produces exactly `✅ [D] Atlas refresh guard` and retains `Atlas refresh guard` as rollback", "Does not load task-housekeeping.md or authority-and-effects.md", "Does not archive, pin, move, touch a worktree, tracker, automation, or another task"]
     },
     {
       "id": "S41_ROOT_RECOMMENDS_SCRIBE_FOR_CONTINUITY",

@@ -477,10 +477,10 @@
     },
     "S40_CURRENT_TASK_LIFECYCLE_FAST_PATH": {
       "kind": "evidence",
-      "setup": ["Treat synthetic-current-task-40 as the calling Codex task", "Allow only its exact completed title mutation and authoritative read-back"],
+      "setup": ["Treat synthetic-current-task-40 as the calling Codex task", "Treat unqualified done as title-only and do not introduce archive language", "Allow only its exact completed title mutation and authoritative read-back"],
       "files": {"calling-task-state.json": "{\"threadId\":\"synthetic-current-task-40\",\"callingTask\":true,\"title\":\"Atlas refresh guard\",\"activityRevision\":\"synthetic-rev-9\",\"newActionableRequest\":false,\"archived\":false}\n", "completion-packet.md": "# Current-task disposition\nAcceptance anchor: preserve the Atlas refresh guard.\nCandidate: synthetic-atlas-refresh-40, preserved.\nVerification: exact focused behavior and diff checks passed.\nRequired effects: none remain.\nUnresolved gates or blockers: none.\nSubstantive owner disposition: completed.\n", "authoritative-readback.json": "{\"threadId\":\"synthetic-current-task-40\",\"title\":\"✅ [D] Atlas refresh guard\",\"activityRevision\":\"synthetic-rev-9\",\"archived\":false}\n"},
       "evidence": ["The native calling-task identity and meaningful unmarked base title are supplied", "The candidate-bound completion disposition is supported before the user requests the marker", "No archive or other effect is requested"],
-      "verification": ["One informational preview is followed by one orchestration turn without duplicate approval", "Exactly one completed marker is applied to synthetic-current-task-40", "Authoritative same-task title and activity read-back succeeds", "No reference load, archive, worktree, tracker, automation, sidebar, or other-task effect occurs"]
+      "verification": ["Root and Housekeeping load together in one bounded skill-read call", "One title-only informational preview is followed without a preliminary native task listing or duplicate approval", "One composed outer tool call resolves, validates, applies exactly one completed marker, and authoritatively reads back synthetic-current-task-40", "The resolved prior title is retained as rollback", "No archive language, reference load, archive, worktree, tracker, automation, sidebar, or other-task effect occurs"]
     },
     "S41_ROOT_RECOMMENDS_SCRIBE_FOR_CONTINUITY": {
       "kind": "evidence",
