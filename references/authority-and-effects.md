@@ -33,6 +33,14 @@ Changed target, content, or effect invalidates approval. Silence is not approval
 
 Approval is semantic, not an incantation. A direct affirmative answer to an exact current preview is valid; do not require the user to repeat targets, hashes, or prescribed wording unless an external system inherently requires it. Multiple named effects may be approved as one explicit bundle, while each still receives its own execution boundary and read-back. Reacquire approval only when the target, content, effect, material risk, or rollback changes.
 
+## Poppy source-first release gate
+
+For a Poppy self-update, preserve one-way promotion: candidate → verified committed revision → merged canonical branch → synchronized clean local checkout → personal installation → fresh-task activation proof. A hotfix shortens waiting and scope; it does not change the order.
+
+Pin the candidate branch and working state, canonical remote and branch, intended commit, version, digest algorithm and digest, installation target, currently active rollback package, and fresh-task read-back before requesting the applicable effects. Commit, push, pull request, merge, local fast-forward, installation, and fresh-task creation remain distinct effects even when approved as one exact bundle. Read back each authoritative destination and stop on the first mismatch or partial failure.
+
+Never install a dirty or unmerged working-tree candidate as the intended release, publish by copying an installed cache backward into Git, or infer that a pre-existing task adopted an upgrade. An installed package is release-artifact evidence, not source authority. If source and installation diverge, first pin both identities and the canonical remote. Prefer the canonical source when it contains the installed artifact exactly; copying an installed package back to source is exceptional recovery only when authoritative source is genuinely missing and provenance establishes the exact artifact.
+
 ### Explicit current-task lifecycle marker
 
 Poppy Housekeeping may use its self-contained single current-task fast path without loading this reference when the user directly requests one lifecycle-marker rename of the calling Codex task and every entrypoint eligibility condition is already supported. The direct command is semantic approval for that exact reversible rename only; it is not evidence that the substantive lifecycle disposition is true. A bounded prompt hook supplies the current Codex `session_id` as the exact task ID for this exception; absent that developer-context identity, the fast path stops without discovery or mutation.

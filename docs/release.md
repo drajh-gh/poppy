@@ -1,5 +1,21 @@
 # Release policy
 
+## Source-first promotion
+
+Release Poppy in one direction only:
+
+1. prepare the smallest coherent candidate on an isolated branch or worktree;
+2. verify it and record its version, source revision, digest algorithm, and digest;
+3. commit the exact candidate under separate authority;
+4. merge it into the resolved canonical GitHub branch and read that branch back;
+5. fast-forward the canonical local checkout to the merged revision and require it to be clean;
+6. install only the package bound to that exact merged revision; and
+7. prove activation from the loaded package in a fresh task.
+
+Never use an installed cache as the ordinary source of a release or defer Git publication until after installation. If the installed package and source appear different, pin the active package, repository candidate, and canonical remote independently before acting. When the canonical branch already contains the exact installed artifact, synchronize the local checkout forward. Cache-to-source copying is recovery, not release, and requires evidence that authoritative source is genuinely missing plus direct artifact provenance.
+
+Use an immediate hotfix lane for a safety fault, authority violation, regression, data-loss risk, or failure likely to compound. Keep the fix minimal and regression-backed, but preserve the same source-first order and effect gates. Batch non-critical wording, documentation, and speculative improvements into a stabilization release when delay does not materially increase risk.
+
 ## Candidate eligibility
 
 A candidate is eligible for personal installation preview only when:

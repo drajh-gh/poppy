@@ -138,6 +138,7 @@ REQUIRED_SCENARIOS = {
     "S41_ROOT_RECOMMENDS_SCRIBE_FOR_CONTINUITY",
     "S42_ROOT_RECOMMENDS_SCRIBE_AFTER_CORRECTION",
     "S43_PROJECT_SCOPED_TASK_PLACEMENT",
+    "S44_SOURCE_FIRST_POPPY_HOTFIX_RELEASE",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -206,6 +207,7 @@ REQUIRED_NEGATIVE_CASES = {
     "N63_SCRIBE_DECLINE_SUPPRESSES_REPEAT",
     "N64_SCRIBE_VISIBLE_PAYLOAD_FORBIDDEN",
     "N65_CROSS_PROJECT_TASK_STAYS_PROJECTLESS",
+    "N66_INSTALL_FIRST_POPPY_RELEASE_REJECTED",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -744,13 +746,21 @@ def active_poppy_identity_contract_check() -> dict:
     root_skill = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8")
     context_skill = (ROOT / "skills" / "poppy-context" / "SKILL.md").read_text(encoding="utf-8")
     context_reference = (ROOT / "references" / "project-context.md").read_text(encoding="utf-8")
+    authority_reference = (ROOT / "references" / "authority-and-effects.md").read_text(encoding="utf-8")
     release_policy = (ROOT / "docs" / "release.md").read_text(encoding="utf-8")
+    development = (ROOT / "docs" / "development.md").read_text(encoding="utf-8")
     required_markers = {
         "root routing": (root_skill, "loaded root `SKILL.md`"),
+        "root source-first promotion": (root_skill, "candidate → verified committed revision → merged canonical branch"),
         "active anchor": (context_skill, "loaded root `SKILL.md`"),
         "manifest resolution": (context_reference, "nearest ancestor `.codex-plugin/plugin.json`"),
         "cache ordering boundary": (context_reference, "Cache presence or version ordering is not activation evidence."),
         "separate candidate identities": (context_reference, "Pin the active package and repository candidate separately"),
+        "installed artifact is not source": (context_reference, "installed package as an artifact derived from one exact merged revision"),
+        "source-first effect gate": (authority_reference, "## Poppy source-first release gate"),
+        "no cache-to-source publication": (authority_reference, "publish by copying an installed cache backward into Git"),
+        "canonical release order": (release_policy, "Release Poppy in one direction only"),
+        "install only after merge": (development, "Install only from that exact merged revision"),
         "installation proof": (release_policy, "loaded root `SKILL.md` path"),
     }
     missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
@@ -1066,6 +1076,13 @@ def scenario_check() -> dict:
         "S41_ROOT_RECOMMENDS_SCRIBE_FOR_CONTINUITY": ["root-direct"],
         "S42_ROOT_RECOMMENDS_SCRIBE_AFTER_CORRECTION": ["root-direct"],
         "S43_PROJECT_SCOPED_TASK_PLACEMENT": ["root-direct"],
+        "S44_SOURCE_FIRST_POPPY_HOTFIX_RELEASE": [
+            "poppy-context",
+            "poppy-delivery",
+            "poppy-assure",
+            "poppy-coordinate",
+            "poppy-context",
+        ],
     }
     for case_id, expected in required_boundaries.items():
         if sequences.get(case_id) != expected:
