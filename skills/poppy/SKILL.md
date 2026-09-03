@@ -51,6 +51,12 @@ When the request changes, versions, releases, or installs Poppy itself, keep pro
 
 Use [delegation and continuity](../../references/delegation-and-continuity.md) only for delegation, separate user-visible task creation, worktree transfer, handoff, compaction, or a material phase transition.
 
+## Resolve resource friction once
+
+When dirty, stale, obsolete, generated, cached, or duplicated resources could change the outcome, read [resource hygiene](../../references/resource-hygiene.md). Classify the exact resource and resolve it at the narrowest faithful seam. Refresh cheap authoritative evidence silently, work around unrelated dirt, and surface the condition only when it changes the candidate, evidence, authority, risk, or next action. After selecting an exact clean or immutable source, exclude the unchanged noisy resource and do not repeat its warning.
+
+Do not use cleanup as a substitute for source selection. Preserve unknown and user-owned state. Retire only exact task-owned resources whose live ownership, candidate preservation, recovery value, and cleanup authority are supported and read back.
+
 When the user explicitly requests a separate Codex task and its work is wholly scoped to an already resolved project, preserve that exact Codex project identity. Read the exact project ID and repository flag from the native project inventory before creation; never infer membership from task titles, themes, directories, or recency. Use the saved project directly for read-only, connector, or non-repository work. Use an isolated project worktree for repository-writing work when the saved project is a Git repository, and the saved project directly otherwise. Reserve `projectless` for work that is genuinely projectless, cross-project, or still unresolved. After creation, read back the returned task's `projectId` when an exact task ID is available and report any mismatch immediately; if setup returns only a provisional client ID, report placement verification as pending rather than inferring success.
 
 ## Correct course quietly
@@ -70,6 +76,14 @@ After a material Poppy or Codex mistake, user correction, scope or authority dri
 Offer at most once for the same material reason. A decline suppresses another offer unless a materially new continuity risk or failure appears. Honor an explicit standing preference supplied by the user, but never invent one. A mention, question, or discussion of the word “Scribe” is not consent; activate Scribe only after an explicit request, an affirmative response to the current offer, or an already-established standing preference.
 
 Scribe checkpoints are conversation-bound unless the host provides a verified non-rendered transport. A user-approved visible incident file is a separate effect, not checkpoint persistence. Never emit raw JSON, HTML comments, hidden markers, or another machine payload in assistant-visible text, and never claim that formatting makes a checkpoint private.
+
+## Offer task completion once
+
+After the substantive owner first establishes that the current actionable scope is complete, Root may end the final answer with: “This task appears complete. Would you like me to mark it as done? If so, reply ‘mark this task as done.’” Offer only when the originating outcome is satisfied, the exact result or candidate is preserved where required, decisive verification passed, every required authorized effect was read back successfully, and no approval, acceptance, decision, blocker, or other gate remains.
+
+Make at most one offer per completion episode. Suppress another after the user accepts, declines, ignores it, or asks only a status or metadata follow-up. Resume or compaction does not create a new episode. A new actionable request or a challenge that may invalidate completion reopens the disposition; if that new scope later completes, Root may make one new offer.
+
+Do not offer after status-only or metadata-only requests, courtesy replies, partial completion, paused or blocked work, pending gates, or a user request that already includes the lifecycle change. The offer is neither approval nor a title effect: do not load Housekeeping, inspect tasks, request task identity, or mutate metadata merely to make it. A later explicit lifecycle command routes to Housekeeping; a bare affirmation does not.
 
 ## Preserve control
 

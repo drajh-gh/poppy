@@ -14,8 +14,11 @@ EXACT_MARKER = re.compile(r"^(?:✅ \[D\]|⏸️ \[P\]|🚧 \[B\]) (?P<base>\S.*
 MARKER_LIKE = re.compile(r"^(?:✅|⏸️|🚧|\[(?:D|P|B)\])", re.IGNORECASE)
 STACKED_MARKER = re.compile(r"^(?:✅ \[D\]|⏸️ \[P\]|🚧 \[B\]) (?:✅ \[D\]|⏸️ \[P\]|🚧 \[B\]) ")
 CURRENT_TASK_LIFECYCLE_REQUEST = re.compile(
-    r"\s*(?:poppy[\s,:-]+)?mark\s+(?:this|the\s+current)\s+"
-    r"(?:thread|task)\s+(?:as\s+)?(?:done|complete|completed|active|paused|blocked)\s*[.!?]?\s*",
+    r"\s*(?:(?:yes|yes\s+please|sure|okay|ok)[\s,;:-]+)?"
+    r"(?:poppy[\s,:-]+)?(?:please\s+)?mark\s+(?:this|the\s+current)\s+"
+    r"(?:thread|task)\s+(?:as\s+)?(?:done|complete|completed|active|paused|blocked)"
+    r"(?:\s+(?:with|using)\s+(?:the\s+)?(?:tag|marker|completion\s+(?:tag|marker)))?"
+    r"\s*[.!?]?\s*",
     re.IGNORECASE,
 )
 SAFE_TASK_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
@@ -72,7 +75,7 @@ def pre_tool_use(event: dict) -> dict:
         task_id = tool_input.get("threadId")
         implicit_current = "threadId" not in tool_input
         if not implicit_current and (not isinstance(task_id, str) or not task_id.strip()):
-            return deny("Housekeeping title mutations require an explicit non-empty threadId or the native implicit calling-task target.")
+            return deny("Housekeeping title mutations require an explicit non-empty threadId or an ordinary native implicit title target.")
         title = tool_input.get("title")
         if not isinstance(title, str) or not title.strip():
             return deny("Housekeeping titles require a non-empty meaningful base title.")
@@ -82,6 +85,8 @@ def pre_tool_use(event: dict) -> dict:
             return deny("Use one exact lifecycle prefix—✅ [D], ⏸️ [P], or 🚧 [B]—or no prefix for active work.")
         if match and MARKER_LIKE.match(match.group("base")):
             return deny("Housekeeping lifecycle markers cannot be stacked.")
+        if implicit_current and match:
+            return deny("Housekeeping lifecycle-marker mutations require an explicit threadId for exact read, rollback, and read-back. Native implicit targeting is only for ordinary non-lifecycle title edits.")
         target = "the native calling task" if implicit_current else "the explicit task ID"
         return context(
             "PreToolUse",
@@ -133,7 +138,7 @@ def main() -> int:
         emit(
             context(
                 "SessionStart",
-                "Poppy Housekeeping: if resumed or compacted work has a lifecycle marker, reconcile it against the newest actionable scope. Clear the marker before new substantive work; status-only or metadata-only activity does not reopen the task.",
+                "Poppy Housekeeping: on resume/compaction, reconcile lifecycle markers with new actionable scope. Clear the marker before substantive work; status-only activity does not reopen it. Do not repeat a completion offer without a newly completed scope.",
             )
         )
     elif name == "UserPromptSubmit":

@@ -14,12 +14,14 @@ Poppy keeps adjacent kinds of work distinct:
 - Research closes a named external evidence gap.
 - Learn proposes the smallest durable lesson after an evidenced outcome.
 - Scribe keeps a bounded conversation checkpoint, can preserve one explicitly approved semantic incident in a configured project vault, reviews material drift or operational evidence, and proposes improvements without becoming truth, canonical memory, or automatic change authority.
-- Housekeeping maintains Codex task lifecycle metadata, archive eligibility, delegation hygiene, and workspace organization without deciding substantive project status. An explicitly requested marker for the calling task can use a tightly gated one-orchestration fast path when the disposition is already supported; other tasks, batches, archives, ambiguity, missing evidence, and drift retain the full safe path.
+- Root may make one concise, non-intrusive “mark it as done?” offer when a substantive scope first reaches fully evidenced completion. The offer neither loads Housekeeping nor changes metadata; an explicit user lifecycle command remains required. Housekeeping then maintains Codex task lifecycle metadata, archive eligibility, delegation hygiene, and workspace organization without deciding substantive project status. An explicitly requested marker for the calling task can use a tightly gated one-orchestration fast path when the disposition is already supported; other tasks, batches, archives, ambiguity, missing evidence, and drift retain the full safe path.
 - When the user requests a separate Codex task, work wholly scoped to an already resolved project retains that exact project identity: read-only or connector work uses the saved project directly, repository-writing work uses an isolated project worktree, and genuinely projectless, cross-project, or unresolved work remains projectless.
 
 Communication guidance is progressively loaded. It favors concrete, reader-ready prose and natural judgment while preserving accepted wording, evidence status, canonical terminology, and commitments. Style patterns remain contextual heuristics.
 
 At material failures, retries, consequential actions, and completion claims, Poppy quietly checks whether the next step can add evidence and still matches the request, candidate, gates, authority, and declared budget. It changes course or surfaces the exact blocker without creating a watcher, attempt ledger, telemetry stream, or automatic memory. Long or model-based evaluation is bounded before it starts and never resumes or expands itself beyond that boundary.
+
+Poppy treats dirty, stale, duplicated, cached, generated, and apparently obsolete resources as a bounded lifecycle question. It refreshes or works around harmless state quietly, protects user-owned and unknown work, uses immutable refs or isolated worktrees when a shared checkout is not a faithful candidate, and reports resource state only when it changes the result or next action. Cleanup remains exact, ownership-aware, authorized, and read back. Plugin upgrades preserve every in-use task-loaded predecessor path instead of leaving old tasks pointed at a deleted cache directory.
 
 Poppy is deliberately small. There is no cockpit, telemetry service, built-in recurring automation, universal capability graph, daemon or persistent runtime, schema platform, persistent execution ledger, project adapter, or repository-local installation. Hook helpers are deterministic, bounded, transcript-free, network-free, and limited to Housekeeping lifecycle guards. Scribe checkpoints remain conversation-bound until Codex provides a verified non-rendered transport; an explicitly approved visible incident artifact is a separate local file effect with its own project profile, preview, read-back, and rollback.
 
@@ -28,7 +30,7 @@ Poppy is deliberately small. There is no cockpit, telemetry service, built-in re
 - .codex-plugin/plugin.json — the skill-and-hook manifest.
 - skills/ — one adaptive root and twelve focused specialists in the exact declared release inventory.
 - hooks/ — reviewed Housekeeping lifecycle guards; installation never implies trust.
-- references/ — progressively loaded behavioral guidance.
+- references/ — progressively loaded behavioral guidance, including resource hygiene for repository, worktree, artifact, and plugin-package lifecycles.
 - tests/scenarios.json and tests/fixtures.json — synthetic acceptance contracts.
 - scripts/verify_product.py — deterministic structure, catalog, hook-contract, boundary, ancestry, and candidate-identity gate.
 - docs/constitution-v3.md — product boundaries and operating promise.

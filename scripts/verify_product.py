@@ -58,6 +58,7 @@ EXPECTED_REFERENCES = {
     "process-observation.md",
     "project-context.md",
     "prototype-to-learn.md",
+    "resource-hygiene.md",
     "specification.md",
     "test-first-delivery.md",
     "work-intake.md",
@@ -87,6 +88,7 @@ REFERENCE_OWNERS = {
     "process-observation.md": "poppy",
     "project-context.md": "poppy-context",
     "prototype-to-learn.md": "poppy-delivery",
+    "resource-hygiene.md": "poppy",
     "specification.md": "poppy-decide",
     "test-first-delivery.md": "poppy-delivery",
     "work-intake.md": "poppy-intake",
@@ -141,6 +143,9 @@ REQUIRED_SCENARIOS = {
     "S43_PROJECT_SCOPED_TASK_PLACEMENT",
     "S44_SOURCE_FIRST_POPPY_HOTFIX_RELEASE",
     "S45_SCRIBE_VISIBLE_INCIDENT_ARTIFACT",
+    "S46_RESOURCE_HYGIENE_WITH_NOISY_CHECKOUT",
+    "S47_ROOT_OFFERS_CURRENT_TASK_COMPLETION",
+    "S48_CURRENT_TASK_LIFECYCLE_REPLY_GRAMMAR",
 }
 
 REQUIRED_NEGATIVE_CASES = {
@@ -210,6 +215,9 @@ REQUIRED_NEGATIVE_CASES = {
     "N64_SCRIBE_VISIBLE_PAYLOAD_FORBIDDEN",
     "N65_CROSS_PROJECT_TASK_STAYS_PROJECTLESS",
     "N66_INSTALL_FIRST_POPPY_RELEASE_REJECTED",
+    "N67_BROAD_WORKTREE_CLEANUP_REJECTED",
+    "N68_COMPLETION_OFFER_INELIGIBLE_OR_REPEATED",
+    "N69_BARE_AFFIRMATION_NOT_LIFECYCLE",
 }
 
 EXPECTED_SOURCE_FILES = {
@@ -243,6 +251,7 @@ EXPECTED_SOURCE_FILES = {
     "references/process-observation.md",
     "references/project-context.md",
     "references/prototype-to-learn.md",
+    "references/resource-hygiene.md",
     "references/specification.md",
     "references/test-first-delivery.md",
     "references/task-housekeeping.md",
@@ -590,6 +599,24 @@ def hook_contract_check() -> dict:
     ):
         raise VerificationError("UserPromptSubmit hook did not supply bounded exact current-task context")
 
+    accepted_lifecycle_prompts = (
+        "Mark this thread as done with the tag.",
+        "Yes, mark this task as done.",
+        "Please mark the current task completed using the completion marker.",
+    )
+    for prompt in accepted_lifecycle_prompts:
+        accepted = execute_hook(
+            "housekeeping_hook.py",
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "session_id": "synthetic-current-task-40",
+                "prompt": prompt,
+            },
+        )
+        accepted_context = accepted.get("hookSpecificOutput", {}).get("additionalContext", "")
+        if "synthetic-current-task-40" not in accepted_context or len(accepted_context) > 160:
+            raise VerificationError(f"UserPromptSubmit hook rejected explicit lifecycle grammar: {prompt}")
+
     prompt_handler = hooks["UserPromptSubmit"][0]["hooks"][0]
     for result in execute_windows_hook_launcher(
         prompt_handler["commandWindows"],
@@ -619,6 +646,23 @@ def hook_contract_check() -> dict:
     )
     if ordinary_prompt != {}:
         raise VerificationError("UserPromptSubmit hook added context to an ordinary non-lifecycle prompt")
+
+    rejected_lifecycle_prompts = (
+        "Yes.",
+        "Mark project Atlas done.",
+        "Mark this task as done and archive it.",
+    )
+    for prompt in rejected_lifecycle_prompts:
+        rejected = execute_hook(
+            "housekeeping_hook.py",
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "session_id": "synthetic-current-task-41",
+                "prompt": prompt,
+            },
+        )
+        if rejected != {}:
+            raise VerificationError(f"UserPromptSubmit hook matched ineligible lifecycle grammar: {prompt}")
 
     missing_identity = execute_hook(
         "housekeeping_hook.py",
@@ -664,7 +708,7 @@ def hook_contract_check() -> dict:
     if "additionalContext" not in valid_title.get("hookSpecificOutput", {}):
         raise VerificationError("PreToolUse hook did not admit an exact lifecycle marker with context")
 
-    implicit_current_title = execute_hook(
+    implicit_lifecycle_title = execute_hook(
         "housekeeping_hook.py",
         {
             "hook_event_name": "PreToolUse",
@@ -672,9 +716,20 @@ def hook_contract_check() -> dict:
             "tool_input": {"title": "⏸️ [P] Atlas review"},
         }
     )
-    implicit_context = implicit_current_title.get("hookSpecificOutput", {}).get("additionalContext", "")
+    if implicit_lifecycle_title.get("hookSpecificOutput", {}).get("permissionDecision") != "deny":
+        raise VerificationError("PreToolUse hook admitted an implicit lifecycle-marker title target")
+
+    implicit_ordinary_title = execute_hook(
+        "housekeeping_hook.py",
+        {
+            "hook_event_name": "PreToolUse",
+            "tool_name": "mcp__codex_app__set_thread_title",
+            "tool_input": {"title": "Atlas review"},
+        }
+    )
+    implicit_context = implicit_ordinary_title.get("hookSpecificOutput", {}).get("additionalContext", "")
     if "native calling task" not in implicit_context:
-        raise VerificationError("PreToolUse hook did not admit the native implicit current-task title target")
+        raise VerificationError("PreToolUse hook rejected an ordinary native implicit title target")
 
     null_target_title = execute_hook(
         "housekeeping_hook.py",
@@ -771,7 +826,7 @@ def hook_contract_check() -> dict:
         "name": "stateless Housekeeping hook and bounded Scribe checkpoint-and-artifact contract",
         "status": "pass",
         "events": sorted(expected_events),
-        "representative_payloads": 11,
+        "representative_payloads": 16,
     }
 
 
@@ -841,6 +896,8 @@ def active_poppy_identity_contract_check() -> dict:
         "canonical release order": (release_policy, "Release Poppy in one direction only"),
         "install only after merge": (development, "Install only from that exact merged revision"),
         "installation proof": (release_policy, "loaded root `SKILL.md` path"),
+        "task-compatible install": (release_policy, "Plugin installation is a compatibility boundary."),
+        "predecessor path retention": (development, "every exact task-loaded path still needed by unfinished tasks"),
     }
     missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
     if missing:
@@ -849,6 +906,61 @@ def active_poppy_identity_contract_check() -> dict:
         )
     return {
         "name": "active Poppy package and repository identity separation",
+        "status": "pass",
+    }
+
+
+def resource_hygiene_contract_check() -> dict:
+    root_skill = (ROOT / "skills" / "poppy" / "SKILL.md").read_text(encoding="utf-8")
+    context_skill = (ROOT / "skills" / "poppy-context" / "SKILL.md").read_text(encoding="utf-8")
+    delivery_skill = (ROOT / "skills" / "poppy-delivery" / "SKILL.md").read_text(encoding="utf-8")
+    housekeeping_skill = (ROOT / "skills" / "poppy-housekeeping" / "SKILL.md").read_text(encoding="utf-8")
+    resource_reference = (ROOT / "references" / "resource-hygiene.md").read_text(encoding="utf-8")
+    housekeeping_reference = (ROOT / "references" / "task-housekeeping.md").read_text(encoding="utf-8")
+    release_policy = (ROOT / "docs" / "release.md").read_text(encoding="utf-8")
+    constitution = (ROOT / "docs" / "constitution-v3.md").read_text(encoding="utf-8")
+    scenarios = json.loads((ROOT / "tests" / "scenarios.json").read_text(encoding="utf-8"))
+    required_markers = {
+        "root bounded resolver": (root_skill, "## Resolve resource friction once"),
+        "context missing-path boundary": (context_skill, "host lifecycle failure, not evidence that a later cache entry is active"),
+        "delivery unrelated-dirt boundary": (delivery_skill, "unrelated dirt does not block a scoped change"),
+        "housekeeping retirement gate": (housekeeping_skill, "A worktree is not obsolete merely because"),
+        "distinct resource states": (resource_reference, "`Dirty`, `stale`, and `obsolete` are not interchangeable."),
+        "one-time resolution": (resource_reference, "do not repeat its unchanged warning"),
+        "plugin path continuity": (resource_reference, "rollback copy outside the task-loaded path is recovery material"),
+        "task and resource separation": (housekeeping_reference, "Task lifecycle and resource lifecycle are separate"),
+        "release compatibility boundary": (release_policy, "Plugin installation is a compatibility boundary."),
+        "product promise": (constitution, "Resource state is resolved proportionately"),
+    }
+    missing = [name for name, (body, marker) in required_markers.items() if marker not in body]
+    if missing:
+        raise VerificationError("Resource hygiene contract is incomplete: " + ", ".join(sorted(missing)))
+
+    by_id = {item["id"]: item for item in [*scenarios["scenarios"], *scenarios["negative_cases"]]}
+    positive = by_id.get("S46_RESOURCE_HYGIENE_WITH_NOISY_CHECKOUT")
+    release = by_id.get("S44_SOURCE_FIRST_POPPY_HOTFIX_RELEASE")
+    negative = by_id.get("N67_BROAD_WORKTREE_CLEANUP_REJECTED")
+    positive_assertions = {
+        "Pins the supplied canonical commit and uses its immutable source for diagnosis",
+        "Excludes the saved checkout from candidate evidence once and does not repeat the unchanged warning",
+        "Continues the requested read-only diagnosis without asking for cleanup or treating unrelated dirt as a blocker",
+    }
+    release_assertions = {
+        "Keeps every supplied predecessor package byte-identical and readable at each pre-existing task's exact loaded path",
+        "Stops on any partial effect, identity mismatch, or rotated predecessor path and retains the supplied rollback package",
+    }
+    negative_assertions = {
+        "Protects active, dirty, unmerged, uniquely valuable, rollback-bearing, inaccessible, and unknown worktrees",
+        "Performs no worktree removal, directory deletion, branch deletion, reset, prune, or broad cleanup",
+    }
+    if positive is None or not positive_assertions.issubset(set(positive["observable_assertions"])):
+        raise VerificationError("Noisy-checkout resource-hygiene regression is incomplete")
+    if release is None or not release_assertions.issubset(set(release["observable_assertions"])):
+        raise VerificationError("Task-compatible plugin release regression is incomplete")
+    if negative is None or not negative_assertions.issubset(set(negative["observable_assertions"])):
+        raise VerificationError("Broad-worktree-cleanup negative control is incomplete")
+    return {
+        "name": "bounded resource hygiene and task-compatible plugin lifecycle",
         "status": "pass",
     }
 
@@ -874,7 +986,12 @@ def housekeeping_fast_path_contract_check() -> dict:
         "root exception": (root_skill, "self-contained single current-task fast path"),
         "authority exception": (authority, "### Explicit current-task lifecycle marker"),
         "formal eligibility": (housekeeping_reference, "## Single current-task fast path"),
-        "structural efficiency claim": (development, "use one `functions.exec` read/rename/read transaction without `list_threads` or workspace discovery"),
+        "structural efficiency claim": (development, "one `functions.exec` read/rename/read transaction without `list_threads` or workspace discovery"),
+        "root completion offer": (root_skill, "## Offer task completion once"),
+        "one offer per episode": (root_skill, "Make at most one offer per completion episode."),
+        "offer is not authority": (authority, "completion offer grants no authority"),
+        "explicit reply after offer": (housekeeping_skill, "A Root completion offer is not evidence, approval, or a lifecycle transition."),
+        "conversation-bound suppression": (housekeeping_reference, "This suppression is conversation-bound and stateless"),
     }
     missing = [name for name, (text, marker) in required_markers.items() if marker not in text]
     if missing:
@@ -903,8 +1020,35 @@ def housekeeping_fast_path_contract_check() -> dict:
             "Housekeeping fast-path regression is missing assertions: "
             + ", ".join(sorted(missing_assertions))
         )
+    completion_offer = next(
+        (scenario for scenario in scenarios["scenarios"] if scenario["id"] == "S47_ROOT_OFFERS_CURRENT_TASK_COMPLETION"),
+        None,
+    )
+    lifecycle_reply = next(
+        (scenario for scenario in scenarios["scenarios"] if scenario["id"] == "S48_CURRENT_TASK_LIFECYCLE_REPLY_GRAMMAR"),
+        None,
+    )
+    negative_by_id = {item["id"]: item for item in scenarios["negative_cases"]}
+    offer_assertions = {
+        "Ends the completed substantive answer with exactly one concise optional completion offer",
+        "Performs no task lookup, skill load, title mutation, archive action, or other metadata effect merely to offer",
+        "Requires a later explicit lifecycle command rather than treating the offer or silence as approval",
+    }
+    reply_assertions = {
+        "Accepts the explicit affirmative lifecycle command and the explicit marker-suffix command",
+        "Injects synthetic-current-task-48 as the exact task ID before Housekeeping uses the single read-title-read path",
+        "Rejects native implicit targeting for the lifecycle-prefixed title mutation",
+    }
+    if completion_offer is None or not offer_assertions.issubset(set(completion_offer["observable_assertions"])):
+        raise VerificationError("Root completion-offer regression is incomplete")
+    if lifecycle_reply is None or not reply_assertions.issubset(set(lifecycle_reply["observable_assertions"])):
+        raise VerificationError("Lifecycle reply-grammar regression is incomplete")
+    if "does not offer again" not in " ".join(negative_by_id["N68_COMPLETION_OFFER_INELIGIBLE_OR_REPEATED"]["observable_assertions"]):
+        raise VerificationError("Completion-offer suppression negative control is incomplete")
+    if "bare affirmation" not in " ".join(negative_by_id["N69_BARE_AFFIRMATION_NOT_LIFECYCLE"]["observable_assertions"]):
+        raise VerificationError("Bare-affirmation lifecycle negative control is incomplete")
     return {
-        "name": "single current-task Housekeeping fast-path contract",
+        "name": "one-shot Root completion offer and single current-task Housekeeping fast-path contract",
         "status": "pass",
     }
 
@@ -1163,6 +1307,9 @@ def scenario_check() -> dict:
             "poppy-context",
         ],
         "S45_SCRIBE_VISIBLE_INCIDENT_ARTIFACT": ["poppy-scribe"],
+        "S46_RESOURCE_HYGIENE_WITH_NOISY_CHECKOUT": ["poppy-diagnose"],
+        "S47_ROOT_OFFERS_CURRENT_TASK_COMPLETION": ["root-direct"],
+        "S48_CURRENT_TASK_LIFECYCLE_REPLY_GRAMMAR": ["poppy-housekeeping"],
     }
     for case_id, expected in required_boundaries.items():
         if sequences.get(case_id) != expected:
@@ -1455,6 +1602,7 @@ def main(argv: list[str] | None = None) -> int:
         skill_check(),
         hook_contract_check(),
         active_poppy_identity_contract_check(),
+        resource_hygiene_contract_check(),
         housekeeping_fast_path_contract_check(),
         project_task_placement_contract_check(),
         linked_reference_check(paths),
