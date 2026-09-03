@@ -20,10 +20,11 @@ Use only the guidance that can change the candidate:
 - regression-first, characterization, or other observable implementation feedback: [test-first delivery](../../references/test-first-delivery.md);
 - Git already stopped on a conflict: [Git conflict resolution](../../references/git-conflict-resolution.md);
 - a helper or checklist with human-only stages: [human-guided procedures](../../references/human-guided-procedures.md).
+- dirty, stale, generated, cached, duplicated, or temporary resource state: [resource hygiene](../../references/resource-hygiene.md).
 
 ## Preserve and hand off
 
-Preserve existing changes and keep one writer per target. Before a commit, dependency adoption, deployment, publication, installation, destructive action, or external effect, read [authority and effects](../../references/authority-and-effects.md). Local implementation authority never implies one of those effects.
+Preserve existing changes and keep one writer per target. Classify working state before treating it as a blocker: unrelated dirt does not block a scoped change, while overlapping or base-defining dirt stays protected. Prefer immutable Git objects for read-only evidence or an exact isolated worktree for writes when the shared checkout is not a faithful candidate. Once excluded, do not repeat the shared checkout warning unless it changes. Before a commit, dependency adoption, deployment, publication, installation, destructive action, or external effect, read [authority and effects](../../references/authority-and-effects.md). Local implementation authority never implies one of those effects.
 
 Keep verification inside the authorized candidate surface. Prefer equivalent no-cache or no-generated-artifact modes when available, inspect exact status or diff afterward, and never delete unknown or pre-existing artifacts to make a candidate appear clean.
 

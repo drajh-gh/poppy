@@ -43,6 +43,8 @@ Never install a dirty or unmerged working-tree candidate as the intended release
 
 ### Explicit current-task lifecycle marker
 
+Root's optional “mark it as done?” completion offer grants no authority and performs no metadata effect. It must not load Housekeeping, inspect tasks, or request identity merely to offer. Only a later explicit current-task lifecycle command can approve the title-only effect; a bare affirmation does not. A bounded affirmative or polite prefix remains valid only when it contains that explicit command.
+
 Poppy Housekeeping may use its self-contained single current-task fast path without loading this reference when the user directly requests one lifecycle-marker rename of the calling Codex task and every entrypoint eligibility condition is already supported. The direct command is semantic approval for that exact reversible rename only; it is not evidence that the substantive lifecycle disposition is true. A bounded prompt hook supplies the current Codex `session_id` as the exact task ID for this exception; absent that developer-context identity, the fast path stops without discovery or mutation.
 
 An unqualified request to mark the calling task done authorizes only the completed title marker. It never authorizes archive or archive language; archive requires an explicit request and remains outside this exception.

@@ -24,11 +24,13 @@ Use exactly one lifecycle marker at the start of a Codex task title:
 
 Preserve the meaningful base title. Never stack markers. A new actionable request in a marked task reopens it and clears the marker before substantive work continues; a status question or metadata-only audit does not.
 
+A Root completion offer is not evidence, approval, or a lifecycle transition. Housekeeping acts only after the user supplies an explicit current-task lifecycle command; a bare affirmation is insufficient. The explicit command may answer a Root offer, but it must still receive the exact current-task ID from bounded prompt context and satisfy every fast-path condition below.
+
 ## Use the single current-task fast path
 
 After this skill is loaded, use this self-contained path only when every condition below is already supported:
 
-- the user directly and explicitly requests active, completed, paused, or blocked state for the calling Codex task; that request is semantic approval for this exact reversible lifecycle-title effect, not evidence for the substantive disposition;
+- the user directly and explicitly requests active, completed, paused, or blocked state for the calling Codex task, including through an explicit command after a Root offer; a bare affirmation does not qualify, and the request is semantic approval for this exact reversible lifecycle-title effect rather than evidence for the substantive disposition;
 - the current context already contains the substantive owner's supported disposition: completed means the originating outcome and required effects are verified, the exact candidate is preserved where needed, and no gate remains; paused means work is intentionally deferred with a safe resumption point and no present blocker; blocked means a named dependency prevents progress and its next unblocking action is explicit; active means work is current or explicitly reopened;
 - bounded developer context supplies one exact current Codex task ID for this request, and `read_thread` can resolve that ID's exact current title and activity;
 - the title has a meaningful base and either no marker or one exact recognized leading marker; and
@@ -40,7 +42,7 @@ Do not call `list_threads`, probe the workspace, or make a preliminary native ta
 
 Fail closed before mutation if the exact developer-supplied task ID is absent, or if the target, title, activity, evidence, or requested transition is ambiguous, missing, contradictory, or has drifted. When the ID is absent, state the unavailable current-task identity once and stop immediately; do not load the full references or attempt discovery. If post-mutation read-back shows a title mismatch or newer contradictory activity, stop, report the observed mutation and the unverified or conflicted lifecycle result, and retain the exact prior title as rollback; do not silently claim success or automatically roll back. Reject a malformed, empty, or stacked title immediately without normalizing or mutating it.
 
-Do not load [task housekeeping](../../references/task-housekeeping.md) or [authority and effects](../../references/authority-and-effects.md) for an eligible fast path, a syntax-only rejection, or a missing current-task ID. Read both references and use the full safe path for a named other task, multiple tasks, archiving, sidebar or worktree organization, standing policy, ambiguous intent, missing or conflicting disposition evidence, drift before mutation, or any consequential or less-reversible effect.
+Do not load [task housekeeping](../../references/task-housekeeping.md), [resource hygiene](../../references/resource-hygiene.md), or [authority and effects](../../references/authority-and-effects.md) for an eligible fast path, a syntax-only rejection, or a missing current-task ID. Read all three references and use the full safe path for a named other task, multiple tasks, archiving, sidebar or worktree organization, resource retirement, standing policy, ambiguous intent, missing or conflicting disposition evidence, drift before mutation, or any consequential or less-reversible effect.
 
 ## Use full reconciliation otherwise
 
@@ -58,4 +60,6 @@ Start with the smallest authoritative task or project listing. Read individual t
 
 Keep pinned tasks protected. Suggest sidebar moves, title normalization, consolidation, and automation changes unless the user authorized those exact effects. Never treat task history as the durable artifact store, delete a worktree, or release a candidate owner merely because a task was marked or archived.
 
-Treat the bundled Housekeeping hooks as stateless reminders and syntax guards, not as semantic authority. Any Scribe summary present in current task context is derived working context and cannot establish lifecycle truth. Housekeeping must still inspect current evidence and native task state.
+For resource audits, separate active or user-owned work from exact task-owned cleanup candidates. A worktree is not obsolete merely because it is old, detached, marked complete, or absent from a short task listing. Group findings, preview exact eligible targets with preservation and recovery evidence, apply only authorized cleanup one target at a time, and verify both Git registration and filesystem state. Do not repeat unchanged retained-resource warnings in unrelated work.
+
+Treat the bundled Housekeeping hooks as stateless reminders and syntax guards, not as semantic authority. The prompt hook may recognize a narrow affirmative or polite prefix and an explicit lifecycle-marker suffix, but it must reject bare affirmations and still supply the exact task ID. Any Scribe summary present in current task context is derived working context and cannot establish lifecycle truth. Housekeeping must still inspect current evidence and native task state.

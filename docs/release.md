@@ -9,10 +9,12 @@ Release Poppy in one direction only:
 3. commit the exact candidate under separate authority;
 4. merge it into the resolved canonical GitHub branch and read that branch back;
 5. fast-forward the canonical local checkout to the merged revision and require it to be clean;
-6. install only the package bound to that exact merged revision; and
+6. preview how every known unfinished Poppy task keeps its exact loaded predecessor path readable, then install only the package bound to that exact merged revision; and
 7. prove activation from the loaded package in a fresh task.
 
 Never use an installed cache as the ordinary source of a release or defer Git publication until after installation. If the installed package and source appear different, pin the active package, repository candidate, and canonical remote independently before acting. When the canonical branch already contains the exact installed artifact, synchronize the local checkout forward. Cache-to-source copying is recovery, not release, and requires evidence that authoritative source is genuinely missing plus direct artifact provenance.
+
+Plugin installation is a compatibility boundary. A rollback copy stored elsewhere is not continuity for a task whose catalog points to an exact package path. Before installation, inventory only known unfinished tasks that used the predecessor package and treat their loaded paths as retained runtime dependencies. If the host installer would rotate one of those paths, either stop for a maintenance boundary after the affected tasks reach safe checkpoints, or include a separately previewed compatibility action that preserves or restores the predecessor byte-for-byte at the same path. Read back predecessor-path continuity and new-package selection independently. Do not infer either from cache ordering.
 
 Use an immediate hotfix lane for a safety fault, authority violation, regression, data-loss risk, or failure likely to compound. Keep the fix minimal and regression-backed, but preserve the same source-first order and effect gates. Batch non-critical wording, documentation, and speculative improvements into a stabilization release when delay does not materially increase risk.
 
@@ -30,7 +32,8 @@ A candidate is eligible for personal installation preview only when:
 8. trigger and non-trigger checks affected by the candidate pass, and any declared hook passes representative event-payload checks;
 9. a fresh independent read-only assurance pass finds no blocking defect;
 10. the candidate is committed under separate authority and python scripts/verify_product.py --require-clean passes; and
-11. the user's shared project surfaces remain unchanged.
+11. the user's shared project surfaces remain unchanged; and
+12. the installation preview names every retained task-loaded predecessor path, its verified source, retirement condition, read-back, and recovery limit, or establishes that no known unfinished task depends on one.
 
 Static verification establishes structure and contract integrity, not behavioral superiority. Paired evaluation establishes only the scenarios and conditions observed. No aggregate score can offset a safety failure. Efficiency matters only after quality passes.
 
@@ -42,7 +45,7 @@ An ownership-routing candidate may instead use the catalog's bounded candidate-o
 
 Commit, local tag, remote tag, push, pull request, merge, publication, personal installation, automation mutation, deployment, tracker mutation, communication, and memory write are distinct effects.
 
-Before personal installation, present the exact committed candidate, version, digest, evaluation and assurance results, installation target, current rollback package, read-back procedure, and rollback action. Install only after approval of that unchanged preview.
+Before personal installation, present the exact committed candidate, version, digest, evaluation and assurance results, installation target, current rollback package, task-loaded predecessor paths and compatibility action, read-back procedure, and rollback action. Install only after approval of that unchanged preview.
 
 ## Installation proof
 
@@ -58,14 +61,15 @@ A fresh task after installation must establish:
 - Scribe has no declared stateful hook, keeps checkpoints conversation-bound, emits no raw checkpoint payload in assistant-visible text, and gates any visible incident artifact through an exact configured target, approval, read-back, and rollback;
 - installation under the user's plugin environment for Codex Desktop and CLI; and
 - the exact preserved rollback package can be restored.
+- every predecessor path retained in the installation preview remains byte-identical and readable to its pre-existing task while the fresh task selects the new package.
 
 The loaded-skill origin proves the package selected for that task. A cache directory, even one with a lexically greater version or later modification time, is not activation evidence. Bind the loaded package to the committed source candidate through its normalized digest or direct file mapping, and keep the active-package and repository identities separate in the read-back.
 
-Retain the raw machine-readable traces for checks actually run. If a pre-existing task keeps a stale skill catalog, record it as a host lifecycle limitation, do not claim the newer package is active there, and keep installation narration out of unrelated work. ChatGPT and other hosts remain unverified unless separately tested. Any later plugin, root, authority, profile, delegation, or assurance change invalidates this proof.
+Retain the raw machine-readable traces for checks actually run. A pre-existing task may keep its original skill catalog and must not be called upgraded. If its exact package path disappears, installation compatibility failed even when a fresh task loads the new package; restore the approved byte-identical path or roll back before claiming the release complete. Keep installation narration out of unrelated work. ChatGPT and other hosts remain unverified unless separately tested. Any later plugin, root, authority, profile, delegation, or assurance change invalidates this proof.
 
 ## Rollback
 
-Keep the previously active package intact until the new installation and fresh-task proof pass. Rollback restores that exact package, reads back its active version and declared skill and hook surfaces, and records any limitation. A hook rollback also restores the previous trusted definition or leaves the replacement untrusted. Do not delete rollback material as part of successful cutover.
+Keep the previously active package intact at its approved rollback location and every retained task-loaded path until the new installation and fresh-task proof pass. Successful cutover does not retire a predecessor path still needed by an unfinished task. Rollback restores that exact package, reads back its active version and declared skill and hook surfaces, and records any limitation. A hook rollback also restores the previous trusted definition or leaves the replacement untrusted. Retire rollback or compatibility material only through an exact later resource-hygiene decision; do not delete it as part of cutover.
 
 ## Natural-use follow-up
 

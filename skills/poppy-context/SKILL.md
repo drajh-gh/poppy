@@ -23,6 +23,8 @@ External project selection is a gate. Continue beyond the index only when it yie
 
 Task size alone does not determine orientation. When freshness, conflict, evidence status, or consequential reporting is load-bearing, read [evidence and assurance](../../references/evidence-and-assurance.md). For terminology or current-versus-intended behavior, read [domain modeling](../../references/domain-modeling.md).
 
+When dirty, stale, duplicated, or host-managed resources affect source selection, use [resource hygiene](../../references/resource-hygiene.md). Resolve or exclude the exact resource once; do not repeatedly reload or narrate an unchanged condition after another authoritative source has been pinned.
+
 ## Pin Poppy before assessing Poppy
 
 When Poppy itself is the subject of a current-state discussion, assessment, capability claim, source comparison, or version-sensitive recommendation:
@@ -34,6 +36,8 @@ When Poppy itself is the subject of a current-state discussion, assessment, capa
 5. Report the task-active package, repository candidate, parity status, and affected evidence limits separately.
 
 A pre-upgrade task may still be running an older loaded package. Report that task-scoped fact and require fresh-task host evidence before claiming a newer package is active. Never use the current working directory or an arbitrary repository checkout as a substitute for active-package evidence.
+
+If the task-loaded package path has disappeared, treat that as a host lifecycle failure, not evidence that a later cache entry is active. Report it once. Use already-loaded task instructions when sufficient; if an unread required contract could materially change safety or outcome, keep that behavior unverified and require a faithful task-compatible package path or an explicitly requested fresh task.
 
 When a separately requested Codex task is wholly scoped to the already selected project, resolve its native placement from the exact Codex project inventory: retain the exact `projectId` and repository flag, never a name, title, directory-theme, or recency guess. This identity may select the task's project target; it does not authorize task creation or any later project effect. Cross-project or unresolved work does not inherit the current task's project.
 
